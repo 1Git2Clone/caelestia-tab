@@ -1,8 +1,8 @@
 # caelestia-tab ideas
 
 A custom new tab for Firefox and its forks (Floorp, LibreWolf, Zen and so on)
-that follows the caelestia colour scheme. It's meant for a broad audience, not
-one setup.
+and Chromium browsers (Chrome, Brave and so on) that follows the caelestia
+colour scheme. It's meant for a broad audience, not one setup.
 
 ## Philosophy: everything is a plugin
 
@@ -21,7 +21,11 @@ one setup.
 
 ## Scope and packaging
 
-- Works in Firefox itself and its forks, not just Floorp.
+- Works in Firefox and its forks, not just Floorp, and in Chromium browsers.
+  One Manifest V3 codebase; the differences are the background script
+  (`service_worker` for Chrome, `scripts` for Firefox), a Chrome manifest for
+  the helper, and publishing (the Chrome Web Store charges a one-time $5, AMO
+  is free).
 - Independent of nixos-dotfiles: it reads what caelestia writes,
   `~/.local/state/caelestia/scheme.json` and `wallpaper/path.txt`.
 - Not NixOS-specific. The core logic doesn't depend on Nix, so it can also
@@ -55,6 +59,19 @@ one setup.
 - Media controls for a configurable service, Spotify by default.
 - Music servers, with Navidrome as the reference.
 - Status checks: an Uptime Kuma plugin as the generic reference.
+
+## Themed websites
+
+- A page-theming plugin puts the live scheme on every page as CSS variables
+  (`--caelestia-primary`, `--caelestia-surface`, and so on) and fires an event
+  when it changes.
+- Stylus styles use the variables, so a site's look follows the scheme and
+  changes live on a switch. For example, YouTube in caelestia colours.
+- Userscripts listen for the event.
+- Stylus and Violentmonkey need no API from us: the pages carry the colours.
+- It needs permission to run on all sites, but only adds the variables and
+  reads nothing from the page.
+- Ship example styles, YouTube first.
 
 ## Example plugins (show how to write your own)
 
