@@ -105,6 +105,31 @@ Once, at install:
   reads nothing from the page.
 - Ship example styles, YouTube first.
 
+### Catppuccin's userstyles, converted
+
+- [catppuccin/userstyles](https://github.com/catppuccin/userstyles) themes 134
+  sites and is MIT-licensed. Converted copies keep its copyright notice.
+- caelestia's scheme already has all 26 Catppuccin colour names (`rosewater`
+  through `crust`) for every scheme, so the palette maps one to one onto
+  `--caelestia-*` variables.
+- The styles are LESS and blend colours at compile time (`mix()`, `fade()`,
+  `lighten()`), which needs concrete colours. A converter rewrites them to
+  runtime CSS, which works on `var()` in Firefox 113+ and Chrome 111+:
+  - `mix(@a, @b, 30%)` becomes `color-mix(in srgb, var(--caelestia-a) 30%,
+    var(--caelestia-b))`;
+  - `fade(@c, 50%)` becomes relative colour syntax,
+    `rgb(from var(--caelestia-c) r g b / 50%)`;
+  - `lighten` and `darken` become `hsl(from ... h s calc(l ± n))`.
+- The flavour choice goes away: dark or light comes from the scheme's mode, so
+  `if(@flavor = latte, ...)` becomes a mode switch.
+- The accent option maps to a scheme colour, `primary` by default.
+- Fallback for anything the converter can't rewrite: the helper compiles the
+  LESS with concrete colours on every switch, like a caelestia template.
+- The result is live: one conversion, and every switch recolours all the
+  converted sites through the variables.
+- Open: serve them through the page-theming plugin, export them as UserCSS for
+  Stylus, or both.
+
 ## Example plugins (show how to write your own)
 
 - My VPS status, built on the Uptime Kuma plugin.
