@@ -36,6 +36,38 @@ colour scheme. It's meant for a broad audience, not one setup.
   [CaelestiaFox](https://addons.mozilla.org/en-US/firefox/addon/caelestiafox),
   so this is the new tab only.
 
+## Constraints
+
+- Plugin code can't run in the extension. Manifest V3 only runs code shipped
+  in the package, `eval` is blocked, and both stores reject remote code. So:
+  - plugin logic runs in the helper, which can reload a plugin when its file
+    changes;
+  - the page gets only data, declarative components and CSS;
+  - secrets stay in the helper, where SOPS decrypts them.
+- The browser window frame is out of scope. CaelestiaFox already recolours
+  Firefox's live, and it's the smallest thing that does that job.
+- Chrome's window frame can't change live: Chrome has no runtime theme API.
+  That's an upstream limitation, so we don't touch it. If you switch colours
+  often, set a neutral Chrome theme.
+- Extensions can't run on the browser's own pages (`about:`, `chrome://`, AMO,
+  the Chrome Web Store), so those are never themed.
+
+What updates live, with no reload:
+
+- The new tab's colours, background, settings, clock and date.
+- Themed websites through the CSS variables, including iframes and shadow DOM;
+  userscripts through the event.
+- Tree Style Tab, by re-sending its style.
+- Media controls (MPRIS signals) and mail (IMAP IDLE).
+- Git hosts, weather and status checks, on a poll rather than a push: a local
+  machine gets no webhooks, and GitHub rate-limits.
+
+Once, at install:
+
+- Tabs already open don't have the page script yet. The extension injects it
+  into them on install, or they need one reload.
+- The browser may need a restart to find the helper the first time.
+
 ## Credentials
 
 - All secrets go through SOPS.
