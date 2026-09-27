@@ -6,18 +6,24 @@ and stdout.
 
 ## Data plugins
 
-Each data plugin implements `plugins::Plugin`:
+The helper runs on tokio. Each data plugin implements `plugins::Plugin`, an
+`async_trait`:
 
 ```rust
-pub trait Plugin {
-    fn topic(&self) -> &'static str;                       // the storage.local key its value goes to
-    fn read(&self) -> io::Result<Value>;                   // the current value
-    fn watches(&self) -> Vec<PathBuf> { … }                // files whose changes mean "read again"
-    fn start(&self, wake: Wake) {}                         // a timer or signal source of its own
-    fn command(&self, message: &Value) -> io::Result<()>   // a message from the extension
-    fn changed(&self, value: &Value) {}                    // after a new value was sent
+#[async_trait]
+pub trait Plugin: Send + Sync {
+    fn topic(&self) -> &'static str;                             // the storage.local key its value goes to
+    async fn read(&self) -> io::Result<Value>;                   // the current value
+    fn watches(&self) -> Vec<PathBuf> { … }                      // files whose changes mean "read again"
+    fn start(&self, wake: Wake) {}                               // spawns a timer or signal task of its own
+    async fn command(&self, message: &Value) -> io::Result<()>   // a message from the extension
+    fn changed(&self, value: &Value) {}                          // after a new value was sent
 }
 ```
+
+Use tokio's `fs` and `process` and the async clients (reqwest, zbus) in a
+plugin; something that only blocks, like `secrets::get`, goes through
+`spawn_blocking`.
 
 These ship today:
 
@@ -54,11 +60,14 @@ was sent. The scheme plugin uses it to write the Zen mod (`src/zen.rs`; see
 
 ## Waking
 
-All of a plugin's reasons to be read again arrive on one channel: a watched
-file's event, a command, or `Event::Refresh(topic)` from the plugin's own
-thread, which `start` sets up (`github`'s timer, `media`'s D-Bus signals).
-The host reads plugins one at a time, so a slow read (a GitHub search) holds
-up the others for its length.
+Every plugin has a task of its own and a queue of jobs: a command to run,
+or just a read. A watched file's event, a command, or `wake.refresh()` from
+the task `start` spawned (`github`'s timer, `media`'s D-Bus signals) each
+queue one. A plugin runs its jobs in order, and jobs that piled up while it
+was busy are answered with a single read. Plugins don't wait for each other:
+a media command is answered in milliseconds while GitHub's searches (which run
+side by side) take seconds. One task writes to stdout, and sends a value only
+when it differs from the last one sent for that topic.
 
 ## Watching
 

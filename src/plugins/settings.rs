@@ -3,7 +3,9 @@ use std::io;
 use std::path::PathBuf;
 use std::time::UNIX_EPOCH;
 
+use async_trait::async_trait;
 use serde_json::{Value, json};
+use tokio::fs as afs;
 
 use super::{Plugin, home};
 
@@ -38,6 +40,7 @@ impl Settings {
     }
 }
 
+#[async_trait]
 impl Plugin for Settings {
     fn topic(&self) -> &'static str {
         "savedSettings"
@@ -47,8 +50,8 @@ impl Plugin for Settings {
         vec![self.path.clone()]
     }
 
-    fn read(&self) -> io::Result<Value> {
-        let text = match fs::read_to_string(&self.path) {
+    async fn read(&self) -> io::Result<Value> {
+        let text = match afs::read_to_string(&self.path).await {
             Ok(text) => text,
             Err(e) if e.kind() == io::ErrorKind::NotFound => {
                 return Ok(json!({ "settings": null }));
@@ -58,7 +61,8 @@ impl Plugin for Settings {
         // A half-written file fails here; the write that finishes it raises
         // another event.
         let settings: Value = serde_json::from_str(&text)?;
-        let mtime = fs::metadata(&self.path)?
+        let mtime = afs::metadata(&self.path)
+            .await?
             .modified()?
             .duration_since(UNIX_EPOCH)
             .map(|d| d.as_millis() as u64)
@@ -66,40 +70,40 @@ impl Plugin for Settings {
         Ok(json!({ "settings": settings, "mtime": mtime }))
     }
 
-    fn command(&self, message: &Value) -> io::Result<()> {
+    async fn command(&self, message: &Value) -> io::Result<()> {
         if message["command"] != "save" || !message["settings"].is_object() {
             return Err(io::Error::other(format!("unknown command {message}")));
         }
-        write(&self.path, &message["settings"])
+        write(&self.path, &message["settings"]).await
     }
 }
 
 /// Pretty JSON, written only when it differs (an unchanged file keeps its
 /// mtime) and renamed into place, so a reader never sees half of it.
-fn write(path: &PathBuf, settings: &Value) -> io::Result<()> {
+async fn write(path: &PathBuf, settings: &Value) -> io::Result<()> {
     let text = serde_json::to_string_pretty(settings)? + "\n";
-    if fs::read_to_string(path).ok().as_deref() == Some(text.as_str()) {
+    if afs::read_to_string(path).await.ok().as_deref() == Some(text.as_str()) {
         return Ok(());
     }
-    fs::create_dir_all(path.parent().unwrap_or(path))?;
+    afs::create_dir_all(path.parent().unwrap_or(path)).await?;
     let tmp = path.with_extension("json.tmp");
-    fs::write(&tmp, text)?;
-    fs::rename(tmp, path)
+    afs::write(&tmp, text).await?;
+    afs::rename(tmp, path).await
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    #[test]
-    fn saves_read_back_and_unchanged_saves_keep_the_file() {
+    #[tokio::test]
+    async fn saves_read_back_and_unchanged_saves_keep_the_file() {
         let dir =
             std::env::temp_dir().join(format!("caelestia-tab-settings-{}", std::process::id()));
         let plugin = Settings {
             path: dir.join("caelestia-tab/settings.json"),
         };
         assert_eq!(
-            plugin.read().unwrap()["settings"],
+            plugin.read().await.unwrap()["settings"],
             Value::Null,
             "no file yet"
         );
@@ -107,16 +111,18 @@ mod tests {
         let settings = json!({ "font": "Rubik", "widgets": [] });
         plugin
             .command(&json!({ "command": "save", "settings": settings }))
+            .await
             .unwrap();
-        let first = plugin.read().unwrap();
+        let first = plugin.read().await.unwrap();
         assert_eq!(first["settings"], settings);
 
-        std::thread::sleep(std::time::Duration::from_millis(20));
+        tokio::time::sleep(std::time::Duration::from_millis(20)).await;
         plugin
             .command(&json!({ "command": "save", "settings": settings }))
+            .await
             .unwrap();
         assert_eq!(
-            plugin.read().unwrap()["mtime"],
+            plugin.read().await.unwrap()["mtime"],
             first["mtime"],
             "the same settings don't rewrite it"
         );
@@ -124,6 +130,7 @@ mod tests {
         assert!(
             plugin
                 .command(&json!({ "command": "save", "settings": 3 }))
+                .await
                 .is_err()
         );
         fs::remove_dir_all(&dir).unwrap();

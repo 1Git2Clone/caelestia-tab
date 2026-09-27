@@ -13,11 +13,16 @@ mod wallpaper;
 use std::io;
 use std::path::PathBuf;
 
+use async_trait::async_trait;
 use serde_json::Value;
 
 use crate::host::Wake;
 
-pub trait Plugin {
+/// Plugins run on the host's tokio runtime, each in a task of its own
+/// (host.rs): a slow one (a network request) holds up only itself, never
+/// another plugin's commands or values.
+#[async_trait]
+pub trait Plugin: Send + Sync {
     /// The key the extension stores this plugin's value under.
     fn topic(&self) -> &'static str;
 
@@ -30,20 +35,20 @@ pub trait Plugin {
 
     /// The current value. An error is logged and nothing is sent; the next
     /// change to a watched file tries again.
-    fn read(&self) -> io::Result<Value>;
+    async fn read(&self) -> io::Result<Value>;
 
     /// Runs after a new value was sent, for plugins that also write
     /// something of their own out.
     fn changed(&self, _value: &Value) {}
 
     /// Starts whatever else changes the value, once: a timer, a D-Bus
-    /// subscription. Send `Event::Refresh(self.topic())` on `wake` to be read
-    /// again. Run it on a thread of its own; this returns straight away.
+    /// subscription. Spawn it as a task and call `wake.refresh()` to be read
+    /// again; this returns straight away.
     fn start(&self, _wake: Wake) {}
 
     /// A message from the extension for this topic. The value is read again
     /// after it, so a command's effect shows without waiting for anything.
-    fn command(&self, _message: &Value) -> io::Result<()> {
+    async fn command(&self, _message: &Value) -> io::Result<()> {
         Err(io::Error::other("takes no commands"))
     }
 }
@@ -55,7 +60,7 @@ pub fn all() -> Vec<Box<dyn Plugin>> {
         Box::new(wallpaper::Wallpaper::new(&state)),
         Box::new(fonts::Fonts),
         Box::new(github::GitHub::new()),
-        Box::new(media::Media),
+        Box::new(media::Media::default()),
         Box::new(lyrics::Lyrics::new()),
         Box::new(settings::Settings::new()),
     ]

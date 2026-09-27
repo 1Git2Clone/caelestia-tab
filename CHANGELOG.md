@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Settings only show a field when it applies: a colour when the source is a colour, a blur when it's the wallpaper.
 - Secrets by alias in `~/.config/caelestia-tab/secrets.toml`: from SOPS (nested keys), a command, a file or the environment. Values never reach the extension.
 - The helper takes commands from the extension, for widgets that control something on the machine.
+- The helper runs on tokio, each plugin in a task of its own, so a media command no longer waits behind GitHub's searches or a lyrics lookup.
 - Your own components, from `~/.config/caelestia-tab/components`, built into the extension with ours; a `Ct` name is refused. They reach ours through `$ct`, and can use Tailwind, plain CSS or SCSS.
 - Data for your widgets from the helper: every MPRIS player (the Spotify app, mpv, a browser) with its year, cover and controls; lyrics from LRCLIB, timed where it has them; and GitHub searches, with a token found without setup (`gh`, git's credential helper or the environment), cached with ETags, and kept in the helper.
 - Settings are kept in `~/.config/caelestia-tab/settings.json` as well, so they survive a browser restart dropping a temporary add-on's storage, and can be edited by hand or kept in dotfiles; a hand edit reaches open tabs live.

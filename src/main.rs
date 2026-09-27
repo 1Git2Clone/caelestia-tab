@@ -29,7 +29,7 @@ fn main() -> ExitCode {
             Ok(())
         }
         // Firefox passes the manifest path and the extension id.
-        _ => host::run(plugins::all()),
+        _ => tokio::runtime::Runtime::new().and_then(|rt| rt.block_on(host::run(plugins::all()))),
     };
     match result {
         Ok(()) => ExitCode::SUCCESS,

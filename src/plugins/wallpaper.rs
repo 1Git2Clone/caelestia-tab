@@ -1,7 +1,7 @@
-use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
 
+use async_trait::async_trait;
 use base64::Engine;
 use serde_json::{Value, json};
 
@@ -21,6 +21,7 @@ impl Wallpaper {
     }
 }
 
+#[async_trait]
 impl Plugin for Wallpaper {
     fn topic(&self) -> &'static str {
         "wallpaper"
@@ -30,10 +31,10 @@ impl Plugin for Wallpaper {
         vec![self.path_txt.clone()]
     }
 
-    fn read(&self) -> io::Result<Value> {
-        let path = fs::read_to_string(&self.path_txt)?;
+    async fn read(&self) -> io::Result<Value> {
+        let path = tokio::fs::read_to_string(&self.path_txt).await?;
         let path = path.trim();
-        let bytes = fs::read(path)?;
+        let bytes = tokio::fs::read(path).await?;
         let data = base64::engine::general_purpose::STANDARD.encode(bytes);
         Ok(json!({
             "path": path,

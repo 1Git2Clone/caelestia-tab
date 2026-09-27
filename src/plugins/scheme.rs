@@ -1,7 +1,7 @@
-use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
 
+use async_trait::async_trait;
 use serde_json::Value;
 
 use super::Plugin;
@@ -20,6 +20,7 @@ impl Scheme {
     }
 }
 
+#[async_trait]
 impl Plugin for Scheme {
     fn topic(&self) -> &'static str {
         "scheme"
@@ -29,10 +30,10 @@ impl Plugin for Scheme {
         vec![self.path.clone()]
     }
 
-    fn read(&self) -> io::Result<Value> {
+    async fn read(&self) -> io::Result<Value> {
         // A half-written file fails to parse; the write that finishes it
         // raises another event.
-        Ok(serde_json::from_slice(&fs::read(&self.path)?)?)
+        Ok(serde_json::from_slice(&tokio::fs::read(&self.path).await?)?)
     }
 
     // Zen's window can't be themed from the extension, only through a mod.

@@ -137,3 +137,9 @@ the hard way.
   when the browser starts, so a browser started before the rebuild still
   starts the old helper, and a plugin added since answers "a command for no
   plugin" or never sends. Restart the browser (2026-09-27).
+- **Reading a watched file raises an event about it.** inotify reports opens
+  and closes too, which notify passes on as `EventKind::Access`. Reading the
+  scheme again on those read it again, forever: 94,000 reads in 8 seconds,
+  and every other plugin's value, a media command's included, queued behind
+  them, arriving tens of seconds late with no error anywhere. The host
+  ignores access events (2026-09-27).

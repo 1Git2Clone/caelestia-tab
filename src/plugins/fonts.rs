@@ -1,5 +1,7 @@
 use std::io;
-use std::process::Command;
+
+use async_trait::async_trait;
+use tokio::process::Command;
 
 use serde_json::Value;
 
@@ -10,13 +12,17 @@ use super::Plugin;
 /// the helper starts; a font installed later shows up after a browser restart.
 pub struct Fonts;
 
+#[async_trait]
 impl Plugin for Fonts {
     fn topic(&self) -> &'static str {
         "fonts"
     }
 
-    fn read(&self) -> io::Result<Value> {
-        let out = Command::new("fc-list").args([":", "family"]).output()?;
+    async fn read(&self) -> io::Result<Value> {
+        let out = Command::new("fc-list")
+            .args([":", "family"])
+            .output()
+            .await?;
         Ok(families(&String::from_utf8_lossy(&out.stdout)).into())
     }
 }

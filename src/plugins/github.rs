@@ -1,13 +1,17 @@
 use std::collections::{BTreeSet, HashMap};
-use std::io::{self, Write};
-use std::process::{Command, Stdio};
+use std::io;
+use std::process::Stdio;
 use std::sync::Mutex;
 use std::time::Duration;
 
+use async_trait::async_trait;
+use futures_util::future::join_all;
 use serde_json::{Value, json};
+use tokio::io::AsyncWriteExt;
+use tokio::process::Command;
 
 use super::Plugin;
-use crate::host::{Event, Wake};
+use crate::host::Wake;
 use crate::secrets;
 
 /// How often the searches run again.
@@ -28,6 +32,7 @@ const EVERY: Duration = Duration::from_secs(90);
 /// The token stays here. The value is only the results, per query.
 pub struct GitHub {
     state: Mutex<State>,
+    http: reqwest::Client,
 }
 
 #[derive(Default)]
@@ -44,27 +49,29 @@ impl GitHub {
     pub fn new() -> Self {
         Self {
             state: Mutex::new(State::default()),
+            http: client(),
         }
     }
 }
 
+#[async_trait]
 impl Plugin for GitHub {
     fn topic(&self) -> &'static str {
         "github"
     }
 
     fn start(&self, wake: Wake) {
-        std::thread::spawn(move || {
+        tokio::spawn(async move {
             loop {
-                std::thread::sleep(EVERY);
-                if wake.send(Event::Refresh("github")).is_err() {
+                tokio::time::sleep(EVERY).await;
+                if !wake.refresh() {
                     break;
                 }
             }
         });
     }
 
-    fn command(&self, message: &Value) -> io::Result<()> {
+    async fn command(&self, message: &Value) -> io::Result<()> {
         let mut state = self.state.lock().unwrap();
         match message["command"].as_str() {
             Some("queries") => {
@@ -89,33 +96,47 @@ impl Plugin for GitHub {
         Ok(())
     }
 
-    fn read(&self) -> io::Result<Value> {
-        let mut state = self.state.lock().unwrap();
-        if state.queries.values().all(Vec::is_empty) {
+    async fn read(&self) -> io::Result<Value> {
+        // What to search and with what, taken out so the lock isn't held
+        // across the requests.
+        let (queries, cached, known) = {
+            let mut state = self.state.lock().unwrap();
+            let queries: BTreeSet<String> = state.queries.values().flatten().cloned().collect();
+            // Results for searches nothing asks for any more are dropped.
+            state.cache.retain(|q, _| queries.contains(q));
+            (queries, state.cache.clone(), state.token.clone())
+        };
+        if queries.is_empty() {
             return Ok(json!({ "results": {} }));
         }
-        if state.token.is_none() {
-            state.token = token();
-        }
-        let Some((token, from)) = state.token.clone() else {
+        let token = match known {
+            Some(t) => Some(t),
+            None => token().await,
+        };
+        let Some((token, from)) = token else {
             return Ok(json!({
                 "results": {},
                 "error": "No GitHub token. Log in with `gh auth login`, set GH_TOKEN, or add a `github` secret (see the handbook's GitHub chapter).",
             }));
         };
+        let answers = join_all(queries.iter().map(|q| {
+            let etag = cached.get(q).map(|(etag, _)| etag.as_str());
+            search(&self.http, &token, q, etag)
+        }))
+        .await;
+
+        let mut state = self.state.lock().unwrap();
+        state.token = Some((token, from));
         let mut results = serde_json::Map::new();
-        let queries: BTreeSet<String> = state.queries.values().flatten().cloned().collect();
-        // Results for searches no widget asks for any more are dropped.
-        state.cache.retain(|q, _| queries.contains(q));
-        for q in queries {
-            let cached = state.cache.get(&q).cloned();
-            match search(&token, &q, cached.as_ref().map(|(etag, _)| etag.as_str())) {
+        for (q, answer) in queries.into_iter().zip(answers) {
+            match answer {
                 Ok(Some((etag, value))) => {
                     state.cache.insert(q.clone(), (etag, value.clone()));
                     results.insert(q, value);
                 }
                 Ok(None) => {
-                    results.insert(q, cached.map(|(_, v)| v).unwrap_or(Value::Null));
+                    let old = cached.get(&q).map(|(_, v)| v.clone());
+                    results.insert(q, old.unwrap_or(Value::Null));
                 }
                 Err(e) => {
                     if e.to_string().contains("401") {
@@ -129,28 +150,33 @@ impl Plugin for GitHub {
     }
 }
 
+/// The HTTP client the network plugins share the settings of: a timeout, so
+/// a request that hangs gives up, and a name, which GitHub and LRCLIB ask for.
+pub fn client() -> reqwest::Client {
+    reqwest::Client::builder()
+        .timeout(Duration::from_secs(10))
+        .user_agent("caelestia-tab (https://git.hu-tao.dev/hutao/caelestia-tab)")
+        .build()
+        .expect("an HTTP client with a timeout and a name")
+}
+
 /// One search, or None when it hasn't changed since `etag`.
-fn search(token: &str, q: &str, etag: Option<&str>) -> io::Result<Option<(String, Value)>> {
-    let mut request = ureq::get("https://api.github.com/search/issues")
-        .query("q", q)
-        .query("sort", "updated")
-        .query("per_page", "20")
-        .header("Authorization", &format!("Bearer {token}"))
+async fn search(
+    http: &reqwest::Client,
+    token: &str,
+    q: &str,
+    etag: Option<&str>,
+) -> io::Result<Option<(String, Value)>> {
+    let mut request = http
+        .get("https://api.github.com/search/issues")
+        .query(&[("q", q), ("sort", "updated"), ("per_page", "20")])
+        .bearer_auth(token)
         .header("Accept", "application/vnd.github+json")
-        .header("X-GitHub-Api-Version", "2022-11-28")
-        .header("User-Agent", "caelestia-tab");
+        .header("X-GitHub-Api-Version", "2022-11-28");
     if let Some(etag) = etag {
         request = request.header("If-None-Match", etag);
     }
-    let mut response = request
-        .config()
-        .http_status_as_error(false)
-        // The host reads plugins one at a time, so a request that hangs
-        // would hold up every other plugin.
-        .timeout_global(Some(std::time::Duration::from_secs(10)))
-        .build()
-        .call()
-        .map_err(io::Error::other)?;
+    let response = request.send().await.map_err(io::Error::other)?;
     let status = response.status().as_u16();
     if status == 304 {
         return Ok(None);
@@ -161,10 +187,7 @@ fn search(token: &str, q: &str, etag: Option<&str>) -> io::Result<Option<(String
         .and_then(|v| v.to_str().ok())
         .unwrap_or_default()
         .to_owned();
-    let text = response
-        .body_mut()
-        .read_to_string()
-        .map_err(io::Error::other)?;
+    let text = response.text().await.map_err(io::Error::other)?;
     let body: Value = serde_json::from_str(&text)?;
     if status != 200 {
         let message = body["message"].as_str().unwrap_or("request failed");
@@ -201,9 +224,10 @@ fn items(body: &Value) -> Value {
 }
 
 /// The first token found, and where it came from.
-fn token() -> Option<(String, &'static str)> {
+async fn token() -> Option<(String, &'static str)> {
     let found = |v: String| Some(v.trim().to_owned()).filter(|v| !v.is_empty());
-    if let Ok(Some(v)) = secrets::get("github") {
+    // The secret may run sops or a command of the user's: off the runtime.
+    if let Ok(Ok(Some(v))) = tokio::task::spawn_blocking(|| secrets::get("github")).await {
         return found(v).map(|v| (v, "secret"));
     }
     for var in ["GH_TOKEN", "GITHUB_TOKEN"] {
@@ -211,19 +235,19 @@ fn token() -> Option<(String, &'static str)> {
             return Some((v, "env"));
         }
     }
-    if let Ok(out) = Command::new("gh").args(["auth", "token"]).output()
+    if let Ok(out) = Command::new("gh").args(["auth", "token"]).output().await
         && out.status.success()
         && let Some(v) = found(String::from_utf8_lossy(&out.stdout).into_owned())
     {
         return Some((v, "gh"));
     }
-    git_credential().map(|v| (v, "git"))
+    git_credential().await.map(|v| (v, "git"))
 }
 
 /// git's stored credential for github.com. Prompts are off, so a helper that
 /// would ask (a terminal prompt, Git Credential Manager's window) answers
 /// nothing instead of popping up.
-fn git_credential() -> Option<String> {
+async fn git_credential() -> Option<String> {
     let mut child = Command::new("git")
         .args(["-c", "credential.interactive=false", "credential", "fill"])
         .env("GIT_TERMINAL_PROMPT", "0")
@@ -235,12 +259,13 @@ fn git_credential() -> Option<String> {
         .stderr(Stdio::null())
         .spawn()
         .ok()?;
-    child
-        .stdin
-        .take()?
+    let mut stdin = child.stdin.take()?;
+    stdin
         .write_all(b"protocol=https\nhost=github.com\n\n")
+        .await
         .ok()?;
-    let out = child.wait_with_output().ok()?;
+    drop(stdin);
+    let out = child.wait_with_output().await.ok()?;
     if !out.status.success() {
         return None;
     }

@@ -2,9 +2,11 @@ use std::collections::HashMap;
 use std::io;
 use std::sync::Mutex;
 
+use async_trait::async_trait;
 use serde_json::{Value, json};
 
 use super::Plugin;
+use super::github::client;
 
 /// Song lyrics from LRCLIB (lrclib.net, free, no key), for a track a widget
 /// asks about: `{ topic: "lyrics", command: "get", artist, title, album,
@@ -14,6 +16,7 @@ use super::Plugin;
 /// track once per helper run.
 pub struct Lyrics {
     state: Mutex<State>,
+    http: reqwest::Client,
 }
 
 #[derive(Default)]
@@ -26,6 +29,7 @@ impl Lyrics {
     pub fn new() -> Self {
         Self {
             state: Mutex::new(State::default()),
+            http: client(),
         }
     }
 }
@@ -39,12 +43,13 @@ pub fn key(artist: &str, title: &str) -> String {
     )
 }
 
+#[async_trait]
 impl Plugin for Lyrics {
     fn topic(&self) -> &'static str {
         "lyrics"
     }
 
-    fn command(&self, message: &Value) -> io::Result<()> {
+    async fn command(&self, message: &Value) -> io::Result<()> {
         if message["command"] != "get" {
             return Err(io::Error::other(format!("unknown command {message}")));
         }
@@ -52,9 +57,8 @@ impl Plugin for Lyrics {
         Ok(())
     }
 
-    fn read(&self) -> io::Result<Value> {
-        let mut state = self.state.lock().unwrap();
-        let Some(want) = state.wanted.clone() else {
+    async fn read(&self) -> io::Result<Value> {
+        let Some(want) = self.state.lock().unwrap().wanted.clone() else {
             return Ok(Value::Null);
         };
         let s = |k: &str| want[k].as_str().unwrap_or_default().to_owned();
@@ -63,10 +67,18 @@ impl Plugin for Lyrics {
             return Ok(Value::Null);
         }
         let key = key(&artist, &title);
-        if let Some(hit) = state.cache.get(&key) {
+        if let Some(hit) = self.state.lock().unwrap().cache.get(&key) {
             return Ok(hit.clone());
         }
-        let value = match fetch(&artist, &title, &s("album"), want["seconds"].as_f64()) {
+        let fetched = fetch(
+            &self.http,
+            &artist,
+            &title,
+            &s("album"),
+            want["seconds"].as_f64(),
+        )
+        .await;
+        let value = match fetched {
             Ok(Some(body)) => json!({
                 "key": key,
                 "plain": body["plainLyrics"],
@@ -77,47 +89,32 @@ impl Plugin for Lyrics {
             // Not cached: the network may be back next time.
             Err(e) => return Ok(json!({ "key": key, "error": e.to_string() })),
         };
-        state.cache.insert(key, value.clone());
+        self.state.lock().unwrap().cache.insert(key, value.clone());
         Ok(value)
     }
 }
 
-fn fetch(
+async fn fetch(
+    http: &reqwest::Client,
     artist: &str,
     title: &str,
     album: &str,
     seconds: Option<f64>,
 ) -> io::Result<Option<Value>> {
-    let mut request = ureq::get("https://lrclib.net/api/get")
-        .query("artist_name", artist)
-        .query("track_name", title)
-        // LRCLIB asks clients to say who they are.
-        .header(
-            "User-Agent",
-            "caelestia-tab (https://git.hu-tao.dev/hutao/caelestia-tab)",
-        );
+    let mut request = http
+        .get("https://lrclib.net/api/get")
+        .query(&[("artist_name", artist), ("track_name", title)]);
     if !album.is_empty() {
-        request = request.query("album_name", album);
+        request = request.query(&[("album_name", album)]);
     }
     if let Some(s) = seconds.filter(|s| *s > 0.0) {
-        request = request.query("duration", (s.round() as u64).to_string());
+        request = request.query(&[("duration", (s.round() as u64).to_string())]);
     }
-    let mut response = request
-        .config()
-        .http_status_as_error(false)
-        // The host reads plugins one at a time, so a request that hangs
-        // would hold up every other plugin.
-        .timeout_global(Some(std::time::Duration::from_secs(10)))
-        .build()
-        .call()
-        .map_err(io::Error::other)?;
+    let response = request.send().await.map_err(io::Error::other)?;
     match response.status().as_u16() {
         404 => Ok(None),
         200 => {
-            let text = response
-                .body_mut()
-                .read_to_string()
-                .map_err(io::Error::other)?;
+            let text = response.text().await.map_err(io::Error::other)?;
             Ok(Some(serde_json::from_str(&text)?))
         }
         status => Err(io::Error::other(format!("LRCLIB said {status}"))),

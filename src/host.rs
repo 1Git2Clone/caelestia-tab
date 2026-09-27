@@ -3,12 +3,14 @@
 //! signal, or a command from the extension) and differs from the last one sent.
 
 use std::collections::HashMap;
-use std::io::{self, Read, Write};
+use std::io;
 use std::path::{Path, PathBuf};
-use std::sync::mpsc;
+use std::sync::Arc;
 
 use notify::{RecursiveMode, Watcher};
 use serde_json::{Value, json};
+use tokio::io::{AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt};
+use tokio::sync::mpsc;
 
 use crate::plugins::Plugin;
 
@@ -16,105 +18,140 @@ use crate::plugins::Plugin;
 /// wallpaper, mostly) goes as parts the extension joins back together.
 const PART: usize = 512 * 1024;
 
-/// Why the host looks at a plugin again.
-pub enum Event {
-    Files(notify::Result<notify::Event>),
-    /// A plugin asks to be read again: its timer fired, or its source changed.
-    Refresh(&'static str),
-    /// A message from the extension: `{ "topic": …, … }`, for that plugin.
-    Command(Value),
+/// What a plugin's task is asked to do: run a command from the extension
+/// and read, or just read.
+type Job = Option<Value>;
+
+/// Handed to [`Plugin::start`]: asks for the plugin to be read again.
+#[derive(Clone)]
+pub struct Wake(mpsc::UnboundedSender<Job>);
+
+impl Wake {
+    /// False once the host has stopped, when whatever called it can stop too.
+    pub fn refresh(&self) -> bool {
+        self.0.send(None).is_ok()
+    }
 }
 
-/// Handed to [`Plugin::start`]: send `Event::Refresh(topic)` to be read again.
-pub type Wake = mpsc::Sender<Event>;
+pub async fn run(plugins: Vec<Box<dyn Plugin>>) -> io::Result<()> {
+    let plugins: Vec<Arc<dyn Plugin>> = plugins.into_iter().map(Arc::from).collect();
+    let (values, mut read) = mpsc::unbounded_channel::<(usize, io::Result<Value>)>();
 
-pub fn run(plugins: Vec<Box<dyn Plugin>>) -> io::Result<()> {
-    let (tx, rx) = mpsc::channel::<Event>();
+    // A task per plugin, so a slow one (GitHub's searches, a lyrics lookup)
+    // holds up only itself: a media command never waits behind a request.
+    let jobs: Vec<mpsc::UnboundedSender<Job>> = plugins
+        .iter()
+        .enumerate()
+        .map(|(i, plugin)| {
+            let (tx, rx) = mpsc::unbounded_channel();
+            tokio::spawn(serve(plugin.clone(), i, rx, values.clone()));
+            plugin.start(Wake(tx.clone()));
+            let _ = tx.send(None);
+            tx
+        })
+        .collect();
 
     // The extension's messages, framed like ours. The browser closes stdin
     // when the extension disconnects, and the helper exits with it.
-    let commands = tx.clone();
-    std::thread::spawn(move || {
-        let mut input = io::stdin().lock();
-        while let Ok(message) = read_frame(&mut input) {
-            if commands.send(Event::Command(message)).is_err() {
-                break;
+    let topics: HashMap<&str, mpsc::UnboundedSender<Job>> = plugins
+        .iter()
+        .map(|p| p.topic())
+        .zip(jobs.iter().cloned())
+        .collect();
+    tokio::spawn(async move {
+        let mut input = tokio::io::stdin();
+        while let Ok(message) = read_frame(&mut input).await {
+            let topic = message["topic"].as_str().unwrap_or_default();
+            match topics.get(topic) {
+                Some(tx) => {
+                    let _ = tx.send(Some(message));
+                }
+                None => eprintln!("caelestia-tab: a command for no plugin: {message}"),
             }
         }
         std::process::exit(0);
     });
 
-    let files = tx.clone();
-    let mut watcher = notify::recommended_watcher(move |e| {
-        let _ = files.send(Event::Files(e));
+    let watches: Vec<Vec<PathBuf>> = plugins.iter().map(|p| p.watches()).collect();
+    let dirs: Vec<PathBuf> = {
+        let mut dirs: Vec<&Path> = watches
+            .iter()
+            .flatten()
+            .filter_map(|f| f.parent())
+            .collect();
+        dirs.sort();
+        dirs.dedup();
+        dirs.into_iter().map(Path::to_owned).collect()
+    };
+    let wake = jobs.clone();
+    let mut watcher = notify::recommended_watcher(move |e: notify::Result<notify::Event>| {
+        let Ok(event) = e else { return };
+        // Reading a file raises an access event too: reacting to it would read
+        // the file again, forever, and bury every other value behind the flood.
+        if let notify::EventKind::Access(_) = event.kind {
+            return;
+        }
+        for (tx, files) in wake.iter().zip(&watches) {
+            if event.paths.iter().any(|p| files.contains(p)) {
+                let _ = tx.send(None);
+            }
+        }
     })
     .map_err(io::Error::other)?;
-    let mut dirs: Vec<&Path> = Vec::new();
-    let watches: Vec<Vec<PathBuf>> = plugins.iter().map(|p| p.watches()).collect();
-    for file in watches.iter().flatten() {
-        let Some(dir) = file.parent() else { continue };
-        if dirs.contains(&dir) {
-            continue;
-        }
-        dirs.push(dir);
+    for dir in &dirs {
         if let Err(e) = watcher.watch(dir, RecursiveMode::NonRecursive) {
             eprintln!("caelestia-tab: can't watch {}: {e}", dir.display());
         }
     }
 
-    let mut out = io::stdout().lock();
+    let mut out = tokio::io::stdout();
     let mut last: HashMap<&str, String> = HashMap::new();
-    for plugin in &plugins {
-        plugin.start(tx.clone());
-        send_if_changed(plugin.as_ref(), &mut last, &mut out)?;
-    }
-
-    for event in rx {
-        match event {
-            Event::Files(Ok(event)) => {
-                for (plugin, files) in plugins.iter().zip(&watches) {
-                    if event.paths.iter().any(|p| files.contains(p)) {
-                        send_if_changed(plugin.as_ref(), &mut last, &mut out)?;
-                    }
-                }
-            }
-            Event::Files(Err(_)) => {}
-            Event::Refresh(topic) => {
-                if let Some(plugin) = plugins.iter().find(|p| p.topic() == topic) {
-                    send_if_changed(plugin.as_ref(), &mut last, &mut out)?;
-                }
-            }
-            Event::Command(message) => {
-                let topic = message["topic"].as_str().unwrap_or_default();
-                let Some(plugin) = plugins.iter().find(|p| p.topic() == topic) else {
-                    eprintln!("caelestia-tab: a command for no plugin: {message}");
-                    continue;
-                };
-                if let Err(e) = plugin.command(&message) {
-                    eprintln!("caelestia-tab: {topic}: {e}");
-                }
-                send_if_changed(plugin.as_ref(), &mut last, &mut out)?;
-            }
-        }
+    while let Some((i, value)) = read.recv().await {
+        send_if_changed(plugins[i].as_ref(), value, &mut last, &mut out).await?;
     }
     Ok(())
 }
 
+/// One plugin's jobs, in order. Jobs that pile up while it's busy are run
+/// and answered with a single read.
+async fn serve(
+    plugin: Arc<dyn Plugin>,
+    i: usize,
+    mut jobs: mpsc::UnboundedReceiver<Job>,
+    values: mpsc::UnboundedSender<(usize, io::Result<Value>)>,
+) {
+    while let Some(first) = jobs.recv().await {
+        let mut next = Some(first);
+        while let Some(job) = next {
+            if let Some(message) = job
+                && let Err(e) = plugin.command(&message).await
+            {
+                eprintln!("caelestia-tab: {}: {e}", plugin.topic());
+            }
+            next = jobs.try_recv().ok();
+        }
+        if values.send((i, plugin.read().await)).is_err() {
+            break;
+        }
+    }
+}
+
 /// One length-prefixed JSON message, as the browser sends and we send.
-fn read_frame(input: &mut impl Read) -> io::Result<Value> {
+async fn read_frame(input: &mut (impl AsyncRead + Unpin)) -> io::Result<Value> {
     let mut len = [0; 4];
-    input.read_exact(&mut len)?;
+    input.read_exact(&mut len).await?;
     let mut body = vec![0; u32::from_ne_bytes(len) as usize];
-    input.read_exact(&mut body)?;
+    input.read_exact(&mut body).await?;
     Ok(serde_json::from_slice(&body)?)
 }
 
-fn send_if_changed<'a>(
-    plugin: &'a dyn Plugin,
-    last: &mut HashMap<&'a str, String>,
-    out: &mut impl Write,
+async fn send_if_changed(
+    plugin: &dyn Plugin,
+    value: io::Result<Value>,
+    last: &mut HashMap<&'static str, String>,
+    out: &mut (impl AsyncWrite + Unpin),
 ) -> io::Result<()> {
-    let value = match plugin.read() {
+    let value = match value {
         Ok(value) => value,
         Err(e) => {
             eprintln!("caelestia-tab: {}: {e}", plugin.topic());
@@ -126,9 +163,9 @@ fn send_if_changed<'a>(
         return Ok(());
     }
     for frame in frames(&body) {
-        out.write_all(&frame)?;
+        out.write_all(&frame).await?;
     }
-    out.flush()?;
+    out.flush().await?;
     plugin.changed(&value);
     last.insert(plugin.topic(), body);
     Ok(())
@@ -171,12 +208,15 @@ fn frames(body: &str) -> Vec<Vec<u8>> {
 mod tests {
     use super::*;
 
-    #[test]
-    fn big_messages_split_and_rejoin() {
+    #[tokio::test]
+    async fn big_messages_split_and_rejoin() {
         let small = json!({ "topic": "scheme", "value": "é" }).to_string();
         let frames_small = frames(&small);
         assert_eq!(frames_small.len(), 1);
-        assert_eq!(read_frame(&mut &frames_small[0][..]).unwrap()["value"], "é");
+        assert_eq!(
+            read_frame(&mut &frames_small[0][..]).await.unwrap()["value"],
+            "é"
+        );
 
         // Multi-byte characters straddling a part boundary must not be cut.
         let big = json!({ "topic": "wallpaper", "value": "ä".repeat(PART) }).to_string();
@@ -185,7 +225,7 @@ mod tests {
         assert!(all.len() > 1);
         for frame in &all {
             assert!(frame.len() - 4 <= 1024 * 1024);
-            let part = read_frame(&mut &frame[..]).unwrap();
+            let part = read_frame(&mut &frame[..]).await.unwrap();
             assert_eq!(part["parts"], all.len());
             joined.push_str(part["data"].as_str().unwrap());
         }
