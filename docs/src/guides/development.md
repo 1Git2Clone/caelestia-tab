@@ -79,6 +79,23 @@ override loads, the helper's scheme and wallpaper arrive, a scheme file renamed
 into place reaches the open tab live, and a matching page gets the variables and
 its compiled Catppuccin style.
 
+How fast a new tab is, the same way, with your wallpaper, scheme and settings
+(copied into the throwaway `HOME`):
+
+```sh
+nix shell nixpkgs#firefox nixpkgs#geckodriver -c node tests/newtab-speed.mjs
+```
+
+It opens a few new tabs and prints, for each, when the page's script ran, its
+state loaded, it mounted, the wallpaper was ready and it first painted, in ms
+from navigation. The page sets those as `performance` marks (`ct-start`,
+`ct-state`, `ct-mounted`, `ct-wallpaper`), so the same numbers come from any
+browser's console on a new tab:
+
+```js
+Object.fromEntries([...performance.getEntriesByType("mark"), ...performance.getEntriesByType("paint")].map((e) => [e.name, Math.round(e.startTime)]))
+```
+
 The UI has Playwright tests (`extension/tests/newtab.spec.ts`), run by the
 pre-push hook and CI:
 

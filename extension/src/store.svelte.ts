@@ -176,4 +176,5 @@ export async function start(): Promise<App> {
 async function wallpaper(app: App, value: { url: string } | undefined) {
   if (app.wallpaper) URL.revokeObjectURL(app.wallpaper);
   app.wallpaper = value ? URL.createObjectURL(await (await fetch(value.url)).blob()) : null;
+  performance.mark("ct-wallpaper");
 }
