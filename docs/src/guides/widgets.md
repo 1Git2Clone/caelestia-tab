@@ -2,7 +2,7 @@
 
 Every widget is a component placed on the page's grid (see
 [The new tab](../architecture/newtab.md#the-page)). Add one from *Settings*,
-*Page*, *Add a widget*: it goes on the page with its editor open beside it.
+*General*, *Add a widget*: it goes on the page with its editor open beside it.
 After that, a widget is edited from the page: turn on the pen and pick it for
 its properties, its placement, whether it shows, or to remove it.
 
