@@ -18,6 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The page is a CSS grid you define, and every widget, the toolbar included, sits where you place it. Widgets can be added and removed, and edit mode gives each one an overlay that opens its properties and placement.
 - A page font, and fonts for the clock's time and date, with the installed fonts offered (listed by the helper). Font sizes are in pt.
 - Tree Style Tab's sidebar takes the background's choices: a tint of any colour, the wallpaper dimmed and blurred, or TST's own look.
+- A media widget for any MPRIS player (the Spotify app, mpv, a browser): what's playing, its cover and progress, and previous, play or pause, next and seek.
+- A GitHub widget: your pull requests and issues as GitHub searches you choose. The helper finds a token without setup (`gh`, git's credential helper or the environment), caches with ETags, and keeps the token to itself.
+- Secrets by alias in `~/.config/caelestia-tab/secrets.toml`: from SOPS (nested keys), a command, a file or the environment. Values never reach the extension.
+- The helper takes commands from the extension, for widgets that control something on the machine.
 - Nerd Font glyphs as a bookmark's mark. The symbols font is bundled, and the editor shows every glyph with a search by name, and suggests glyphs from the bookmark's address and name.
 - Zen's window follows the scheme live. The helper writes a Zen mod into every Zen profile, and `zen/caelestia-tab.cfg` (installed with `caelestia-tab install-zen`, or `lib.wrapZen` on Nix) reloads it on each change.
 - The clock sits on the same glass as the bookmarks, so it stays legible over any wallpaper, dark text in light mode included.

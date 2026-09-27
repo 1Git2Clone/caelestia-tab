@@ -47,6 +47,8 @@ export interface App {
   wallpaper: string | null;
   // Installed font families, from the helper; empty without it.
   fonts: string[];
+  // The helper's other plugins' values, by topic (github, media …).
+  data: Record<string, any>;
   editing: boolean;
   panel: boolean;
   // The open modal, if any: a component and its props. It gets an onclose.
@@ -106,14 +108,21 @@ export function complete(saved: any): Settings {
 
 const store = browser.storage.local;
 
+// The helper's topics that widgets read through app.data.
+const TOPICS = ["github", "media"];
+
+// Sends a widget's command to one of the helper's plugins.
+export const tell = (message: { topic: string; command: string; [k: string]: unknown }) => browser.runtime.sendMessage({ type: "helper", message }).catch(() => {});
+
 export async function start(): Promise<App> {
-  const got = await store.get(["settings", "scheme", "wallpaper", "helperError", "fonts"]);
+  const got = await store.get(["settings", "scheme", "wallpaper", "helperError", "fonts", ...TOPICS]);
   const app: App = $state({
     settings: complete(got.settings),
     scheme: got.scheme ?? null,
     helperError: got.helperError ?? null,
     wallpaper: null,
     fonts: got.fonts ?? [],
+    data: Object.fromEntries(TOPICS.map((t) => [t, got[t] ?? null])),
     editing: false,
     panel: false,
     dialog: null,
@@ -140,6 +149,7 @@ export async function start(): Promise<App> {
     if (changes.wallpaper) wallpaper(app, changes.wallpaper.newValue);
     if (changes.helperError) app.helperError = changes.helperError.newValue ?? null;
     if (changes.fonts) app.fonts = changes.fonts.newValue ?? [];
+    for (const t of TOPICS) if (changes[t]) app.data[t] = changes[t].newValue ?? null;
     if (changes.settings) {
       const json = JSON.stringify(changes.settings.newValue ?? null);
       if (pending.delete(json) || json === last) return;

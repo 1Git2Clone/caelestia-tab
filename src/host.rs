@@ -1,13 +1,14 @@
 //! The native messaging side: sends every plugin's value on start, then again
-//! whenever a watched file changes and the value differs from the last one sent.
+//! whenever it may have changed (a watched file, the plugin's own timer or
+//! signal, or a command from the extension) and differs from the last one sent.
 
 use std::collections::HashMap;
-use std::io::{self, Write};
+use std::io::{self, Read, Write};
 use std::path::{Path, PathBuf};
 use std::sync::mpsc;
 
 use notify::{RecursiveMode, Watcher};
-use serde_json::json;
+use serde_json::{Value, json};
 
 use crate::plugins::Plugin;
 
@@ -15,16 +16,39 @@ use crate::plugins::Plugin;
 /// wallpaper, mostly) goes as parts the extension joins back together.
 const PART: usize = 512 * 1024;
 
+/// Why the host looks at a plugin again.
+pub enum Event {
+    Files(notify::Result<notify::Event>),
+    /// A plugin asks to be read again: its timer fired, or its source changed.
+    Refresh(&'static str),
+    /// A message from the extension: `{ "topic": …, … }`, for that plugin.
+    Command(Value),
+}
+
+/// Handed to [`Plugin::start`]: send `Event::Refresh(topic)` to be read again.
+pub type Wake = mpsc::Sender<Event>;
+
 pub fn run(plugins: Vec<Box<dyn Plugin>>) -> io::Result<()> {
-    // The browser closes stdin when the extension disconnects. Nothing is
-    // expected from it yet, so this thread only drains it and exits with it.
-    std::thread::spawn(|| {
-        let _ = io::copy(&mut io::stdin().lock(), &mut io::sink());
+    let (tx, rx) = mpsc::channel::<Event>();
+
+    // The extension's messages, framed like ours. The browser closes stdin
+    // when the extension disconnects, and the helper exits with it.
+    let commands = tx.clone();
+    std::thread::spawn(move || {
+        let mut input = io::stdin().lock();
+        while let Ok(message) = read_frame(&mut input) {
+            if commands.send(Event::Command(message)).is_err() {
+                break;
+            }
+        }
         std::process::exit(0);
     });
 
-    let (tx, rx) = mpsc::channel();
-    let mut watcher = notify::recommended_watcher(tx).map_err(io::Error::other)?;
+    let files = tx.clone();
+    let mut watcher = notify::recommended_watcher(move |e| {
+        let _ = files.send(Event::Files(e));
+    })
+    .map_err(io::Error::other)?;
     let mut dirs: Vec<&Path> = Vec::new();
     let watches: Vec<Vec<PathBuf>> = plugins.iter().map(|p| p.watches()).collect();
     for file in watches.iter().flatten() {
@@ -41,18 +65,48 @@ pub fn run(plugins: Vec<Box<dyn Plugin>>) -> io::Result<()> {
     let mut out = io::stdout().lock();
     let mut last: HashMap<&str, String> = HashMap::new();
     for plugin in &plugins {
+        plugin.start(tx.clone());
         send_if_changed(plugin.as_ref(), &mut last, &mut out)?;
     }
 
     for event in rx {
-        let Ok(event) = event else { continue };
-        for (plugin, files) in plugins.iter().zip(&watches) {
-            if event.paths.iter().any(|p| files.contains(p)) {
+        match event {
+            Event::Files(Ok(event)) => {
+                for (plugin, files) in plugins.iter().zip(&watches) {
+                    if event.paths.iter().any(|p| files.contains(p)) {
+                        send_if_changed(plugin.as_ref(), &mut last, &mut out)?;
+                    }
+                }
+            }
+            Event::Files(Err(_)) => {}
+            Event::Refresh(topic) => {
+                if let Some(plugin) = plugins.iter().find(|p| p.topic() == topic) {
+                    send_if_changed(plugin.as_ref(), &mut last, &mut out)?;
+                }
+            }
+            Event::Command(message) => {
+                let topic = message["topic"].as_str().unwrap_or_default();
+                let Some(plugin) = plugins.iter().find(|p| p.topic() == topic) else {
+                    eprintln!("caelestia-tab: a command for no plugin: {message}");
+                    continue;
+                };
+                if let Err(e) = plugin.command(&message) {
+                    eprintln!("caelestia-tab: {topic}: {e}");
+                }
                 send_if_changed(plugin.as_ref(), &mut last, &mut out)?;
             }
         }
     }
     Ok(())
+}
+
+/// One length-prefixed JSON message, as the browser sends and we send.
+fn read_frame(input: &mut impl Read) -> io::Result<Value> {
+    let mut len = [0; 4];
+    input.read_exact(&mut len)?;
+    let mut body = vec![0; u32::from_ne_bytes(len) as usize];
+    input.read_exact(&mut body)?;
+    Ok(serde_json::from_slice(&body)?)
 }
 
 fn send_if_changed<'a>(
@@ -116,17 +170,6 @@ fn frames(body: &str) -> Vec<Vec<u8>> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use serde_json::Value;
-    use std::io::Read;
-
-    /// Reads one frame, the way the browser would.
-    fn read_frame(input: &mut impl Read) -> io::Result<Value> {
-        let mut len = [0; 4];
-        input.read_exact(&mut len)?;
-        let mut body = vec![0; u32::from_ne_bytes(len) as usize];
-        input.read_exact(&mut body)?;
-        Ok(serde_json::from_slice(&body)?)
-    }
 
     #[test]
     fn big_messages_split_and_rejoin() {

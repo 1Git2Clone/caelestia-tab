@@ -1,8 +1,10 @@
-//! Data plugins: each one turns some file on disk into a JSON value the
-//! extension receives under the plugin's topic. Add one by implementing
-//! [`Plugin`] and listing it in [`all`].
+//! Data plugins: each one turns something on the machine (a file, a service,
+//! an API) into a JSON value the extension receives under the plugin's topic.
+//! Add one by implementing [`Plugin`] and listing it in [`all`].
 
 mod fonts;
+mod github;
+mod media;
 mod scheme;
 mod wallpaper;
 
@@ -11,6 +13,8 @@ use std::path::PathBuf;
 
 use serde_json::Value;
 
+use crate::host::Wake;
+
 pub trait Plugin {
     /// The key the extension stores this plugin's value under.
     fn topic(&self) -> &'static str;
@@ -18,7 +22,9 @@ pub trait Plugin {
     /// Files whose changes mean the value should be read again. Their parent
     /// directories are what's watched, so a file that doesn't exist yet, or
     /// that is replaced by a rename, still counts.
-    fn watches(&self) -> Vec<PathBuf>;
+    fn watches(&self) -> Vec<PathBuf> {
+        Vec::new()
+    }
 
     /// The current value. An error is logged and nothing is sent; the next
     /// change to a watched file tries again.
@@ -27,6 +33,17 @@ pub trait Plugin {
     /// Runs after a new value was sent, for plugins that also write
     /// something of their own out.
     fn changed(&self, _value: &Value) {}
+
+    /// Starts whatever else changes the value, once: a timer, a D-Bus
+    /// subscription. Send `Event::Refresh(self.topic())` on `wake` to be read
+    /// again. Run it on a thread of its own; this returns straight away.
+    fn start(&self, _wake: Wake) {}
+
+    /// A message from the extension for this topic. The value is read again
+    /// after it, so a command's effect shows without waiting for anything.
+    fn command(&self, _message: &Value) -> io::Result<()> {
+        Err(io::Error::other("takes no commands"))
+    }
 }
 
 pub fn all() -> Vec<Box<dyn Plugin>> {
@@ -35,6 +52,8 @@ pub fn all() -> Vec<Box<dyn Plugin>> {
         Box::new(scheme::Scheme::new(&state)),
         Box::new(wallpaper::Wallpaper::new(&state)),
         Box::new(fonts::Fonts),
+        Box::new(github::GitHub::new()),
+        Box::new(media::Media),
     ]
 }
 

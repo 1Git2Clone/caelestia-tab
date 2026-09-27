@@ -34,7 +34,7 @@
         style:--area={w.place.area}
         use:edges
       >
-        <c.component settings={w.settings} editing={app.editing} />
+        <c.component id={w.id} settings={w.settings} editing={app.editing} />
         {#if app.editing && Overlay}<Overlay widget={w} {app} />{/if}
       </section>
     {/if}

@@ -10,27 +10,53 @@ Each data plugin implements `plugins::Plugin`:
 
 ```rust
 pub trait Plugin {
-    fn topic(&self) -> &'static str;       // the storage.local key its value goes to
-    fn watches(&self) -> Vec<PathBuf>;     // files whose changes mean "read again"
-    fn read(&self) -> io::Result<Value>;   // the current value
+    fn topic(&self) -> &'static str;                       // the storage.local key its value goes to
+    fn read(&self) -> io::Result<Value>;                   // the current value
+    fn watches(&self) -> Vec<PathBuf> { … }                // files whose changes mean "read again"
+    fn start(&self, wake: Wake) {}                         // a timer or signal source of its own
+    fn command(&self, message: &Value) -> io::Result<()>   // a message from the extension
+    fn changed(&self, value: &Value) {}                    // after a new value was sent
 }
 ```
 
-Two ship today:
+These ship today:
 
-| Topic | Reads | Value |
-| --- | --- | --- |
-| `scheme` | `$XDG_STATE_HOME/caelestia/scheme.json` | the file as caelestia wrote it: `name`, `flavour`, `mode`, `variant`, `colours` (hex without `#`) |
-| `wallpaper` | `$XDG_STATE_HOME/caelestia/wallpaper/path.txt`, then the image it names | `{ path, url }`, where `url` is a `data:` URL of the image |
+| Topic | Reads | Value | Updates |
+| --- | --- | --- | --- |
+| `scheme` | `$XDG_STATE_HOME/caelestia/scheme.json` | the file as caelestia wrote it: `name`, `flavour`, `mode`, `variant`, `colours` (hex without `#`) | the file changes |
+| `wallpaper` | `$XDG_STATE_HOME/caelestia/wallpaper/path.txt`, then the image it names | `{ path, url }`, where `url` is a `data:` URL of the image | the file changes |
+| `fonts` | `fc-list : family` | the installed font families, sorted | once, at start |
+| `github` | GitHub's search API, with the token from the chain in [The widgets](../guides/widgets.md#the-token) | `{ results: { query: { total, items } }, auth, error? }` | every 90 s, and on a command |
+| `media` | every MPRIS player on the session bus | `{ players: [{ player, identity, status, title, artist, art, length, position, at, … }] }` | a player's properties change, it seeks, or a player comes or goes |
 
 `XDG_STATE_HOME` defaults to `~/.local/state`, as it does for caelestia.
 
 To add one: a new file in `src/plugins/`, an entry in `plugins::all()`, and the
-extension reads `storage.local[topic]`.
+extension reads `storage.local[topic]`. A plugin that needs a secret asks
+`secrets::get(alias)` (`src/secrets.rs`); the value stays in the helper.
+
+## Commands
+
+The extension can send a plugin a message, `{ topic, command, … }`: a widget
+calls `tell()` (`store.svelte.ts`), the background passes it to the helper
+over the native messaging port, and the host hands it to that topic's
+plugin's `command`. The plugin's value is read again straight after, so the
+effect shows without waiting. The GitHub widget sends its searches this way;
+the media widget, its controls. A plugin decides what it accepts: `media`
+takes only the player methods it names, so the extension can't reach
+anything else on the bus through it.
 
 A plugin can also implement `changed(&value)`, which runs after a new value
 was sent. The scheme plugin uses it to write the Zen mod (`src/zen.rs`; see
 [Zen's window](../guides/zen.md)).
+
+## Waking
+
+All of a plugin's reasons to be read again arrive on one channel: a watched
+file's event, a command, or `Event::Refresh(topic)` from the plugin's own
+thread, which `start` sets up (`github`'s timer, `media`'s D-Bus signals).
+The host reads plugins one at a time, so a slow read (a GitHub search) holds
+up the others for its length.
 
 ## Watching
 

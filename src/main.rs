@@ -1,6 +1,7 @@
 mod host;
 mod install;
 mod plugins;
+mod secrets;
 mod zen;
 
 use std::process::ExitCode;

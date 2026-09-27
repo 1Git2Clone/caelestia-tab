@@ -36,6 +36,13 @@ function connectHelper() {
 }
 
 connectHelper();
+// Commands for the helper's plugins, from the new tab's widgets:
+// { type: "helper", message: { topic, command, … } }.
+browser.runtime.onMessage.addListener((msg: any) => {
+  if (msg?.type !== "helper") return;
+  connectHelper();
+  helper.postMessage(msg.message);
+});
 // An open new tab holds a port to this page, which keeps it (and so the
 // helper) running while there's a tab to update live.
 browser.runtime.onConnect.addListener(connectHelper);

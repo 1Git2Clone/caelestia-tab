@@ -1,5 +1,4 @@
 use std::io;
-use std::path::PathBuf;
 use std::process::Command;
 
 use serde_json::Value;
@@ -14,10 +13,6 @@ pub struct Fonts;
 impl Plugin for Fonts {
     fn topic(&self) -> &'static str {
         "fonts"
-    }
-
-    fn watches(&self) -> Vec<PathBuf> {
-        Vec::new()
     }
 
     fn read(&self) -> io::Result<Value> {

@@ -115,3 +115,10 @@ the hard way.
   async rendering. It's only loaded for async renders and a failed load is
   caught, so the SSR build marks it external rather than polyfilling it
   (2026-09-27).
+- **`playerctld` is on the bus as an MPRIS player too.** It stands in for
+  whichever player is active, so listing every `org.mpris.MediaPlayer2.*`
+  name shows that player twice. The media plugin skips it (2026-09-27).
+- **The helper's GitHub token comes from the browser's environment.** `gh`
+  reads its login from `$HOME`, so a browser started with another `HOME` (the
+  e2e tests' throwaway one, a Flatpak) finds no token. `GH_TOKEN` in that
+  environment works (2026-09-27).
