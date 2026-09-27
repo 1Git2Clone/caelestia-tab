@@ -83,6 +83,9 @@ the hard way.
 - **Firefox caches a temporary add-on's files.** Reloading the page after
   editing the extension's CSS shows the old CSS; restart `web-ext run`
   (started with `--no-reload`) to see the change (2026-09-27).
+- **The Forgejo runner has no home directory.** Building nixpkgs' Firefox
+  there fails with "home directory /homeless-shelter exists", so the
+  end-to-end test runs from the pre-push hook instead of CI (2026-09-27).
 - **The Chrome DevTools MCP can't find Chrome on NixOS**; it looks in
   `/opt/google/chrome`. To look at the new tab outside a browser, serve
   `extension/` with a stub `browser` object and screenshot it with

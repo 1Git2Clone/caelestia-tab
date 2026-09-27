@@ -2,6 +2,11 @@
 # Fast pre-commit gate, the same checks CI runs. Bypass with `git commit --no-verify`.
 set -e
 
+# Git runs hooks outside the dev shell; step into it when a tool is missing.
+if ! command -v web-ext >/dev/null 2>&1 && command -v nix >/dev/null 2>&1 && [ -z "$IN_NIX_SHELL" ]; then
+  exec nix develop --quiet -c "$0" "$@"
+fi
+
 echo "pre-commit • cargo fmt --check"
 cargo fmt --check
 

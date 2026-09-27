@@ -1,0 +1,18 @@
+#!/bin/sh
+# The Firefox end-to-end test, before anything leaves the machine. CI can't
+# run it: the runner has no home directory, and nixpkgs' Firefox wrapper
+# won't build without one. Bypass with `git push --no-verify`.
+set -e
+
+# Git runs hooks outside the dev shell; step into it when a tool is missing.
+if ! command -v web-ext >/dev/null 2>&1 && command -v nix >/dev/null 2>&1 && [ -z "$IN_NIX_SHELL" ]; then
+  exec nix develop --quiet -c "$0" "$@"
+fi
+
+echo "pre-push • cargo build"
+cargo build --quiet
+
+echo "pre-push • tests/e2e-firefox.mjs (headless Firefox)"
+nix shell nixpkgs#firefox nixpkgs#geckodriver -c node tests/e2e-firefox.mjs
+
+echo "pre-push • OK"

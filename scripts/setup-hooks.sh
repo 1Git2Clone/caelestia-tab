@@ -5,3 +5,4 @@ cd "$(git rev-parse --show-toplevel)"
 git config core.hooksPath .githooks
 echo "Git hooks enabled (core.hooksPath = .githooks)."
 echo "  pre-commit: cargo fmt, clippy, node --test, web-ext lint"
+echo "  pre-push:   the headless Firefox end-to-end test"

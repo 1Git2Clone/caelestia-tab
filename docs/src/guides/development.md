@@ -50,8 +50,9 @@ node --test tests/*.test.mjs
 web-ext lint --source-dir extension --self-hosted
 ```
 
-And, slower, the whole path in a real headless Firefox (CI's `nix` job runs it
-too):
+And, slower, the whole path in a real headless Firefox. The pre-push hook runs
+it; CI doesn't, because the runner has no home directory and nixpkgs' Firefox
+wrapper won't build without one:
 
 ```sh
 cargo build
