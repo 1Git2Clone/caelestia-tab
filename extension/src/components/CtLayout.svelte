@@ -13,11 +13,15 @@
   const app = getContext<App>("ct");
 </script>
 
-<main class="ct-page relative z-1 box-border grid h-screen grid-rows-[minmax(0,1fr)_auto] gap-8 px-10 pt-4 {app.panel ? 'mr-[min(30rem,100vw)]' : ''}">
+<main
+  class="ct-page relative z-1 box-border grid h-screen grid-rows-[minmax(0,1fr)_auto] gap-8 px-10 pt-4 transition-[margin-right] duration-[260ms] ease-out motion-reduce:transition-none {app.panel
+    ? 'mr-[min(30rem,100vw)]'
+    : 'mr-0'}"
+>
   <CtMenu />
   <section class="ct-part relative min-w-0" use:edges>
     <CtBookmarks settings={app.settings.bookmarks} editing={app.editing} />
-    {#if app.editing}<CtEditOverlay info={parts.bookmarks} values={app.settings.bookmarks} />{/if}
+    {#if app.editing}<CtEditOverlay info={parts.bookmarks} at={(s) => s.bookmarks} />{/if}
   </section>
   {#if !app.scheme && app.helperError}
     <p class="absolute top-1/2 left-1/2 m-0 -translate-1/2 rounded-2xl bg-error px-4 py-2.5 text-on-error">No colours yet: {app.helperError}. See Settings, Advanced.</p>

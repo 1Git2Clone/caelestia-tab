@@ -3,6 +3,7 @@
 // The helper's messages go straight into storage.local, which the new tab and
 // the content scripts watch, so none of them depend on this page staying
 // awake. The only other state here is a cache of compiled styles.
+import { stable } from "./json.ts";
 import { cssVars } from "./scheme.ts";
 import { isTreeStyleTab, sidebarWallpaper, syncTreeStyleTab, tstOptions } from "./treestyletab.ts";
 import { SITES, compile, cssFor, libFor, matches } from "./userstyles.ts";
@@ -76,7 +77,7 @@ async function restore(saved: { settings: any; mtime?: number } | null) {
     return;
   }
   if (settings && (saved.mtime ?? 0) <= settingsChangedAt) return;
-  if (JSON.stringify(settings) === JSON.stringify(saved.settings)) return;
+  if (stable(settings) === stable(saved.settings)) return;
   store.set({ settings: saved.settings });
 }
 

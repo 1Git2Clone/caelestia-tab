@@ -161,3 +161,26 @@ the hard way.
   private-use character, and as a button's only text it becomes its name,
   which no label or locator matches. Mark the glyph `aria-hidden="true"`
   and name the button (2026-09-27).
+- **The helper's settings file has its keys sorted.** serde_json's maps are
+  ordered, so the file comes back with the same settings as storage in a
+  different order, and a `JSON.stringify` comparison called them changed.
+  The background then wrote the file's copy back, the new tab replaced
+  `app.settings` with it, and every open editor went on editing the old
+  objects: a bookmark's colour changed once, then never again until a
+  reload. Compare with `stable()` (`json.ts`), and give an editor a function
+  that finds what it edits in `app.settings` each time (`App.focus.props`)
+  (2026-09-27).
+- **GitHub allows 30 searches a minute, and a tab mounts often.** The GitHub
+  tab sent its searches on every mount (each new tab, each switch back to
+  it), and the helper searched on every message: three searches each time,
+  and a 403 within minutes. The helper fetches on its timer, on refresh and
+  for a new search only, and answers from what it has otherwise
+  (2026-09-27).
+- **A transition on a component's root doesn't play when the parent's
+  `{#if}` shows it.** Svelte 5 transitions are local by default: they play
+  only for their own block. The settings panel, shown by App's `{#if}`,
+  needs `transition:fly|global` (2026-09-27).
+- **The browser runs the helper it started with.** After a rebuild, an open
+  browser keeps the old helper, and a new tab that expects newer data waits
+  for what never comes. The GitHub tab checks for the keys it needs and asks
+  for a newer helper instead (2026-09-27).

@@ -142,6 +142,40 @@ test("GitHub's last search shows in the tab's formats", async ({ page }) => {
   await expect(page.locator(".ct-github header")).toContainText("Updated at yesterday, 09:05");
 });
 
+test("GitHub shows your activity, and a rate limit keeps the last results", async ({ page }) => {
+  const q = "is:open is:pr author:@me archived:false";
+  const card = { url: "https://github.com/a/b/pull/1", repo: "a/b", number: 1, title: "Kept PR", pr: true, draft: false, updated: new Date().toISOString() };
+  const until = new Date();
+  until.setHours(23, 40);
+  await seed(page, {
+    github: {
+      at: Date.now(),
+      results: { [q]: { total: 1, items: [card] } },
+      activity: [{ kind: "PushEvent", repo: "a/b", text: "Pushed 2 commits to main", url: "https://github.com/a/b/commits/main", at: new Date().toISOString() }],
+      error: "GitHub said 403: API rate limit exceeded",
+      limitedUntil: until.getTime(),
+    },
+    settings: { menu: { open: true, tab: "CtGitHub", tabs: {} } },
+  });
+  const tab = page.locator(".ct-github");
+  await expect(tab.getByRole("heading", { name: "Recent activity" })).toBeVisible();
+  await expect(tab.getByRole("link", { name: /Pushed 2 commits to main/ })).toHaveAttribute("href", "https://github.com/a/b/commits/main");
+  await expect(tab.getByRole("link", { name: /Kept PR/ })).toBeVisible();
+  await expect(tab).toContainText("API rate limit exceeded, until 23:40.");
+  // The time sits beside the refresh button.
+  const stamp = (await tab.getByText(/^Updated at /).boundingBox())!;
+  const refresh = (await tab.getByTitle("Fetch again now").boundingBox())!;
+  expect(refresh.x - (stamp.x + stamp.width)).toBeLessThan(40);
+});
+
+test("a helper too old for the time and activity says so, rather than wait", async ({ page }) => {
+  await seed(page, { github: { results: {} }, settings: { menu: { open: true, tab: "CtGitHub", tabs: {} } } });
+  const tab = page.locator(".ct-github");
+  await expect(tab).toContainText("Update the helper to see when it last fetched");
+  await expect(tab).toContainText("Needs a newer helper.");
+  await expect(tab).not.toContainText("Not fetched yet");
+});
+
 test("the toolbar on the left puts the menu on the right, its button at the edge", async ({ page }) => {
   await page.getByTitle("Edit", { exact: true }).click();
   await page.getByTitle("Edit Toolbar").click();
@@ -242,6 +276,27 @@ test("scrolling the lyrics stops them following, until the current line is back 
   await page.waitForTimeout(2000);
   await page.evaluate((media) => (window as any).browser.storage.local.set({ media }), at(55));
   await expect.poll(() => shown("line 55")).toBe(true);
+});
+
+test("a bookmark's colour can be changed again and again", async ({ page }) => {
+  await page.getByTitle("Edit", { exact: true }).click();
+  await page.locator(".ct-controls").first().getByTitle("Edit").click();
+  const colours = panel(page).getByRole("radiogroup", { name: "Colour", exact: true });
+  const tile = page.locator(".ct-tile").first();
+  for (const name of ["Secondary", "Tertiary", "Primary container", "Secondary"]) {
+    await colours.getByRole("radio", { name, exact: true }).click();
+    await expect(colours.getByRole("radio", { name, exact: true })).toHaveAttribute("aria-checked", "true");
+    const token = { Secondary: "secondary", Tertiary: "tertiary", "Primary container": "primary-container" }[name];
+    await expect(tile).toHaveAttribute("style", new RegExp(`--tile: var\\(--caelestia-${token}\\)`));
+    // Another tab, or the settings file, replaces the settings meanwhile:
+    // the open editor must still edit the bookmark on the page.
+    await page.evaluate(async () => {
+      const store = (window as any).browser.storage.local;
+      const { settings } = await store.get("settings");
+      settings.clock.timeSeparator = `${Math.random()}`;
+      await store.set({ settings: JSON.parse(JSON.stringify(settings)) });
+    });
+  }
 });
 
 test("a bookmark's line matches its colour, or is its own, or none", async ({ page }) => {

@@ -1,22 +1,27 @@
 use std::collections::HashMap;
 use std::io;
+use std::path::PathBuf;
 use std::sync::Mutex;
 
 use async_trait::async_trait;
 use serde_json::{Value, json};
 
-use super::Plugin;
 use super::github::client;
+use super::{Plugin, home};
 
 /// Song lyrics from LRCLIB (lrclib.net, free, no key), for a track a widget
 /// asks about: `{ topic: "lyrics", command: "get", artist, title, album,
 /// seconds }`. The value is the lyrics of the last track asked for, keyed so
 /// a widget can tell they're for the song it shows: `{ key, plain, synced:
 /// [{ ms, text }], none }`. Nothing is fetched until a widget asks, and each
-/// track once per helper run.
+/// track once: lyrics found are kept in `$XDG_CACHE_HOME/caelestia-tab/lyrics/`,
+/// a file a track, across helper runs (a browser start is a new run). A
+/// track LRCLIB has nothing for is remembered for this run only, so lyrics
+/// added there later are found.
 pub struct Lyrics {
     state: Mutex<State>,
     http: reqwest::Client,
+    dir: PathBuf,
 }
 
 #[derive(Default)]
@@ -30,6 +35,11 @@ impl Lyrics {
         Self {
             state: Mutex::new(State::default()),
             http: client(),
+            dir: std::env::var_os("XDG_CACHE_HOME")
+                .filter(|d| !d.is_empty())
+                .map(PathBuf::from)
+                .unwrap_or_else(|| home().join(".cache"))
+                .join("caelestia-tab/lyrics"),
         }
     }
 }
@@ -70,6 +80,14 @@ impl Plugin for Lyrics {
         if let Some(hit) = self.state.lock().unwrap().cache.get(&key) {
             return Ok(hit.clone());
         }
+        let file = self.dir.join(format!("{:016x}.json", fnv(&key)));
+        if let Ok(text) = tokio::fs::read_to_string(&file).await
+            && let Ok(hit) = serde_json::from_str::<Value>(&text)
+            && hit["key"] == key.as_str()
+        {
+            self.state.lock().unwrap().cache.insert(key, hit.clone());
+            return Ok(hit);
+        }
         let fetched = fetch(
             &self.http,
             &artist,
@@ -89,9 +107,23 @@ impl Plugin for Lyrics {
             // Not cached: the network may be back next time.
             Err(e) => return Ok(json!({ "key": key, "error": e.to_string() })),
         };
+        if value["none"] != true {
+            // A cache that can't be written is only a slower next time.
+            let _ = tokio::fs::create_dir_all(&self.dir).await;
+            if let Err(e) = tokio::fs::write(&file, value.to_string()).await {
+                eprintln!("caelestia-tab: lyrics: {}: {e}", file.display());
+            }
+        }
         self.state.lock().unwrap().cache.insert(key, value.clone());
         Ok(value)
     }
+}
+
+/// FNV-1a, for a cache file's name: stable across builds, unlike std's hasher.
+fn fnv(text: &str) -> u64 {
+    text.bytes().fold(0xcbf29ce484222325, |h, b| {
+        (h ^ b as u64).wrapping_mul(0x100000001b3)
+    })
 }
 
 async fn fetch(

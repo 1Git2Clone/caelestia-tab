@@ -3,6 +3,7 @@
 // every other tab's change (and the helper's) arrives here, so open tabs stay
 // in step with each other and with caelestia.
 import type { Component } from "svelte";
+import { stable } from "./json.ts";
 import { tstOptions, TREE_STYLE_TAB } from "./treestyletab.ts";
 import type { Scheme } from "./types.ts";
 import { SITES } from "./userstyles.ts";
@@ -42,8 +43,12 @@ export interface App {
   // What the side panel is editing instead of its tabs: a component and its
   // props (a part's settings, one bookmark). There are no pop-ups: every
   // editor is a view in the panel, beside the page, applying as it changes.
-  // `title` can be a function, for a title that follows what's being edited.
-  focus: { title: string | (() => string); component: Component<any>; props: Record<string, any> } | null;
+  // `title` can be a function, for a title that follows what's being edited,
+  // and `props` should be: a function that finds what's edited in
+  // app.settings each time, since app.settings is replaced whole when
+  // another tab or the settings file changes it, and an editor holding the
+  // old objects would edit nothing anyone sees.
+  focus: { title: string | (() => string); component: Component<any>; props: Record<string, any> | (() => Record<string, any>) } | null;
 }
 
 export const DEFAULTS: Settings = {
@@ -105,7 +110,7 @@ const store = browser.storage.local;
 const TOPICS = ["github", "media", "lyrics"];
 
 // Opens an editor in the side panel.
-export function edit(app: App, title: string | (() => string), component: Component<any>, props: Record<string, any>) {
+export function edit(app: App, title: string | (() => string), component: Component<any>, props: Record<string, any> | (() => Record<string, any>)) {
   app.focus = { title, component, props };
   app.panel = true;
 }
@@ -132,10 +137,10 @@ export async function start(): Promise<App> {
   // step, and a step's echo can arrive after the next step was saved: taking
   // that echo for another tab's change would roll the value back.
   const pending = new Set<string>();
-  let last = JSON.stringify(app.settings);
+  let last = stable(app.settings);
   $effect.root(() => {
     $effect(() => {
-      const json = JSON.stringify(app.settings);
+      const json = stable(app.settings);
       if (json === last) return;
       last = json;
       pending.add(json);
@@ -150,10 +155,14 @@ export async function start(): Promise<App> {
     if (changes.fonts) app.fonts = changes.fonts.newValue ?? [];
     for (const t of TOPICS) if (changes[t]) app.data[t] = changes[t].newValue ?? null;
     if (changes.settings) {
-      const json = JSON.stringify(changes.settings.newValue ?? null);
-      if (pending.delete(json) || json === last) return;
-      app.settings = complete(changes.settings.newValue ?? {});
-      last = JSON.stringify(app.settings);
+      // Compared whole and key order aside: replacing app.settings with the
+      // same settings would still leave every open editor holding the old
+      // objects.
+      const next = complete(changes.settings.newValue ?? {});
+      const json = stable(next);
+      if (pending.delete(stable(changes.settings.newValue ?? null)) || json === last) return;
+      app.settings = next;
+      last = json;
     }
   });
 

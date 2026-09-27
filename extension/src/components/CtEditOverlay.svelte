@@ -3,11 +3,13 @@
 <script lang="ts">
   import { getContext } from "svelte";
   import type { WidgetInfo } from "../fields.ts";
-  import { edit, type App } from "../store.svelte.ts";
+  import { edit, type App, type Settings } from "../store.svelte.ts";
   import CtIcon from "./CtIcon.svelte";
   import CtPartEditor from "./CtPartEditor.svelte";
 
-  let { info, values }: { info: WidgetInfo; values: Record<string, any> } = $props();
+  // `at` finds the part's settings in app.settings, afresh for every render
+  // of the editor (see App.focus).
+  let { info, at }: { info: WidgetInfo; at: (s: Settings) => Record<string, any> } = $props();
   const app = getContext<App>("ct");
 </script>
 
@@ -16,7 +18,7 @@
     type="button"
     class="pointer-events-auto absolute -top-3.5 left-3 flex cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-full border-0 bg-primary px-3 py-1 text-sm text-on-primary shadow-md"
     title="Edit {info.label}"
-    onclick={() => edit(app, info.label, CtPartEditor, { info, values })}
+    onclick={() => edit(app, info.label, CtPartEditor, () => ({ info, values: at(app.settings) }))}
   >
     <CtIcon name="edit" />{info.label}
   </button>

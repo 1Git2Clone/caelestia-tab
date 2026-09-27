@@ -4,6 +4,8 @@
      pen, a bookmark. There are no pop-ups. -->
 <script lang="ts">
   import { getContext } from "svelte";
+  import { cubicOut } from "svelte/easing";
+  import { fly } from "svelte/transition";
   import type { Field } from "../fields.ts";
   import { COLOURS } from "../scheme.ts";
   import { complete, DEFAULTS, type App } from "../store.svelte.ts";
@@ -14,8 +16,12 @@
 
   const app = getContext<App>("ct");
   let tab = $state(0);
+  // Slides in from the edge it's docked to. |global: the {#if} that shows it
+  // is App's, and a local transition only plays for its own block.
+  const still = typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
   const focus = $derived(app.focus);
   const title = $derived(typeof focus?.title === "function" ? focus.title() || "Untitled" : (focus?.title ?? "Settings"));
+  const props = $derived(typeof focus?.props === "function" ? focus.props() : focus?.props);
 
   // The new tab's background and Tree Style Tab's sidebar take the same
   // choices; `none` is what "no background of ours" means for each.
@@ -87,6 +93,7 @@
 <aside
   class="ct-settings fixed inset-y-0 right-0 z-10 box-border w-[min(30rem,100vw)] overflow-auto bg-surface-container p-6 text-on-surface shadow-[0_0_2rem_color-mix(in_srgb,var(--caelestia-shadow)_40%,transparent)]"
   aria-label="Settings"
+  transition:fly|global={{ x: "100%", opacity: 1, duration: still ? 0 : 260, easing: cubicOut }}
 >
   <header class="mb-4 flex items-center gap-2">
     {#if app.focus}
@@ -98,7 +105,7 @@
   {#if focus}
     <!-- The editor's props come from `focus`, not app.focus: closing an editor
          nulls app.focus while its handler (a remove, say) is still running. -->
-    <focus.component {...focus.props} onclose={() => (app.focus = null)} />
+    <focus.component {...props} onclose={() => (app.focus = null)} />
   {:else}
   <CtTabs tabs={["General", "Background", "Websites", "Browser", "Advanced"]} bind:current={tab} />
 

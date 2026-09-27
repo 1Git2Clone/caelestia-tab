@@ -31,7 +31,9 @@ Open or closed, and the tab it's on, stay as you left them, in every new tab.
 Tabs of your own come after these (see [Writing a menu tab](plugins.md)).
 
 - **GitHub**: each of your searches (one per line, `Label: query`) as a
-  column of compact cards, and when the helper last searched, as
+  column of compact cards, a column of your recent activity (pushes, pull
+  requests, reviews, comments …), and, beside the refresh button, when the
+  helper last fetched them, as
   *Updated at 22:31*, *Updated at yesterday, 22:31* or
   *Updated at 26-09-2026 22:31*: the words and the three formats are settings.
 - **Media**: a tab per player at the top (four a row, two on a narrow page,
@@ -57,14 +59,17 @@ with `tell({ topic, command, … })`. A tab of your own can too:
   itself. Checked with Firefox's media and the Spotify app.
 - **`lyrics`**: a track's lyrics from [LRCLIB](https://lrclib.net), after a
   tab sends `{ command: "get", artist, title, album, seconds }`, timed
-  (`synced: [{ ms, text }]`) when LRCLIB has them, plain otherwise, or
-  `none`. The artist, title and album go to lrclib.net, and only when a tab
-  asks. Some players send lyrics themselves (`lyrics` on the player).
-- **`github`**: GitHub searches, after a tab sends
-  `{ command: "queries", widget: id, queries }` (its own list, replacing its
-  last one). The helper runs all of them every 90 seconds and on
-  `{ command: "refresh" }`, side by side, and an unchanged result comes back
-  as a `304`, which doesn't count against GitHub's rate limit. Every open tab
+  (`synced: [{ ms, text }]`) when LRCLIB has them, plain otherwise, or  `none`. The artist, title and album go to lrclib.net, and only when a tab
+  asks, and once a track: lyrics found are kept in
+  `~/.cache/caelestia-tab/lyrics/`. Some players send lyrics themselves (`lyrics` on the player).
+- **`github`**: GitHub searches, and your recent events when asked, after a
+  tab sends `{ command: "queries", widget: id, queries, activity }` (its own
+  list, replacing its last one). The helper fetches them every five minutes,
+  on `{ command: "refresh" }` and when a search is new, side by side, and
+  otherwise answers from what it last fetched, so opening a tab doesn't
+  search again: GitHub allows 30 searches a minute. An unchanged result comes
+  back as a `304`. Rate-limited, it keeps what it had, says so
+  (`error`, `limitedUntil`) and waits for GitHub's reset. Every open tab
   reads the same results from storage, so ten open tabs make no more requests
   than one.
 

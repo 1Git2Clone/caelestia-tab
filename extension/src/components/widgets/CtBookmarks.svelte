@@ -4,14 +4,16 @@
   import { edit, type App as State } from "../../store.svelte.ts";
 
   // Opens a bookmark in the side panel; a new one is added first, so the
-  // page shows it while it's being filled in.
+  // page shows it while it's being filled in. The editor finds it by its id
+  // in app.settings each time (see App.focus).
   function editItem(app: State, settings: any, index: number) {
     if (index < 0) {
       settings.items.push(item({ name: "New bookmark", url: "" }));
       index = settings.items.length - 1;
     }
-    const it = settings.items[index];
-    edit(app, () => it.name || "Bookmark", CtBookmarkEditor, { settings, index });
+    const id = settings.items[index].id;
+    const find = () => app.settings.bookmarks.items.findIndex((it: any) => it.id === id);
+    edit(app, () => app.settings.bookmarks.items[find()]?.name || "Bookmark", CtBookmarkEditor, () => ({ settings: app.settings.bookmarks, index: find() }));
   }
 
   const PRESETS = [

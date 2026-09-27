@@ -73,7 +73,7 @@
             {#if current}<current.component settings={menu.tabs[current.name]} />{/if}
           </div>
         {/key}
-        {#if app.editing && current}<CtEditOverlay info={current.tab} values={menu.tabs[current.name]} />{/if}
+        {#if app.editing && current}{@const name = current.name}<CtEditOverlay info={current.tab} at={(s) => s.menu.tabs[name]} />{/if}
       </div>
     </div>
   {/if}
@@ -114,7 +114,7 @@
     </div>
     <div class="relative row-1 {{ start: 'col-1', center: 'col-2 justify-self-center', end: 'col-2 justify-self-end' }[side as 'end'] ?? 'col-2 justify-self-end'}">
       <CtToolbar settings={app.settings.toolbar} />
-      {#if app.editing}<CtEditOverlay info={parts.toolbar} values={app.settings.toolbar} />{/if}
+      {#if app.editing}<CtEditOverlay info={parts.toolbar} at={(s) => s.toolbar} />{/if}
     </div>
   </nav>
 
@@ -122,7 +122,7 @@
     <div class="grid min-h-0 flex-1 place-items-center" in:fade={{ duration: ms(200), delay: ms(120) }}>
       <div class="ct-part relative">
         <CtClock settings={app.settings.clock} />
-        {#if app.editing}<CtEditOverlay info={parts.clock} values={app.settings.clock} />{/if}
+        {#if app.editing}<CtEditOverlay info={parts.clock} at={(s) => s.clock} />{/if}
       </div>
     </div>
   {/if}

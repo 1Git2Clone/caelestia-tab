@@ -165,7 +165,7 @@
           in:fly={{ x: 48 * dir, duration: still ? 0 : 220, easing: cubicOut }}
           out:fly={{ x: -48 * dir, duration: still ? 0 : 220, easing: cubicOut }}
         >
-          <div class="grid min-w-0 grid-cols-[minmax(0,1fr)] content-start justify-items-center gap-3">
+          <div class="grid min-w-0 grid-cols-[minmax(0,1fr)] justify-items-center gap-3 {wide ? 'content-center' : 'content-start'}">
             <div
               class="aspect-square w-[min(var(--cover),100%)] rounded-2xl bg-surface-container-high bg-(image:--art) bg-cover bg-center"
               style:--cover="{settings.cover}rem"
