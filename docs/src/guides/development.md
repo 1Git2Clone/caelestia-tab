@@ -189,3 +189,25 @@ mdbook build docs    # what the pages workflow does
 
 The pages workflow publishes `main` to
 <https://pages.hu-tao.dev/hutao/caelestia-tab/docs/>.
+
+## Releasing
+
+Date the `[Unreleased]` section of `CHANGELOG.md`, bump `version` in
+`extension/public/manifest.json` and `Cargo.toml`, commit, and tag it
+`v<version>`. Then build the extension without anyone's own components (a
+normal build takes in `~/.config/caelestia-tab/components`), and zip it for
+addons.mozilla.org, leaving out `render.js`, which nothing loads yet:
+
+```sh
+CAELESTIA_TAB_COMPONENTS=$(mktemp -d) npm run --prefix extension build
+web-ext build --source-dir extension/dist --artifacts-dir release \
+  --filename caelestia-tab-<version>.zip --ignore-files render.js
+git archive --format=zip -o release/caelestia-tab-<version>-source.zip v<version>
+```
+
+AMO asks for the source of bundled, minified code: the second zip, built as
+above (Node 24, npm 11). Its linter warns about `vendor/less.min.js`
+(less.js, unmodified, from `scripts/vendor-userstyles.mjs`), the
+`innerHTML` in Svelte's runtime and the page's `<style>`s, and
+`data_collection_permissions` being newer than the minimum Firefox; none is
+an error.

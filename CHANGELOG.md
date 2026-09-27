@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-09-28
+
 ### Added
 
 - `caelestia-tab`, the native messaging helper. It streams caelestia's scheme and wallpaper to the extension and resends them when they change. `caelestia-tab install` registers it with Firefox, Floorp, Zen, LibreWolf and Waterfox.
@@ -34,3 +36,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tree Style Tab's sidebar is tinted towards the scheme's primary and follows switches live. It can be turned off, and its strength set, in *Settings*, *Browser*.
 - Site themes: the 134 catppuccin/userstyles, compiled against the live scheme and injected per site. Every page also gets the scheme as `--caelestia-*` CSS variables and a `caelestia-scheme` event, for your own Stylus styles and userscripts.
 - Per-site overrides in *Settings*, *Websites*: more domains for a style, a CSS selector that applies it to matching pages wherever they're hosted, and your own CSS on top. The docs carry recipes for mdBook on any domain and for claude.ai's current design.
+
+[Unreleased]: https://git.hu-tao.dev/hutao/caelestia-tab/compare/v0.1.0...main
+[0.1.0]: https://git.hu-tao.dev/hutao/caelestia-tab/releases/tag/v0.1.0
