@@ -112,7 +112,7 @@ it's filled in.
 A widget's form is drawn from its component's `fields` (see
 [Writing a component](../guides/plugins.md)): the settings panel knows nothing
 about clocks or bookmarks. Settings itself has no per-widget section: its
-*Page* tab holds the page's font and grid and adds widgets, and everything
+*General* tab holds the page's font and grid and adds widgets, and everything
 about one widget is edited from the page with the pen. The panel is a
 component named in settings (`panel`), so it can be replaced.
 
