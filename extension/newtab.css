@@ -46,6 +46,12 @@
   box-sizing: border-box;
 }
 
+/* An element's own display (flex, grid) beats the UA's [hidden] otherwise,
+   and the element stays visible. */
+[hidden] {
+  display: none !important;
+}
+
 html,
 body {
   margin: 0;
@@ -562,6 +568,14 @@ legend button {
   margin-top: 12px;
   max-height: 40vh;
   overflow: auto;
+}
+
+.styles .site[open] {
+  grid-column: 1 / -1;
+}
+
+.styles .site summary {
+  cursor: pointer;
 }
 
 @media (max-width: 720px) {

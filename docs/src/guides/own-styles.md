@@ -45,6 +45,47 @@ apply();
 document.addEventListener("caelestia-scheme", apply);
 ```
 
+## Overriding a bundled site style
+
+The bundled styles are Catppuccin's, applied as upstream wrote them. To go
+further, open *Settings*, *Websites* and click a site's name. Each has three
+fields, all empty by default:
+
+- **Also on**: more domains for the style, one per line. `docs.example.org`
+  covers its subdomains too.
+- **Also on pages matching**: a CSS selector. Once a page has loaded, the
+  style applies to it if the selector matches anything, wherever the page is
+  hosted. This is for kinds of site, like documentation generators, that live
+  on many domains.
+- **Your CSS**: applied after the style, on every page the style applies to.
+  It can use the `--caelestia-*` variables, and wins over the style, since it
+  comes later.
+
+The page picks up a change on its next scheme switch or reload. Extra
+domains and selectors take the style's rules for all its pages at once: the
+path filters some styles have (GitHub's leaves out `github.com/home`, for
+example) don't apply to them.
+
+### Recipes
+
+**mdBook, on any domain.** Catppuccin's mdBook style lists only a few
+well-known books. Every mdBook page has a theme picker, so under *mdBook*,
+set *Also on pages matching* to:
+
+```css
+#mdbook-theme-list, #theme-list
+```
+
+(`#mdbook-theme-list` in mdBook 0.5, `#theme-list` before it.)
+
+**claude.ai's current design.** Claude moved to a new set of `--cds-*`
+variables, and Catppuccin's Claude style still sets the old ones, so it
+changes nothing. Paste this into *Claude*'s *Your CSS*:
+
+```css
+{{#include recipes/claude.css}}
+```
+
 ## Limits
 
 - Pages the browser won't let extensions touch (`about:` pages, the add-ons

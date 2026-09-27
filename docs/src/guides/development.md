@@ -65,6 +65,19 @@ override loads, the helper's scheme and wallpaper arrive, a scheme file renamed
 into place reaches the open tab live, and a matching page gets the variables and
 its compiled Catppuccin style.
 
+To check the site styles themselves against the live sites, which takes about
+ten minutes and needs the network, run this by hand after vendoring a new
+catppuccin/userstyles revision:
+
+```sh
+nix shell nixpkgs#firefox nixpkgs#geckodriver -c node tests/sites-firefox.mjs          # all of them
+nix shell nixpkgs#firefox nixpkgs#geckodriver -c node tests/sites-firefox.mjs github   # just these
+```
+
+It prints each site as themed or not and lists the ones to look at by hand;
+[Site themes](../architecture/site-themes.md#checking-the-styles) says why a
+failure there isn't always a broken style.
+
 `web-ext lint` warns about `new Function` and `innerHTML` in
 `vendor/less.min.js`; those are less.js's JavaScript-evaluation and plugin
 features, which no bundled style uses. Warnings don't fail the build, errors

@@ -25,6 +25,10 @@ test("splits @-moz-document blocks and matches them like Stylus", () => {
   assert.ok(!matches(blocks[0].rules, "https://notexample.com/"));
   assert.equal(cssFor(css, "https://nowhere.net/"), "");
   assert.match(cssFor(css, "https://other.org/docs/a"), /e \{ f: g; \}/);
+  // An override that matched the page some other way takes every block.
+  const all = cssFor(css, "https://nowhere.net/", true);
+  assert.match(all, /b \{ c: d; \}/);
+  assert.match(all, /e \{ f: g; \}/);
 });
 
 test("the vendored lib takes the scheme's colours and accent", () => {

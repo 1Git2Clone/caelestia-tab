@@ -85,7 +85,7 @@ const lib = fetch("userstyles/lib.less").then((r) => r.text());
 // id -> { key, css: Promise<string> }, recompiled when the scheme changes.
 const compiled = new Map();
 
-async function themeFor(url) {
+async function themeFor(url, detected) {
   const { scheme, settings } = await store.get(["scheme", "settings"]);
   if (!scheme) return "";
   const sites = { ...SITES, ...settings?.sites };
@@ -93,7 +93,11 @@ async function themeFor(url) {
   if (!sites.enabled) return css;
   const key = JSON.stringify([scheme.mode, scheme.colours, sites.accent]);
   for (const style of (await index).styles) {
-    if (sites.off.includes(style.id) || !matches(style.matches, url)) continue;
+    // The user's override: more domains, pages matching a selector, their CSS.
+    const own = sites.overrides?.[style.id] ?? {};
+    const domains = (own.domains ?? "").split(/\s+/).filter(Boolean).map((value) => ({ type: "domain", value }));
+    const anywhere = (own.when && detected?.includes(style.id)) || matches(domains, url);
+    if (sites.off.includes(style.id) || !(anywhere || matches(style.matches, url))) continue;
     let hit = compiled.get(style.id);
     if (hit?.key !== key) {
       const source = fetch(`userstyles/${style.id}.less`).then((r) => r.text());
@@ -104,10 +108,11 @@ async function themeFor(url) {
       compiled.set(style.id, hit);
     }
     try {
-      css += `\n${cssFor(await hit.css, url)}`;
+      css += `\n${cssFor(await hit.css, url, anywhere)}`;
     } catch (e) {
       console.warn(`caelestia-tab: ${style.id}:`, e.message ?? e);
     }
+    if (own.css) css += `\n${own.css}`;
   }
   return css;
 }
@@ -115,7 +120,7 @@ async function themeFor(url) {
 browser.runtime.onMessage.addListener((msg, sender) => {
   if (msg.type !== "theme") return;
   return (async () => {
-    const css = await themeFor(msg.url);
+    const css = await themeFor(msg.url, msg.detected);
     if (css === msg.applied) return css;
     // insertCSS rather than a <style> from the content script: it isn't
     // subject to the page's Content-Security-Policy.

@@ -14,6 +14,7 @@ const NAMES = [
 // scheme's primary.
 export const SITES = { enabled: true, off: [], accent: "primary" };
 
+
 const IMPORT = /@import\s+["']https:\/\/userstyles\.catppuccin\.com\/lib\/std\/v1\.less["'];/;
 
 // Swaps catppuccin's palette in lib.less for the scheme's colours, and the
@@ -110,9 +111,10 @@ export function matches(rules, url) {
 }
 
 // The CSS one compiled style contributes to a page, or "" when none of its
-// blocks match the URL.
-export function cssFor(compiled, url) {
+// blocks match the URL. `all` takes every block, for a page the user's
+// override matched by its content or an extra domain.
+export function cssFor(compiled, url, all = false) {
   const { global, blocks } = documents(compiled);
-  const bodies = blocks.filter((b) => matches(b.rules, url)).map((b) => b.body);
+  const bodies = blocks.filter((b) => all || matches(b.rules, url)).map((b) => b.body);
   return bodies.length ? global + bodies.join("\n") : "";
 }

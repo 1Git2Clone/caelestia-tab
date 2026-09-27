@@ -1,0 +1,59 @@
+/* A site override for claude.ai (Settings → Websites → Claude → Your CSS).
+   Claude moved to a --cds-* design system; catppuccin's Claude style still
+   sets the older --bg-* variables, which Claude no longer reads. Claude
+   derives almost everything from a neutral scale, the surfaces and an accent
+   role, so this sets those, on every element Claude declares them on, and
+   !important beats Claude's own there. Checked against claude.ai on
+   2026-09-27. */
+:root,
+.cds-root,
+.cds-dark-scope,
+[data-mode] {
+  --cds-neutral-0: color-mix(in srgb, var(--caelestia-on-surface) 0.0%, var(--caelestia-surface)) !important;
+  --cds-neutral-10: color-mix(in srgb, var(--caelestia-on-surface) 1.1%, var(--caelestia-surface)) !important;
+  --cds-neutral-20: color-mix(in srgb, var(--caelestia-on-surface) 2.2%, var(--caelestia-surface)) !important;
+  --cds-neutral-30: color-mix(in srgb, var(--caelestia-on-surface) 3.3%, var(--caelestia-surface)) !important;
+  --cds-neutral-40: color-mix(in srgb, var(--caelestia-on-surface) 4.4%, var(--caelestia-surface)) !important;
+  --cds-neutral-50: color-mix(in srgb, var(--caelestia-on-surface) 5.6%, var(--caelestia-surface)) !important;
+  --cds-neutral-60: color-mix(in srgb, var(--caelestia-on-surface) 6.7%, var(--caelestia-surface)) !important;
+  --cds-neutral-70: color-mix(in srgb, var(--caelestia-on-surface) 7.8%, var(--caelestia-surface)) !important;
+  --cds-neutral-80: color-mix(in srgb, var(--caelestia-on-surface) 8.9%, var(--caelestia-surface)) !important;
+  --cds-neutral-90: color-mix(in srgb, var(--caelestia-on-surface) 10.0%, var(--caelestia-surface)) !important;
+  --cds-neutral-100: color-mix(in srgb, var(--caelestia-on-surface) 11.1%, var(--caelestia-surface)) !important;
+  --cds-neutral-150: color-mix(in srgb, var(--caelestia-on-surface) 16.7%, var(--caelestia-surface)) !important;
+  --cds-neutral-200: color-mix(in srgb, var(--caelestia-on-surface) 22.2%, var(--caelestia-surface)) !important;
+  --cds-neutral-250: color-mix(in srgb, var(--caelestia-on-surface) 27.8%, var(--caelestia-surface)) !important;
+  --cds-neutral-300: color-mix(in srgb, var(--caelestia-on-surface) 33.3%, var(--caelestia-surface)) !important;
+  --cds-neutral-350: color-mix(in srgb, var(--caelestia-on-surface) 38.9%, var(--caelestia-surface)) !important;
+  --cds-neutral-400: color-mix(in srgb, var(--caelestia-on-surface) 44.4%, var(--caelestia-surface)) !important;
+  --cds-neutral-450: color-mix(in srgb, var(--caelestia-on-surface) 50.0%, var(--caelestia-surface)) !important;
+  --cds-neutral-500: color-mix(in srgb, var(--caelestia-on-surface) 55.6%, var(--caelestia-surface)) !important;
+  --cds-neutral-550: color-mix(in srgb, var(--caelestia-on-surface) 61.1%, var(--caelestia-surface)) !important;
+  --cds-neutral-600: color-mix(in srgb, var(--caelestia-on-surface) 66.7%, var(--caelestia-surface)) !important;
+  --cds-neutral-650: color-mix(in srgb, var(--caelestia-on-surface) 72.2%, var(--caelestia-surface)) !important;
+  --cds-neutral-700: color-mix(in srgb, var(--caelestia-on-surface) 77.8%, var(--caelestia-surface)) !important;
+  --cds-neutral-750: color-mix(in srgb, var(--caelestia-on-surface) 83.3%, var(--caelestia-surface)) !important;
+  --cds-neutral-800: color-mix(in srgb, var(--caelestia-on-surface) 88.9%, var(--caelestia-surface)) !important;
+  --cds-neutral-810: color-mix(in srgb, var(--caelestia-on-surface) 90.0%, var(--caelestia-surface)) !important;
+  --cds-neutral-820: color-mix(in srgb, var(--caelestia-on-surface) 91.1%, var(--caelestia-surface)) !important;
+  --cds-neutral-830: color-mix(in srgb, var(--caelestia-on-surface) 92.2%, var(--caelestia-surface)) !important;
+  --cds-neutral-840: color-mix(in srgb, var(--caelestia-on-surface) 93.3%, var(--caelestia-surface)) !important;
+  --cds-neutral-850: color-mix(in srgb, var(--caelestia-on-surface) 94.4%, var(--caelestia-surface)) !important;
+  --cds-neutral-860: color-mix(in srgb, var(--caelestia-on-surface) 95.6%, var(--caelestia-surface)) !important;
+  --cds-neutral-870: color-mix(in srgb, var(--caelestia-on-surface) 96.7%, var(--caelestia-surface)) !important;
+  --cds-neutral-880: color-mix(in srgb, var(--caelestia-on-surface) 97.8%, var(--caelestia-surface)) !important;
+  --cds-neutral-890: color-mix(in srgb, var(--caelestia-on-surface) 98.9%, var(--caelestia-surface)) !important;
+  --cds-neutral-900: color-mix(in srgb, var(--caelestia-on-surface) 100.0%, var(--caelestia-surface)) !important;
+  --cds-surface-0: var(--caelestia-surface) !important;
+  --cds-surface-1: var(--caelestia-surface-container-low) !important;
+  --cds-surface-2: var(--caelestia-surface-container) !important;
+  --cds-surface-3: var(--caelestia-surface-container-high) !important;
+  --cds-text-primary: var(--caelestia-on-surface) !important;
+  --cds-text-secondary: var(--caelestia-on-surface-variant) !important;
+  --cds-text-muted: var(--caelestia-outline) !important;
+  --cds-role-accent-fill: var(--caelestia-primary) !important;
+  --cds-role-accent-fill-hover: color-mix(in srgb, var(--caelestia-primary) 85%, var(--caelestia-on-surface)) !important;
+  --cds-fill-accent: var(--caelestia-primary) !important;
+  --cds-text-accent: var(--caelestia-primary) !important;
+  --cds-bg-accent: color-mix(in srgb, var(--caelestia-primary) 20%, transparent) !important;
+}

@@ -200,22 +200,38 @@ function websitesTab() {
   fetch("userstyles/index.json")
     .then((r) => r.json())
     .then(({ styles }) => {
-      const rows = styles.map((s) =>
-        el(
-          "label",
-          { className: "inline", title: s.name.toLowerCase() },
-          el("input", {
-            type: "checkbox",
-            checked: !sites.off.includes(s.id),
-            onchange: (e) => {
-              sites.off = e.target.checked ? sites.off.filter((id) => id !== s.id) : [...sites.off, s.id];
-              save();
-            },
-          }),
-          ` ${s.name}`,
-        ),
-      );
-      list.replaceChildren(...rows);
+      const rows = styles.map((s) => {
+        const override = { domains: "", when: "", css: "", ...sites.overrides?.[s.id] };
+        const saveOverride = () => {
+          sites.overrides = { ...sites.overrides, [s.id]: override };
+          save();
+        };
+        const fields = [
+          { key: "domains", label: "Also on", type: "textarea", hint: "More domains for this style, one per line." },
+          { key: "when", label: "Also on pages matching", type: "text", hint: "A CSS selector, checked once the page has loaded: the style applies wherever it matches." },
+          { key: "css", label: "Your CSS", type: "textarea", hint: "Applied after the style, on the same pages. The scheme is in var(--caelestia-*)." },
+        ];
+        const body = ui.form(fields, override, saveOverride);
+        return el(
+          "details",
+          { className: "site", title: s.name.toLowerCase() },
+          el(
+            "summary",
+            {},
+            el("input", {
+              type: "checkbox",
+              checked: !sites.off.includes(s.id),
+              onclick: (e) => e.stopPropagation(),
+              onchange: (e) => {
+                sites.off = e.target.checked ? sites.off.filter((id) => id !== s.id) : [...sites.off, s.id];
+                save();
+              },
+            }),
+            ` ${s.name}`,
+          ),
+          body,
+        );
+      });
       filter.oninput = () => rows.forEach((r) => (r.hidden = !r.title.includes(filter.value.toLowerCase())));
     });
 

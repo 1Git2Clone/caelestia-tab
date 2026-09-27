@@ -38,6 +38,24 @@ that was inserted.
 Content-Security-Policy can block inline styles but not an extension's
 inserted sheet.
 
+## Overrides
+
+The styles are applied as upstream wrote them; anything beyond that is the
+user's, in `settings.sites.overrides[id]` (see
+[Theming your own sites](../guides/own-styles.md#overriding-a-bundled-site-style)):
+`domains`, `when` (a CSS selector) and `css`. The extension ships no fixes of
+its own; recipes live in the docs.
+
+- `domains` are extra `domain` rules. A style matched through one, or through
+  `when`, contributes all its `@-moz-document` bodies (`cssFor(…, all)`),
+  because its own rules don't name that page.
+- `when` needs the parsed document, which `document_start` doesn't have. The
+  content script asks once at `document_start` as always, then again at
+  `DOMContentLoaded`, sending the ids whose selector matches as `detected`.
+  So a page themed only through `when` shows the unthemed page until its DOM is
+  parsed.
+- `css` goes after the style's CSS, so it wins at equal specificity.
+
 ## The palette swap
 
 `userstyles.js` `libFor()` rewrites the vendored `lib.less` before compiling:
@@ -60,6 +78,16 @@ bodies of the blocks whose rules match the page, with Stylus's semantics
 build their rules with LESS (syncthing's come from an `@var`), so the vendoring
 script reads them from a compiled copy into `index.json`; that tells the
 background which styles a page wants before it compiles any.
+
+## Checking the styles
+
+`tests/sites-firefox.mjs` loads a page for every style in a headless Firefox
+with the extension, logged out, and reports whether the background behind the
+middle of the page became a scheme colour. It's slow and depends on the live
+sites, so it's run by hand (see [Development](../guides/development.md)). A
+failure is a lead, not a verdict: a landing page that differs from the
+logged-in site, a page whose middle is an image, or a style that only covers
+some pages all show up as failures.
 
 ## Known gaps
 

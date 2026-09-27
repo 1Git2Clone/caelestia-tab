@@ -90,3 +90,14 @@ the hard way.
   `/opt/google/chrome`. To look at the new tab outside a browser, serve
   `extension/` with a stub `browser` object and screenshot it with
   `google-chrome-stable --headless=new --screenshot` (2026-09-27).
+- **`hidden` loses to any `display` rule.** An element with `display: flex`
+  from a class stays visible with the `hidden` attribute set, which is why the
+  *Filter sites* box did nothing. `newtab.css` has a global
+  `[hidden] { display: none !important }` (2026-09-27).
+- **A catppuccin style can compile, match and still change nothing.** The site
+  moved on and the style sets variables it no longer reads. claude.ai's is the
+  example: it sets `--bg-*`, Claude reads `--cds-*` (2026-09-27). Only looking
+  at the page shows it; `tests/sites-firefox.mjs` does that for every style.
+- **A style's domain list is not everywhere its site kind lives.** mdBook's
+  lists a handful of Rust books, so an mdBook anywhere else is unthemed. That's
+  what an override's *Also on pages matching* selector is for (2026-09-27).
