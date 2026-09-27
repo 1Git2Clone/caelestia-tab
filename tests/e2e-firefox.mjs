@@ -89,6 +89,18 @@ try {
   await sleep(1500);
   assert.equal(await primary(), "#ff3355", "the new tab followed the switch live");
 
+  // Settings are kept in a file by the helper too, both ways: a change here
+  // is saved to it, and a hand edit of it reaches the new tab.
+  const saved = path.join(tmp, "home/.config/caelestia-tab/settings.json");
+  await js(`const { settings } = await browser.storage.local.get("settings"); await browser.storage.local.set({ settings: { ...settings, font: "E2E Sans" } });`);
+  await sleep(2500);
+  assert.equal(JSON.parse(fs.readFileSync(saved, "utf8")).font, "E2E Sans", "a settings change is saved to the file");
+  const edited = { ...JSON.parse(fs.readFileSync(saved, "utf8")), font: "Hand Edited" };
+  fs.writeFileSync(`${saved}.tmp`, JSON.stringify(edited));
+  fs.renameSync(`${saved}.tmp`, saved);
+  await sleep(1500);
+  assert.equal(await js(`return (await browser.storage.local.get("settings")).settings.font`), "Hand Edited", "a hand edit of the file reaches the extension");
+
   await call("POST", `${s}/url`, { url: "http://127.0.0.1:9090/" });
   await sleep(2500);
   assert.equal(await primary(), "#ff3355", "the page got the variables");

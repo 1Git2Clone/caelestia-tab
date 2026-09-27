@@ -6,6 +6,7 @@ mod fonts;
 mod github;
 mod media;
 mod scheme;
+mod settings;
 mod wallpaper;
 
 use std::io;
@@ -54,6 +55,7 @@ pub fn all() -> Vec<Box<dyn Plugin>> {
         Box::new(fonts::Fonts),
         Box::new(github::GitHub::new()),
         Box::new(media::Media),
+        Box::new(settings::Settings::new()),
     ]
 }
 

@@ -45,9 +45,15 @@ saved before the Svelte rewrite name a `plugin` (`clock`, `bookmarks`), which
 is mapped to the component on load, and settings from before the page grid get
 the toolbar added, since it was part of the page then.
 
-Settings are local to the device: `storage.local`, not `storage.sync`.
-*Settings*, *Advanced*, *All settings* shows the whole object as JSON, to back
-up, copy to another machine, or edit by hand.
+Settings are local to the device: `storage.local`, not `storage.sync`, and,
+with the helper, `~/.config/caelestia-tab/settings.json` too. The browser's
+copy is lost when a temporary add-on is removed, which a browser restart does;
+the file isn't, and can live in a dotfiles repo. The background saves every
+change to the file a second after it's made, and takes the file's settings
+when storage has none (a restart, a fresh install) or when the file changed
+after the last change in the browser (a hand edit), so an older file never
+rolls back newer edits. *Settings*, *Advanced*, *All settings* shows the whole
+object as JSON as well.
 
 ## The page
 

@@ -26,7 +26,9 @@ function connectHelper() {
       msg = JSON.parse(parts.join(""));
       parts = [];
     }
-    store.set({ [msg.topic]: msg.value, helperError: null });
+    // The settings file is compared, not stored: see restore().
+    if (msg.topic === "savedSettings") restore(msg.value);
+    else store.set({ [msg.topic]: msg.value, helperError: null });
   });
   helper.onDisconnect.addListener((port: any) => {
     // Set when the helper isn't registered or died; the new tab shows it.
@@ -46,6 +48,32 @@ browser.runtime.onMessage.addListener((msg: any) => {
 // An open new tab holds a port to this page, which keeps it (and so the
 // helper) running while there's a tab to update live.
 browser.runtime.onConnect.addListener(connectHelper);
+
+// The settings, kept in a file by the helper as well (src/plugins/settings.rs):
+// storage.local goes when a temporary add-on is removed, which a browser
+// restart does, and a file can live in someone's dotfiles. Every change is
+// saved a moment after it's made; the file wins when storage has no settings
+// (a fresh install, a restart) or when it changed after the last change here
+// (edited by hand), so an older file never rolls back newer edits.
+let saving: ReturnType<typeof setTimeout> | undefined;
+store.onChanged.addListener((changes: any) => {
+  if (!changes.settings) return;
+  store.set({ settingsChangedAt: Date.now() });
+  clearTimeout(saving);
+  saving = setTimeout(async () => {
+    const { settings } = await store.get("settings");
+    if (!settings) return;
+    connectHelper();
+    helper.postMessage({ topic: "savedSettings", command: "save", settings });
+  }, 1000);
+});
+async function restore(saved: { settings: any; mtime?: number } | null) {
+  if (!saved?.settings) return;
+  const { settings, settingsChangedAt = 0 } = await store.get(["settings", "settingsChangedAt"]);
+  if (settings && (saved.mtime ?? 0) <= settingsChangedAt) return;
+  if (JSON.stringify(settings) === JSON.stringify(saved.settings)) return;
+  store.set({ settings: saved.settings });
+}
 
 // Tree Style Tab: re-send the tint on every scheme or settings change, and
 // when TST (re)starts or opens a sidebar.

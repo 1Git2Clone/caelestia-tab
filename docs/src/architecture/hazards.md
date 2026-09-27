@@ -122,3 +122,7 @@ the hard way.
   reads its login from `$HOME`, so a browser started with another `HOME` (the
   e2e tests' throwaway one, a Flatpak) finds no token. `GH_TOKEN` in that
   environment works (2026-09-27).
+- **A watched file's directory has to exist when the helper starts.** The host
+  watches directories, and a watch on one that isn't there yet fails, so a
+  file created there later is never seen. The settings plugin creates
+  `~/.config/caelestia-tab/` at start for that reason (2026-09-27).

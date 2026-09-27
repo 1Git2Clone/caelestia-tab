@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A GitHub widget: your pull requests and issues as GitHub searches you choose. The helper finds a token without setup (`gh`, git's credential helper or the environment), caches with ETags, and keeps the token to itself.
 - Secrets by alias in `~/.config/caelestia-tab/secrets.toml`: from SOPS (nested keys), a command, a file or the environment. Values never reach the extension.
 - The helper takes commands from the extension, for widgets that control something on the machine.
+- Settings are kept in `~/.config/caelestia-tab/settings.json` as well, so they survive a browser restart dropping a temporary add-on's storage, and can be edited by hand or kept in dotfiles; a hand edit reaches open tabs live.
 - Nerd Font glyphs as a bookmark's mark. The symbols font is bundled, and the editor shows every glyph with a search by name, and suggests glyphs from the bookmark's address and name.
 - Zen's window follows the scheme live. The helper writes a Zen mod into every Zen profile, and `zen/caelestia-tab.cfg` (installed with `caelestia-tab install-zen`, or `lib.wrapZen` on Nix) reloads it on each change.
 - The clock sits on the same glass as the bookmarks, so it stays legible over any wallpaper, dark text in light mode included.
