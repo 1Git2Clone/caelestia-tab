@@ -7,7 +7,7 @@ one looks for the helper's manifest, and a few browser settings.
 | --- | --- | --- |
 | Firefox | `~/.mozilla/native-messaging-hosts/` | |
 | Floorp | `~/.mozilla/native-messaging-hosts/` | Floorp keeps Firefox's lookup, even though its profiles live elsewhere (read from its `omni.ja`, 2026-09-26). |
-| Zen | `~/.zen/native-messaging-hosts/` or `~/.mozilla/…` | Not yet confirmed which; `install` writes both, so either works. See the new tab note below. |
+| Zen | `~/.mozilla/native-messaging-hosts/` | Like Floorp, though its profiles live in `~/.zen` (confirmed with Zen 1.22.3b, 2026-09-27). See the new tab note below. |
 | LibreWolf | `~/.librewolf/native-messaging-hosts/` | |
 | Waterfox | `~/.waterfox/native-messaging-hosts/` | |
 
@@ -28,10 +28,24 @@ read) go to the extension's console: `about:debugging`, caelestia-tab,
 
 ## Zen's new tab
 
-Zen can open its command bar instead of a new tab page. If the new tab never
-shows, look in Zen's settings, or `about:config` under `zen.urlbar`, for the
-option that replaces the new tab. The preference name has changed between Zen
-releases, so check yours.
+Out of the box Zen opens its command bar instead of a new tab page, so the
+new tab never shows. Set `zen.urlbar.replace-newtab` to `false` in
+`about:config` (it defaults to `true` in Zen 1.22.3b).
+
+## Tested with
+
+Checked on 2026-09-27, each with the extension loaded through `web-ext run`,
+the helper registered by `caelestia-tab install`, and live wallpaper switches
+through `caelestia wallpaper`:
+
+| Browser | Version | New tab | Live switch | Site themes |
+| --- | --- | --- | --- | --- |
+| Firefox | 156 | yes | yes | yes (GitHub, YouTube) |
+| Floorp | 12.17 | yes | yes | yes (GitHub, YouTube, logged in) |
+| Zen | 1.22.3b | yes | yes | yes (GitHub, YouTube) |
+
+YouTube's cookie-consent overlay, shown to a logged-out visitor, keeps its own
+colours; the catppuccin style doesn't cover it.
 
 ## Chrome and Chromium
 

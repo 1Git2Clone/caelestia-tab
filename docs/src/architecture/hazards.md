@@ -40,6 +40,16 @@ the hard way.
 - **Some upstream styles have rules that never match.** InvokeAI's nests its
   `:root` rules inside `:root`, compiling to `:root :root`. Check the compiled
   CSS before blaming the injection (2026-09-27).
+- **`--start-url about:newtab` shows the browser's own new tab**, not the
+  extension's. The override applies to tabs opened as new tabs (Ctrl+T), so
+  open one to test it (2026-09-27).
+- **A fresh Zen profile shows a welcome screen and no new tab page.** Pass
+  `--pref zen.welcome-screen.seen=true --pref zen.urlbar.replace-newtab=false`
+  to `web-ext run` (2026-09-27).
+- **Testing against a real profile:** `web-ext run --firefox-profile <dir>`
+  runs a temporary copy, next to the running browser, and deletes it on exit.
+  The copy restores the session and extensions like Tab Session Manager, so
+  the start URL may open behind other tabs (2026-09-27).
 - **The Chrome DevTools MCP can't find Chrome on NixOS**; it looks in
   `/opt/google/chrome`. To look at the new tab outside a browser, serve
   `extension/` with a stub `browser` object and screenshot it with
