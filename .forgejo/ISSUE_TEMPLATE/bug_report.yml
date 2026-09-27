@@ -1,0 +1,34 @@
+name: Bug report
+description: Something misbehaves or looks wrong.
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you observed, and what you expected instead. Screenshots help.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Switch the caelestia scheme to ...
+        2. Open a new tab / open example.com
+        3. ...
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and version
+      placeholder: Floorp 12.3, Zen 1.17, Firefox 143 ...
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Browser console output
+      description: From about:debugging, Inspect caelestia-tab. The helper's errors land there too.
+      render: text

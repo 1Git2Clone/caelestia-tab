@@ -1,0 +1,25 @@
+# The handbook. docs/src/ is the source; docs/book/ is the render, gitignored,
+# built and published by .forgejo/workflows/pages.yml.
+#
+#   nix develop -c mdbook serve docs    # live reload while writing
+#   nix develop -c mdbook build docs    # what CI does
+
+[book]
+title = "caelestia-tab"
+description = "A new tab, and site themes, that follow the caelestia colour scheme live."
+authors = ["hutao"]
+language = "en"
+src = "src"
+
+[build]
+# A SUMMARY.md entry with no file fails the build instead of shipping a 404.
+create-missing = false
+
+[output.html]
+git-repository-url = "https://git.hu-tao.dev/hutao/caelestia-tab"
+edit-url-template = "https://git.hu-tao.dev/hutao/caelestia-tab/_edit/main/docs/{path}"
+# Served under a path on pages.hu-tao.dev, never a domain root.
+site-url = "/hutao/caelestia-tab/docs/"
+
+[output.html.search]
+enable = true

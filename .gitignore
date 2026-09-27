@@ -1,0 +1,10 @@
+/target
+/docs/book
+/web-ext-artifacts
+/result
+/extension/node_modules
+/extension/dist
+/extension/test-results
+/extension/playwright-report
+/extension/src/user-source.css
+/extension/test-dist

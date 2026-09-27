@@ -1,0 +1,30 @@
+#!/bin/sh
+# Fast pre-commit gate, the same checks CI runs. Bypass with `git commit --no-verify`.
+set -e
+
+# Git runs hooks outside the dev shell; step into it when a tool is missing.
+if ! command -v web-ext >/dev/null 2>&1 && command -v nix >/dev/null 2>&1 && [ -z "$IN_NIX_SHELL" ]; then
+  exec nix develop --quiet -c "$0" "$@"
+fi
+
+echo "pre-commit • cargo fmt --check"
+cargo fmt --check
+
+echo "pre-commit • cargo clippy"
+cargo clippy --all-targets -- -D warnings
+
+echo "pre-commit • node --test"
+node --test tests/*.test.mjs
+
+echo "pre-commit • extension: npm ci, svelte-check, build"
+# ci only when the lockfile moved, so a commit doesn't reinstall every time.
+if [ ! -d extension/node_modules ] || [ extension/package-lock.json -nt extension/node_modules/.package-lock.json ]; then
+  npm ci --prefix extension --silent
+fi
+npm run --prefix extension --silent check
+npm run --prefix extension --silent build >/dev/null
+
+echo "pre-commit • web-ext lint"
+web-ext lint --source-dir extension/dist --self-hosted >/dev/null
+
+echo "pre-commit • OK"

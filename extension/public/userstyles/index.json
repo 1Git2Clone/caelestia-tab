@@ -1,0 +1,3478 @@
+{
+ "rev": "5307c4e5e98a0ea623114ec31102f575104a368e",
+ "styles": [
+  {
+   "id": "advent-of-code",
+   "name": "Advent Of Code",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "adventofcode.com"
+    }
+   ]
+  },
+  {
+   "id": "alacritty.org",
+   "name": "alacritty.org",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "alacritty.org"
+    }
+   ]
+  },
+  {
+   "id": "alternativeto",
+   "name": "AlternativeTo",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "alternativeto.net"
+    },
+    {
+     "type": "domain",
+     "value": "auth.alternativeto.net"
+    }
+   ]
+  },
+  {
+   "id": "amplenote",
+   "name": "Amplenote",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "amplenote.com"
+    }
+   ]
+  },
+  {
+   "id": "anilist",
+   "name": "AniList/AniChart",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve",
+    "contrastColor": "red"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "anilist.co"
+    },
+    {
+     "type": "domain",
+     "value": "anichart.net"
+    },
+    {
+     "type": "domain",
+     "value": "anichart.net"
+    }
+   ]
+  },
+  {
+   "id": "anonymous-overflow",
+   "name": "Anonymous Overflow",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "ao.vern.cc"
+    },
+    {
+     "type": "domain",
+     "value": "overflow.adminforge.de"
+    },
+    {
+     "type": "domain",
+     "value": "overflow.floppa.cloud"
+    },
+    {
+     "type": "domain",
+     "value": "overflow.hostux.net"
+    },
+    {
+     "type": "domain",
+     "value": "ao.bloat.cat"
+    },
+    {
+     "type": "domain",
+     "value": "ao.owo.si"
+    },
+    {
+     "type": "domain",
+     "value": "overflow.r4fo.com"
+    },
+    {
+     "type": "domain",
+     "value": "overflow.ducks.party"
+    },
+    {
+     "type": "domain",
+     "value": "anonymousoverflow.privacyredirect.com"
+    },
+    {
+     "type": "domain",
+     "value": "soflow.nerdvpn.de"
+    },
+    {
+     "type": "domain",
+     "value": "overflow.einfachzocken.eu"
+    },
+    {
+     "type": "domain",
+     "value": "anonymousoverflow.catsarch.com"
+    },
+    {
+     "type": "domain",
+     "value": "overflow.darkness.services"
+    },
+    {
+     "type": "domain",
+     "value": "anonflow.aketawi.space"
+    },
+    {
+     "type": "domain",
+     "value": "o.iii.st"
+    },
+    {
+     "type": "domain",
+     "value": "overflow.canine.tools"
+    }
+   ]
+  },
+  {
+   "id": "arch-wiki",
+   "name": "Arch Wiki",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "wiki.archlinux.org"
+    }
+   ]
+  },
+  {
+   "id": "boringproxy",
+   "name": "boringproxy",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "boring.example.com"
+    }
+   ]
+  },
+  {
+   "id": "brave-search",
+   "name": "Brave Search",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "search.brave.com"
+    }
+   ]
+  },
+  {
+   "id": "bsky",
+   "name": "Bluesky Social",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "bsky.app"
+    }
+   ]
+  },
+  {
+   "id": "bstats",
+   "name": "bStats",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve",
+    "graphUseAccentColor": "0"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "bstats.org"
+    }
+   ]
+  },
+  {
+   "id": "canvas-lms",
+   "name": "Canvas LMS",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "instructure.com"
+    },
+    {
+     "type": "domain",
+     "value": "instructuremedia.com"
+    }
+   ]
+  },
+  {
+   "id": "chatgpt",
+   "name": "ChatGPT",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "chatgpt.com"
+    },
+    {
+     "type": "domain",
+     "value": "auth.openai.com"
+    }
+   ]
+  },
+  {
+   "id": "chatreplay",
+   "name": "ChatReplay",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve",
+    "bg-opacity": "0.2",
+    "bg-blur": "20"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "chatreplay.stream"
+    }
+   ]
+  },
+  {
+   "id": "chess.com",
+   "name": "Chess.com",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve",
+    "highlightColor1": "red",
+    "highlightColor2": "green",
+    "highlightColor3": "peach",
+    "highlightColor4": "blue",
+    "styleBoardAndPieces": "1"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "chess.com"
+    }
+   ]
+  },
+  {
+   "id": "cinny",
+   "name": "Cinny",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "cinny.in"
+    }
+   ]
+  },
+  {
+   "id": "claude",
+   "name": "Claude",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "claude.ai"
+    }
+   ]
+  },
+  {
+   "id": "cobalt",
+   "name": "cobalt",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "cobalt.tools"
+    }
+   ]
+  },
+  {
+   "id": "codeberg",
+   "name": "Codeberg",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "codeberg.org"
+    },
+    {
+     "type": "domain",
+     "value": "codeberg.org"
+    }
+   ]
+  },
+  {
+   "id": "crates.io",
+   "name": "crates.io",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "crates.io"
+    }
+   ]
+  },
+  {
+   "id": "crowdin",
+   "name": "Crowdin",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "regexp",
+     "value": "https://crowdin.com(?!/translate).*"
+    },
+    {
+     "type": "regexp",
+     "value": "https://crowdin.com/translate/.*"
+    }
+   ]
+  },
+  {
+   "id": "deepl",
+   "name": "DeepL",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "regexp",
+     "value": "https:\\/\\/www.deepl.com\\/?(.*\\/)translator.*$"
+    }
+   ]
+  },
+  {
+   "id": "deepseek",
+   "name": "DeepSeek",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "url-prefix",
+     "value": "https://chat.deepseek.com"
+    }
+   ]
+  },
+  {
+   "id": "desmos",
+   "name": "Desmos",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "regexp",
+     "value": "^(https?://)(?!(cl|teacher|student).desmos.com)([a-zA-Z0-9-]+.)?desmos.com(/.*)?$"
+    }
+   ]
+  },
+  {
+   "id": "dev.to",
+   "name": "DEV Community",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "dev.to"
+    },
+    {
+     "type": "domain",
+     "value": "forem.com"
+    }
+   ]
+  },
+  {
+   "id": "devdocs",
+   "name": "DevDocs",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "devdocs.io"
+    }
+   ]
+  },
+  {
+   "id": "docs.deno.com",
+   "name": "docs.deno.com",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "docs.deno.com"
+    }
+   ]
+  },
+  {
+   "id": "docs.rs",
+   "name": "docs.rs",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "docs.rs"
+    },
+    {
+     "type": "domain",
+     "value": "doc.rust-lang.org"
+    }
+   ]
+  },
+  {
+   "id": "duckduckgo",
+   "name": "DuckDuckGo",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "duckduckgo.com"
+    },
+    {
+     "type": "domain",
+     "value": "duck.ai"
+    },
+    {
+     "type": "domain",
+     "value": "start.duckduckgo.com"
+    }
+   ]
+  },
+  {
+   "id": "ecosia",
+   "name": "Ecosia",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "ecosia.org"
+    }
+   ]
+  },
+  {
+   "id": "elk",
+   "name": "Elk",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "elk.zone"
+    }
+   ]
+  },
+  {
+   "id": "formative",
+   "name": "Formative",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "app.formative.com"
+    },
+    {
+     "type": "domain",
+     "value": "goformative.com"
+    }
+   ]
+  },
+  {
+   "id": "freedesktop",
+   "name": "freedesktop.org",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "www.freedesktop.org"
+    },
+    {
+     "type": "domain",
+     "value": "specifications.freedesktop.org"
+    }
+   ]
+  },
+  {
+   "id": "ghostty.org",
+   "name": "Ghostty.org",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "ghostty.org"
+    }
+   ]
+  },
+  {
+   "id": "github",
+   "name": "GitHub",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "regexp",
+     "value": "https://github.com(?!(/home$|/features($|/.*)|/organizations/plan)).*$"
+    },
+    {
+     "type": "domain",
+     "value": "gist.github.com"
+    },
+    {
+     "type": "domain",
+     "value": "docs.github.com"
+    },
+    {
+     "type": "domain",
+     "value": "viewscreen.githubusercontent.com"
+    },
+    {
+     "type": "url-prefix",
+     "value": "https://viewscreen.githubusercontent.com/markdown/mermaid"
+    },
+    {
+     "type": "regexp",
+     "value": "https://notebooks.githubusercontent.com/view/ipynb.*"
+    }
+   ]
+  },
+  {
+   "id": "gleam.run",
+   "name": "gleam.run",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "gleam.run"
+    }
+   ]
+  },
+  {
+   "id": "gmail",
+   "name": "Gmail",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "mail.google.com"
+    }
+   ]
+  },
+  {
+   "id": "go.dev",
+   "name": "go.dev",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "go.dev"
+    },
+    {
+     "type": "domain",
+     "value": "pkg.go.dev"
+    },
+    {
+     "type": "url-prefix",
+     "value": "https://go.dev/tour"
+    }
+   ]
+  },
+  {
+   "id": "google",
+   "name": "Google",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "regexp",
+     "value": "^https?://(www\\.|images\\.)?google\\..*"
+    },
+    {
+     "type": "regexp",
+     "value": "^https?://(ogs\\.)?google\\..*"
+    }
+   ]
+  },
+  {
+   "id": "google-drive",
+   "name": "Google Drive",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "drive.google.com"
+    }
+   ]
+  },
+  {
+   "id": "google-gemini",
+   "name": "Google Gemini",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "gemini.google.com"
+    }
+   ]
+  },
+  {
+   "id": "google-photos",
+   "name": "Google Photos",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "photos.google.com"
+    }
+   ]
+  },
+  {
+   "id": "grabify",
+   "name": "Grabify",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "grabify.link"
+    }
+   ]
+  },
+  {
+   "id": "graphite",
+   "name": "Graphite",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "app.graphite.com"
+    }
+   ]
+  },
+  {
+   "id": "hackage",
+   "name": "Hackage",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "hackage.haskell.org"
+    },
+    {
+     "type": "domain",
+     "value": "hackage-content.haskell.org"
+    }
+   ]
+  },
+  {
+   "id": "hacker-news",
+   "name": "Hacker News",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "news.ycombinator.com"
+    }
+   ]
+  },
+  {
+   "id": "have-i-been-pwned",
+   "name": "Have I Been Pwned",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "haveibeenpwned.com"
+    }
+   ]
+  },
+  {
+   "id": "holodex",
+   "name": "Holodex",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "holodex.net"
+    }
+   ]
+  },
+  {
+   "id": "home-manager-options-search",
+   "name": "Home Manager Options Search",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "home-manager-options.extranix.com"
+    }
+   ]
+  },
+  {
+   "id": "homepage",
+   "name": "homepage",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "homepage.example.com"
+    },
+    {
+     "type": "regexp",
+     "value": "https?://homepage\\..*"
+    }
+   ]
+  },
+  {
+   "id": "hoogle",
+   "name": "Hoogle",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "hoogle.haskell.org"
+    }
+   ]
+  },
+  {
+   "id": "hoppscotch",
+   "name": "Hoppscotch",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "hoppscotch.io"
+    }
+   ]
+  },
+  {
+   "id": "hyperpipe",
+   "name": "Hyperpipe",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "hyperpipe.surge.sh"
+    }
+   ]
+  },
+  {
+   "id": "ichi.moe",
+   "name": "ichi.moe",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve",
+    "zen": "0"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "ichi.moe"
+    }
+   ]
+  },
+  {
+   "id": "indie-wiki-buddy",
+   "name": "Indie Wiki Buddy",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "bing.com"
+    },
+    {
+     "type": "domain",
+     "value": "search.brave.com"
+    },
+    {
+     "type": "domain",
+     "value": "duckduckgo.com"
+    },
+    {
+     "type": "domain",
+     "value": "ecosia.org"
+    },
+    {
+     "type": "domain",
+     "value": "kagi.com"
+    },
+    {
+     "type": "domain",
+     "value": "qwant.com"
+    },
+    {
+     "type": "domain",
+     "value": "search.yahoo.com"
+    },
+    {
+     "type": "domain",
+     "value": "startpage.com"
+    },
+    {
+     "type": "domain",
+     "value": "ya.ru"
+    },
+    {
+     "type": "regexp",
+     "value": "^https?://(www\\.)?google\\..*"
+    },
+    {
+     "type": "regexp",
+     "value": "^https?://(www\\.)?yandex\\..*"
+    },
+    {
+     "type": "domain",
+     "value": "fandom.com"
+    },
+    {
+     "type": "domain",
+     "value": "fextralife.com"
+    },
+    {
+     "type": "domain",
+     "value": "neoseeker.com"
+    },
+    {
+     "type": "domain",
+     "value": "breezewiki.com"
+    },
+    {
+     "type": "domain",
+     "value": "antifandom.com"
+    },
+    {
+     "type": "domain",
+     "value": "bw.artemislena.eu"
+    },
+    {
+     "type": "domain",
+     "value": "breezewiki.catsarch.com"
+    },
+    {
+     "type": "domain",
+     "value": "breezewiki.esmailelbob.xyz"
+    },
+    {
+     "type": "domain",
+     "value": "breezewiki.frontendfriendly.xyz"
+    },
+    {
+     "type": "domain",
+     "value": "bw.hamstro.dev"
+    },
+    {
+     "type": "domain",
+     "value": "breeze.hostux.net"
+    },
+    {
+     "type": "domain",
+     "value": "breezewiki.hyperreal.coffee"
+    },
+    {
+     "type": "domain",
+     "value": "breeze.mint.lgbt"
+    },
+    {
+     "type": "domain",
+     "value": "breezewiki.nadeko.net"
+    },
+    {
+     "type": "domain",
+     "value": "nerd.whatever.social"
+    },
+    {
+     "type": "domain",
+     "value": "breeze.nohost.network"
+    },
+    {
+     "type": "domain",
+     "value": "z.opnxng.com"
+    },
+    {
+     "type": "domain",
+     "value": "bw.projectsegfau.lt"
+    },
+    {
+     "type": "domain",
+     "value": "breezewiki.pussthecat.org"
+    },
+    {
+     "type": "domain",
+     "value": "bw.vern.cc"
+    },
+    {
+     "type": "domain",
+     "value": "breeze.whateveritworks.org"
+    },
+    {
+     "type": "domain",
+     "value": "breezewiki.woodland.cafe"
+    }
+   ]
+  },
+  {
+   "id": "inoreader",
+   "name": "inoreader",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "inoreader.com"
+    }
+   ]
+  },
+  {
+   "id": "instagram",
+   "name": "Instagram",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "instagram.com"
+    },
+    {
+     "type": "regexp",
+     "value": "^.*instagram.com/direct.*"
+    }
+   ]
+  },
+  {
+   "id": "invidious",
+   "name": "Invidious",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve",
+    "styleVideoPlayer": "1"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "anontube.lvkaszus.pl"
+    },
+    {
+     "type": "domain",
+     "value": "inv.citw.lgbt"
+    },
+    {
+     "type": "domain",
+     "value": "inv.in.projectsegfau.lt"
+    },
+    {
+     "type": "domain",
+     "value": "inv.tux.pizza"
+    },
+    {
+     "type": "domain",
+     "value": "inv.us.projectsegfau.lt"
+    },
+    {
+     "type": "domain",
+     "value": "inv.zzls.xyz"
+    },
+    {
+     "type": "domain",
+     "value": "invidious.asir.dev"
+    },
+    {
+     "type": "domain",
+     "value": "invidious.drgns.space"
+    },
+    {
+     "type": "domain",
+     "value": "invidious.einfachzocken.eu"
+    },
+    {
+     "type": "domain",
+     "value": "invidious.fdn.fr"
+    },
+    {
+     "type": "domain",
+     "value": "invidious.io.lol"
+    },
+    {
+     "type": "domain",
+     "value": "invidious.lunar.icu"
+    },
+    {
+     "type": "domain",
+     "value": "invidious.nerdvpn.de"
+    },
+    {
+     "type": "domain",
+     "value": "invidious.no-logs.com"
+    },
+    {
+     "type": "domain",
+     "value": "invidious.perennialte.ch"
+    },
+    {
+     "type": "domain",
+     "value": "invidious.privacydev.net"
+    },
+    {
+     "type": "domain",
+     "value": "invidious.private.coffee"
+    },
+    {
+     "type": "domain",
+     "value": "invidious.projectsegfau.lt"
+    },
+    {
+     "type": "domain",
+     "value": "invidious.protokolla.fi"
+    },
+    {
+     "type": "domain",
+     "value": "invidious.slipfox.xyz"
+    },
+    {
+     "type": "domain",
+     "value": "iv.datura.network"
+    },
+    {
+     "type": "domain",
+     "value": "iv.ggtyler.dev"
+    },
+    {
+     "type": "domain",
+     "value": "iv.melmac.space"
+    },
+    {
+     "type": "domain",
+     "value": "iv.nboeck.de"
+    },
+    {
+     "type": "domain",
+     "value": "iv.winston.sh"
+    },
+    {
+     "type": "domain",
+     "value": "onion.tube"
+    },
+    {
+     "type": "domain",
+     "value": "vid.priv.au"
+    },
+    {
+     "type": "domain",
+     "value": "vid.puffyan.us"
+    },
+    {
+     "type": "domain",
+     "value": "yewtu.be"
+    },
+    {
+     "type": "domain",
+     "value": "yt.artemislena.eu"
+    },
+    {
+     "type": "domain",
+     "value": "yt.cdaut.de"
+    },
+    {
+     "type": "domain",
+     "value": "yt.drgnz.club"
+    },
+    {
+     "type": "domain",
+     "value": "yt.oelrichsgarcia.de"
+    }
+   ]
+  },
+  {
+   "id": "invokeai",
+   "name": "InvokeAI",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "regexp",
+     "value": "http:\\/\\/(127\\.0\\.0\\.1|localhost):9090(.*)"
+    }
+   ]
+  },
+  {
+   "id": "jisho",
+   "name": "Jisho",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "jisho.org"
+    }
+   ]
+  },
+  {
+   "id": "keybr.com",
+   "name": "keybr.com",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "keybr.com"
+    }
+   ]
+  },
+  {
+   "id": "keyoxide",
+   "name": "Keyoxide",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "url-prefix",
+     "value": "https://keyoxide.org"
+    },
+    {
+     "type": "domain",
+     "value": "docs.keyoxide.org"
+    },
+    {
+     "type": "domain",
+     "value": "blog.keyoxide.org"
+    }
+   ]
+  },
+  {
+   "id": "lastfm",
+   "name": "Last.fm",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "last.fm"
+    }
+   ]
+  },
+  {
+   "id": "learn-x-in-y-minutes",
+   "name": "Learn X in Y Minutes",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "learnxinyminutes.com"
+    }
+   ]
+  },
+  {
+   "id": "lemmy",
+   "name": "Lemmy",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "lemmy.ml"
+    },
+    {
+     "type": "domain",
+     "value": "lemmy.world"
+    }
+   ]
+  },
+  {
+   "id": "libreddit",
+   "name": "Libreddit/Redlib",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "libredd.it"
+    },
+    {
+     "type": "domain",
+     "value": "libreddit.spike.codes"
+    },
+    {
+     "type": "domain",
+     "value": "libreddit.dothq.co"
+    },
+    {
+     "type": "domain",
+     "value": "libreddit.kavin.rocks"
+    },
+    {
+     "type": "domain",
+     "value": "reddit.invak.id"
+    },
+    {
+     "type": "domain",
+     "value": "reddit.phii.me"
+    },
+    {
+     "type": "domain",
+     "value": "lr.riverside.rocks"
+    },
+    {
+     "type": "domain",
+     "value": "libreddit.strongthany.cc"
+    },
+    {
+     "type": "domain",
+     "value": "libreddit.database.red"
+    },
+    {
+     "type": "domain",
+     "value": "libreddit.privacy.com.de"
+    },
+    {
+     "type": "domain",
+     "value": "libreddit.domain.glass"
+    },
+    {
+     "type": "domain",
+     "value": "libreddit.sugoma.tk"
+    },
+    {
+     "type": "domain",
+     "value": "libreddit.jamiethalacker.dev"
+    },
+    {
+     "type": "domain",
+     "value": "reddit.artemislena.eu"
+    },
+    {
+     "type": "domain",
+     "value": "r.nf"
+    },
+    {
+     "type": "domain",
+     "value": "libreddit.some-things.org"
+    },
+    {
+     "type": "domain",
+     "value": "reddit.stuehieyr.com"
+    },
+    {
+     "type": "domain",
+     "value": "lr.mint.lgbt"
+    },
+    {
+     "type": "domain",
+     "value": "libreddit.igna.rocks"
+    },
+    {
+     "type": "domain",
+     "value": "libreddit.autarkic.org"
+    },
+    {
+     "type": "domain",
+     "value": "libreddit.flux.industries"
+    },
+    {
+     "type": "domain",
+     "value": "libreddit.drivet.xyz"
+    },
+    {
+     "type": "domain",
+     "value": "lr.oversold.host"
+    },
+    {
+     "type": "domain",
+     "value": "libreddit.de"
+    },
+    {
+     "type": "domain",
+     "value": "libreddit.pussthecat.org"
+    },
+    {
+     "type": "domain",
+     "value": "libreddit.mutahar.rocks"
+    },
+    {
+     "type": "domain",
+     "value": "libreddit.northboot.xyz"
+    },
+    {
+     "type": "domain",
+     "value": "leddit.xyz"
+    },
+    {
+     "type": "domain",
+     "value": "de.leddit.xyz"
+    },
+    {
+     "type": "domain",
+     "value": "lr.cowfee.moe"
+    },
+    {
+     "type": "domain",
+     "value": "libreddit.hu"
+    },
+    {
+     "type": "domain",
+     "value": "libreddit.totaldarkness.net"
+    },
+    {
+     "type": "domain",
+     "value": "libreddit.esmailelbob.xyz"
+    },
+    {
+     "type": "domain",
+     "value": "lr.vern.cc"
+    },
+    {
+     "type": "domain",
+     "value": "libreddit.nl"
+    },
+    {
+     "type": "domain",
+     "value": "lr.stilic.ml"
+    },
+    {
+     "type": "domain",
+     "value": "reddi.tk"
+    },
+    {
+     "type": "domain",
+     "value": "libreddit.bus-hit.me"
+    },
+    {
+     "type": "domain",
+     "value": "libreddit.datatunnel.xyz"
+    },
+    {
+     "type": "domain",
+     "value": "libreddit.crewz.me"
+    },
+    {
+     "type": "domain",
+     "value": "r.walkx.org"
+    },
+    {
+     "type": "domain",
+     "value": "libreddit.kylrth.com"
+    },
+    {
+     "type": "domain",
+     "value": "libreddit.yonalee.eu"
+    },
+    {
+     "type": "domain",
+     "value": "libreddit.winscloud.net"
+    },
+    {
+     "type": "domain",
+     "value": "libreddit.tiekoetter.com"
+    },
+    {
+     "type": "domain",
+     "value": "reddit.rtrace.io"
+    },
+    {
+     "type": "domain",
+     "value": "libreddit.lunar.icu"
+    },
+    {
+     "type": "domain",
+     "value": "libreddit.privacydev.net"
+    },
+    {
+     "type": "domain",
+     "value": "libreddit.notyourcomputer.net"
+    },
+    {
+     "type": "domain",
+     "value": "r.ahwx.org"
+    },
+    {
+     "type": "domain",
+     "value": "bob.fr.to"
+    },
+    {
+     "type": "domain",
+     "value": "reddit.beparanoid.de"
+    },
+    {
+     "type": "domain",
+     "value": "libreddit.dcs0.hu"
+    },
+    {
+     "type": "domain",
+     "value": "reddit.dr460nf1r3.org"
+    },
+    {
+     "type": "domain",
+     "value": "rd.jae.su"
+    },
+    {
+     "type": "domain",
+     "value": "libreddit.mha.fi"
+    },
+    {
+     "type": "domain",
+     "value": "libreddit.foss.wtf"
+    },
+    {
+     "type": "domain",
+     "value": "libreddit.encrypted-data.xyz"
+    },
+    {
+     "type": "domain",
+     "value": "libreddit.eu.org"
+    },
+    {
+     "type": "domain",
+     "value": "l.opnxng.com"
+    },
+    {
+     "type": "domain",
+     "value": "safereddit.com"
+    },
+    {
+     "type": "domain",
+     "value": "libreddit.projectsegfau.lt"
+    },
+    {
+     "type": "domain",
+     "value": "libreddit.bus-hit.me"
+    },
+    {
+     "type": "domain",
+     "value": "reddit.invak.id"
+    },
+    {
+     "type": "domain",
+     "value": "redlib.catsarch.com"
+    },
+    {
+     "type": "domain",
+     "value": "reddit.idevicehacked.com"
+    },
+    {
+     "type": "domain",
+     "value": "redlib.freedit.eu"
+    },
+    {
+     "type": "domain",
+     "value": "redlib.perennialte.ch"
+    },
+    {
+     "type": "domain",
+     "value": "redlib.tux.pizza"
+    },
+    {
+     "type": "domain",
+     "value": "redlib.vimmer.dev"
+    },
+    {
+     "type": "domain",
+     "value": "libreddit.privacydev.net"
+    },
+    {
+     "type": "domain",
+     "value": "lr.n8pjl.ca"
+    },
+    {
+     "type": "domain",
+     "value": "reddit.owo.si"
+    },
+    {
+     "type": "domain",
+     "value": "redlib.ducks.party"
+    },
+    {
+     "type": "domain",
+     "value": "red.ngn.tf"
+    },
+    {
+     "type": "domain",
+     "value": "redlib.dnfetheus.xyz"
+    },
+    {
+     "type": "domain",
+     "value": "redlib.cow.rip"
+    },
+    {
+     "type": "domain",
+     "value": "libreddit.eu.org"
+    },
+    {
+     "type": "domain",
+     "value": "r.darrennathanael.com"
+    },
+    {
+     "type": "domain",
+     "value": "redlib.kittywi.re"
+    },
+    {
+     "type": "domain",
+     "value": "redlib.privacyredirect.com"
+    }
+   ]
+  },
+  {
+   "id": "lichess",
+   "name": "Lichess",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve",
+    "lastMoveColor": "red",
+    "checkColor": "red",
+    "stylePieces": "1",
+    "styleBoard": "1"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "lichess.org"
+    }
+   ]
+  },
+  {
+   "id": "lingva",
+   "name": "Lingva",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "lingva.ml"
+    },
+    {
+     "type": "domain",
+     "value": "translate.plausibility.cloud"
+    },
+    {
+     "type": "domain",
+     "value": "lingva.lunar.icu"
+    },
+    {
+     "type": "domain",
+     "value": "translate.projectsegfau.lt"
+    },
+    {
+     "type": "domain",
+     "value": "lingva.garudalinux.org"
+    }
+   ]
+  },
+  {
+   "id": "linkedin",
+   "name": "LinkedIn",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "www.linkedin.com"
+    }
+   ]
+  },
+  {
+   "id": "listenbrainz",
+   "name": "ListenBrainz",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "listenbrainz.org"
+    }
+   ]
+  },
+  {
+   "id": "lobste.rs",
+   "name": "Lobsters",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "lobste.rs"
+    }
+   ]
+  },
+  {
+   "id": "mastodon",
+   "name": "Mastodon",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "mastodon.social"
+    },
+    {
+     "type": "domain",
+     "value": "fosstodon.org"
+    }
+   ]
+  },
+  {
+   "id": "mdbook",
+   "name": "mdBook",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "rust-lang.github.io"
+    },
+    {
+     "type": "domain",
+     "value": "doc.rust-lang.org"
+    },
+    {
+     "type": "domain",
+     "value": "rust-book.cs.brown.edu"
+    },
+    {
+     "type": "domain",
+     "value": "rustc-dev-guide.rust-lang.org"
+    },
+    {
+     "type": "domain",
+     "value": "forge.rust-lang.org"
+    },
+    {
+     "type": "domain",
+     "value": "lang-team.rust-lang.org"
+    },
+    {
+     "type": "domain",
+     "value": "doc.redox-os.org"
+    },
+    {
+     "type": "url-prefix",
+     "value": "https://lukaswirth.dev/tlborm/"
+    }
+   ]
+  },
+  {
+   "id": "mdn",
+   "name": "MDN",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "developer.mozilla.org"
+    },
+    {
+     "type": "domain",
+     "value": "interactive-examples.mdn.mozilla.net"
+    }
+   ]
+  },
+  {
+   "id": "microsoft-word",
+   "name": "Microsoft Word",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve",
+    "applyToDocument": "0"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "live.com"
+    }
+   ]
+  },
+  {
+   "id": "migadu-webmail",
+   "name": "Migadu Webmail",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve",
+    "hideProfilePictures": "0"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "webmail.migadu.com"
+    }
+   ]
+  },
+  {
+   "id": "minesweeper",
+   "name": "Minesweeper Online",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "minesweeper.online"
+    }
+   ]
+  },
+  {
+   "id": "modrinth",
+   "name": "Modrinth",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "modrinth.com"
+    }
+   ]
+  },
+  {
+   "id": "namemc",
+   "name": "NameMC",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "namemc.com"
+    }
+   ]
+  },
+  {
+   "id": "neovim.io",
+   "name": "neovim.io",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "neovim.io"
+    }
+   ]
+  },
+  {
+   "id": "nitter",
+   "name": "Nitter",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "nitter.net"
+    },
+    {
+     "type": "domain",
+     "value": "nitter.unixfox.eu"
+    },
+    {
+     "type": "domain",
+     "value": "nitter.42l.fr"
+    },
+    {
+     "type": "domain",
+     "value": "nitter.fdn.fr"
+    },
+    {
+     "type": "domain",
+     "value": "nitter.1d4.us"
+    },
+    {
+     "type": "domain",
+     "value": "nitter.kavin.rocks"
+    },
+    {
+     "type": "domain",
+     "value": "nitter.namazso.eu"
+    },
+    {
+     "type": "domain",
+     "value": "nitter.hu"
+    },
+    {
+     "type": "domain",
+     "value": "bird.trom.tf"
+    },
+    {
+     "type": "domain",
+     "value": "nitter.it"
+    },
+    {
+     "type": "domain",
+     "value": "twitter.censors.us"
+    },
+    {
+     "type": "domain",
+     "value": "nitter.grimneko.de"
+    },
+    {
+     "type": "domain",
+     "value": "n.hyperborea.cloud"
+    },
+    {
+     "type": "domain",
+     "value": "nitter.ca"
+    },
+    {
+     "type": "domain",
+     "value": "twitter.076.ne.jp"
+    },
+    {
+     "type": "domain",
+     "value": "nitter.mstdn.social"
+    },
+    {
+     "type": "domain",
+     "value": "nitter.fly.dev"
+    },
+    {
+     "type": "domain",
+     "value": "nitter.weiler.rocks"
+    },
+    {
+     "type": "domain",
+     "value": "nitter.sethforprivacy.com"
+    },
+    {
+     "type": "domain",
+     "value": "nttr.stream"
+    },
+    {
+     "type": "domain",
+     "value": "nitter.tiekoetter.com"
+    },
+    {
+     "type": "domain",
+     "value": "nitter.spaceint.fr"
+    },
+    {
+     "type": "domain",
+     "value": "nitter.privacy.com.denitter.mastodon.pro"
+    },
+    {
+     "type": "domain",
+     "value": "nitter.notraxx.chnitter.poast.org"
+    },
+    {
+     "type": "domain",
+     "value": "nitter.bird.froth.zone"
+    },
+    {
+     "type": "domain",
+     "value": "nitter.dcs0.hu"
+    },
+    {
+     "type": "domain",
+     "value": "twitter.beparanoid.de"
+    },
+    {
+     "type": "domain",
+     "value": "n.ramle.be"
+    },
+    {
+     "type": "domain",
+     "value": "nitter.cz"
+    },
+    {
+     "type": "domain",
+     "value": "nitter.privacydev.net"
+    },
+    {
+     "type": "domain",
+     "value": "tweet.lambda.dance"
+    },
+    {
+     "type": "domain",
+     "value": "nitter.kylrth.com"
+    },
+    {
+     "type": "domain",
+     "value": "nitter.oishi-ra.men"
+    },
+    {
+     "type": "domain",
+     "value": "nitter.foss.wtf"
+    },
+    {
+     "type": "domain",
+     "value": "nitter.priv.pw"
+    },
+    {
+     "type": "domain",
+     "value": "t.com.sb"
+    },
+    {
+     "type": "domain",
+     "value": "xcancel.com"
+    },
+    {
+     "type": "domain",
+     "value": "nitter.poast.org"
+    }
+   ]
+  },
+  {
+   "id": "nixos-manual",
+   "name": "NixOS Manual/Nixpkgs Manual",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "url-prefix",
+     "value": "https://nixos.org/manual/"
+    },
+    {
+     "type": "url-prefix",
+     "value": "https://nix-darwin.github.io/nix-darwin/manual/"
+    }
+   ]
+  },
+  {
+   "id": "nixos-search",
+   "name": "NixOS Search",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "search.nixos.org"
+    }
+   ]
+  },
+  {
+   "id": "npm",
+   "name": "npm",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "www.npmjs.com"
+    }
+   ]
+  },
+  {
+   "id": "npmx",
+   "name": "npmx",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "npmx.dev"
+    }
+   ]
+  },
+  {
+   "id": "ollama",
+   "name": "Ollama",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "ollama.com"
+    }
+   ]
+  },
+  {
+   "id": "openmediavault",
+   "name": "openmediavault",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "openmediavault.example.com"
+    }
+   ]
+  },
+  {
+   "id": "paste.rs",
+   "name": "paste.rs",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "paste.rs"
+    }
+   ]
+  },
+  {
+   "id": "perplexity",
+   "name": "Perplexity",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "perplexity.ai"
+    }
+   ]
+  },
+  {
+   "id": "phanpy",
+   "name": "Phanpy",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "phanpy.social"
+    }
+   ]
+  },
+  {
+   "id": "picrew",
+   "name": "Picrew",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "picrew.me"
+    }
+   ]
+  },
+  {
+   "id": "pinterest",
+   "name": "Pinterest",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "regexp",
+     "value": "^https?:\\/\\/(www|[a-z]{2}).pinterest.(com(.(au|mx))?|co(.(uk|kr))?|at|ca|ch|cl|de|dk|es|fr|ie|it|jp|nz|ph|pt|ru|se)\\/.*"
+    }
+   ]
+  },
+  {
+   "id": "planet-minecraft",
+   "name": "Planet Minecraft",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "planetminecraft.com"
+    }
+   ]
+  },
+  {
+   "id": "poe",
+   "name": "Poe",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "url-prefix",
+     "value": "https://poe.com"
+    }
+   ]
+  },
+  {
+   "id": "porkbun",
+   "name": "Porkbun",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "porkbun.com"
+    }
+   ]
+  },
+  {
+   "id": "pronouns.cc",
+   "name": "pronouns.cc",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "pronouns.cc"
+    }
+   ]
+  },
+  {
+   "id": "pronouns.page",
+   "name": "Pronouns.page",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "pronouns.page"
+    },
+    {
+     "type": "domain",
+     "value": "pronomen.net"
+    },
+    {
+     "type": "domain",
+     "value": "pronombr.es"
+    },
+    {
+     "type": "domain",
+     "value": "pronomejo.net"
+    },
+    {
+     "type": "domain",
+     "value": "fornovn.fo"
+    },
+    {
+     "type": "domain",
+     "value": "pronoms.fr"
+    },
+    {
+     "type": "domain",
+     "value": "pronom.it"
+    },
+    {
+     "type": "domain",
+     "value": "zaimki.pl"
+    }
+   ]
+  },
+  {
+   "id": "proton",
+   "name": "Proton",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "regexp",
+     "value": "https://(account|mail|drive|calendar|lumo).proton.me/.*$"
+    }
+   ]
+  },
+  {
+   "id": "pypi",
+   "name": "PyPI",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "pypi.org"
+    }
+   ]
+  },
+  {
+   "id": "pythonanywhere",
+   "name": "PythonAnywhere",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "www.pythonanywhere.com"
+    },
+    {
+     "type": "domain",
+     "value": "eu.pythonanywhere.com"
+    },
+    {
+     "type": "domain",
+     "value": "blog.pythonanywhere.com"
+    }
+   ]
+  },
+  {
+   "id": "quizlet",
+   "name": "Quizlet",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "quizlet.com"
+    }
+   ]
+  },
+  {
+   "id": "raindrop",
+   "name": "Raindrop",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "app.raindrop.io"
+    }
+   ]
+  },
+  {
+   "id": "react.dev",
+   "name": "React.dev",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "react.dev"
+    }
+   ]
+  },
+  {
+   "id": "reddit",
+   "name": "Reddit",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "reddit.com"
+    }
+   ]
+  },
+  {
+   "id": "regex101",
+   "name": "regex101",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "regex101.com"
+    }
+   ]
+  },
+  {
+   "id": "rentry.co",
+   "name": "Rentry.co",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "rentry.org"
+    },
+    {
+     "type": "domain",
+     "value": "rentry.co"
+    },
+    {
+     "type": "regexp",
+     "value": "https?://rentry\\.(co|org)/.+/(raw|exists)"
+    },
+    {
+     "type": "url-prefix",
+     "value": "https://rentry.co/static/"
+    },
+    {
+     "type": "domain",
+     "value": "export3.rentry.co"
+    }
+   ]
+  },
+  {
+   "id": "scalar",
+   "name": "Scalar",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "scalar.com"
+    }
+   ]
+  },
+  {
+   "id": "searchix",
+   "name": "Searchix",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "searchix.ovh"
+    }
+   ]
+  },
+  {
+   "id": "searxng",
+   "name": "SearXNG",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve",
+    "additions": "0"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "search.bus-hit.me"
+    },
+    {
+     "type": "domain",
+     "value": "search.inetol.net"
+    }
+   ]
+  },
+  {
+   "id": "seventv",
+   "name": "7TV",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "7tv.app"
+    },
+    {
+     "type": "domain",
+     "value": "twitch.tv"
+    }
+   ]
+  },
+  {
+   "id": "shinigami-eyes",
+   "name": "Shinigami Eyes",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "facebook.com"
+    },
+    {
+     "type": "domain",
+     "value": "youtube.com"
+    },
+    {
+     "type": "domain",
+     "value": "reddit.com"
+    },
+    {
+     "type": "domain",
+     "value": "twitter.com"
+    },
+    {
+     "type": "domain",
+     "value": "x.com"
+    },
+    {
+     "type": "domain",
+     "value": "medium.com"
+    },
+    {
+     "type": "domain",
+     "value": "disqus.com"
+    },
+    {
+     "type": "domain",
+     "value": "tumblr.com"
+    },
+    {
+     "type": "domain",
+     "value": "wikipedia.org"
+    },
+    {
+     "type": "domain",
+     "value": "rationalwiki.org"
+    },
+    {
+     "type": "domain",
+     "value": "cohost.org"
+    },
+    {
+     "type": "domain",
+     "value": "bsky.app"
+    },
+    {
+     "type": "domain",
+     "value": "anarchism.space"
+    },
+    {
+     "type": "domain",
+     "value": "aus.social"
+    },
+    {
+     "type": "domain",
+     "value": "c.im"
+    },
+    {
+     "type": "domain",
+     "value": "chaos.social"
+    },
+    {
+     "type": "domain",
+     "value": "eightpoint.app"
+    },
+    {
+     "type": "domain",
+     "value": "eldritch.cafe"
+    },
+    {
+     "type": "domain",
+     "value": "fosstodon.org"
+    },
+    {
+     "type": "domain",
+     "value": "hachyderm.io"
+    },
+    {
+     "type": "domain",
+     "value": "infosec.exchange"
+    },
+    {
+     "type": "domain",
+     "value": "kolektiva.social"
+    },
+    {
+     "type": "domain",
+     "value": "mas.to"
+    },
+    {
+     "type": "domain",
+     "value": "masto.ai"
+    },
+    {
+     "type": "domain",
+     "value": "chaosfem.tw"
+    },
+    {
+     "type": "domain",
+     "value": "mastodon.art"
+    },
+    {
+     "type": "domain",
+     "value": "mastodon.cloud"
+    },
+    {
+     "type": "domain",
+     "value": "mastodon.green"
+    },
+    {
+     "type": "domain",
+     "value": "mastodon.ie"
+    },
+    {
+     "type": "domain",
+     "value": "mastodon.nz"
+    },
+    {
+     "type": "domain",
+     "value": "mastodon.online"
+    },
+    {
+     "type": "domain",
+     "value": "mastodon.scot"
+    },
+    {
+     "type": "domain",
+     "value": "mastodon.social"
+    },
+    {
+     "type": "domain",
+     "value": "mastodon.world"
+    },
+    {
+     "type": "domain",
+     "value": "mastodon.xyz"
+    },
+    {
+     "type": "domain",
+     "value": "mastodonapp.uk"
+    },
+    {
+     "type": "domain",
+     "value": "meow.social"
+    },
+    {
+     "type": "domain",
+     "value": "mstdn.ca"
+    },
+    {
+     "type": "domain",
+     "value": "mstdn.jp"
+    },
+    {
+     "type": "domain",
+     "value": "mstdn.social"
+    },
+    {
+     "type": "domain",
+     "value": "octodon.social"
+    },
+    {
+     "type": "domain",
+     "value": "ohai.social"
+    },
+    {
+     "type": "domain",
+     "value": "pixelfed.social"
+    },
+    {
+     "type": "domain",
+     "value": "queer.party"
+    },
+    {
+     "type": "domain",
+     "value": "sfba.social"
+    },
+    {
+     "type": "domain",
+     "value": "social.transsafety.network"
+    },
+    {
+     "type": "domain",
+     "value": "tech.lgbt"
+    },
+    {
+     "type": "domain",
+     "value": "techhub.social"
+    },
+    {
+     "type": "domain",
+     "value": "toot.cat"
+    },
+    {
+     "type": "domain",
+     "value": "toot.community"
+    },
+    {
+     "type": "domain",
+     "value": "toot.wales"
+    },
+    {
+     "type": "domain",
+     "value": "vulpine.club"
+    },
+    {
+     "type": "domain",
+     "value": "wandering.shop"
+    },
+    {
+     "type": "domain",
+     "value": "lgbtqia.space"
+    },
+    {
+     "type": "domain",
+     "value": "threads.net"
+    },
+    {
+     "type": "domain",
+     "value": "duckduckgo.com"
+    },
+    {
+     "type": "domain",
+     "value": "bing.com"
+    },
+    {
+     "type": "domain",
+     "value": "google.ar"
+    },
+    {
+     "type": "domain",
+     "value": "google.at"
+    },
+    {
+     "type": "domain",
+     "value": "google.be"
+    },
+    {
+     "type": "domain",
+     "value": "google.ca"
+    },
+    {
+     "type": "domain",
+     "value": "google.ch"
+    },
+    {
+     "type": "domain",
+     "value": "google.co.uk"
+    },
+    {
+     "type": "domain",
+     "value": "google.com"
+    },
+    {
+     "type": "domain",
+     "value": "google.de"
+    },
+    {
+     "type": "domain",
+     "value": "google.dk"
+    },
+    {
+     "type": "domain",
+     "value": "google.es"
+    },
+    {
+     "type": "domain",
+     "value": "google.fi"
+    },
+    {
+     "type": "domain",
+     "value": "google.fr"
+    },
+    {
+     "type": "domain",
+     "value": "google.is"
+    },
+    {
+     "type": "domain",
+     "value": "google.it"
+    },
+    {
+     "type": "domain",
+     "value": "google.no"
+    },
+    {
+     "type": "domain",
+     "value": "google.pt"
+    },
+    {
+     "type": "domain",
+     "value": "google.se"
+    }
+   ]
+  },
+  {
+   "id": "snapchat-web",
+   "name": "Snapchat Web",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "url-prefix",
+     "value": "https://www.snapchat.com/web"
+    }
+   ]
+  },
+  {
+   "id": "spotify-web",
+   "name": "Spotify Web",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "open.spotify.com"
+    }
+   ]
+  },
+  {
+   "id": "stack-overflow",
+   "name": "Stack Overflow",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "stackoverflow.com"
+    },
+    {
+     "type": "domain",
+     "value": "stackexchange.com"
+    },
+    {
+     "type": "domain",
+     "value": "serverfault.com"
+    },
+    {
+     "type": "domain",
+     "value": "superuser.com"
+    },
+    {
+     "type": "domain",
+     "value": "mathoverflow.net"
+    },
+    {
+     "type": "domain",
+     "value": "askubuntu.com"
+    },
+    {
+     "type": "domain",
+     "value": "stackapps.com"
+    }
+   ]
+  },
+  {
+   "id": "startpage",
+   "name": "Startpage",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "startpage.com"
+    }
+   ]
+  },
+  {
+   "id": "status.cafe",
+   "name": "status.cafe",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "regexp",
+     "value": "https://status\\.cafe/(?!users).*"
+    },
+    {
+     "type": "domain",
+     "value": "forum.status.cafe"
+    }
+   ]
+  },
+  {
+   "id": "stylus",
+   "name": "Stylus",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "url-prefix",
+     "value": "moz-extension://"
+    },
+    {
+     "type": "url-prefix",
+     "value": "chrome-extension://"
+    }
+   ]
+  },
+  {
+   "id": "substack",
+   "name": "Substack",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "substack.com"
+    }
+   ]
+  },
+  {
+   "id": "syncthing",
+   "name": "Syncthing",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve",
+    "urls": "127\\.0\\.0\\.1\\:8384,0\\.0\\.0\\.0\\:8384,localhost\\:8384"
+   },
+   "matches": [
+    {
+     "type": "regexp",
+     "value": "https?://(127.0.0.1:8384|0.0.0.0:8384|localhost:8384)/.*"
+    }
+   ]
+  },
+  {
+   "id": "tabnews",
+   "name": "TabNews",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "tabnews.com.br"
+    }
+   ]
+  },
+  {
+   "id": "tldraw",
+   "name": "tldraw",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "tldraw.com"
+    }
+   ]
+  },
+  {
+   "id": "trinket",
+   "name": "Trinket",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "trinket.io"
+    }
+   ]
+  },
+  {
+   "id": "tuta",
+   "name": "Tuta",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "app.tuta.com"
+    },
+    {
+     "type": "domain",
+     "value": "mail.tutanota.com"
+    }
+   ]
+  },
+  {
+   "id": "twitch",
+   "name": "Twitch",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "twitch.tv"
+    },
+    {
+     "type": "domain",
+     "value": "dashboard.twitch.tv"
+    },
+    {
+     "type": "domain",
+     "value": "dev.twitch.tv"
+    },
+    {
+     "type": "url-prefix",
+     "value": "https://discuss.dev.twitch.com/embed/topics"
+    }
+   ]
+  },
+  {
+   "id": "twitter",
+   "name": "Twitter",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve",
+    "colorizeLogo": "0",
+    "darkenShadows": "1"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "twitter.com"
+    },
+    {
+     "type": "domain",
+     "value": "x.com"
+    },
+    {
+     "type": "domain",
+     "value": "api.twitter.com"
+    },
+    {
+     "type": "domain",
+     "value": "api.x.com"
+    },
+    {
+     "type": "domain",
+     "value": "twitter.com"
+    },
+    {
+     "type": "domain",
+     "value": "x.com"
+    }
+   ]
+  },
+  {
+   "id": "vercel",
+   "name": "Vercel/Next.js",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "vercel.com"
+    },
+    {
+     "type": "domain",
+     "value": "nextjs.org"
+    },
+    {
+     "type": "domain",
+     "value": "nextjs.org"
+    }
+   ]
+  },
+  {
+   "id": "vikunja",
+   "name": "Vikunja",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "try.vikunja.io"
+    }
+   ]
+  },
+  {
+   "id": "web.dev",
+   "name": "web.dev",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "url-prefix",
+     "value": "https://web.dev"
+    }
+   ]
+  },
+  {
+   "id": "whatsapp-web",
+   "name": "WhatsApp Web",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve",
+    "lighterMessages": "0"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "web.whatsapp.com"
+    }
+   ]
+  },
+  {
+   "id": "wiki.nixos.org",
+   "name": "NixOS Wiki",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve",
+    "highlight-redirect": "0"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "wiki.nixos.org"
+    }
+   ]
+  },
+  {
+   "id": "wikipedia",
+   "name": "Wikipedia",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve",
+    "highlight-redirect": "0"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "wikipedia.org"
+    },
+    {
+     "type": "domain",
+     "value": "wiktionary.org"
+    },
+    {
+     "type": "domain",
+     "value": "www.mediawiki.org"
+    },
+    {
+     "type": "domain",
+     "value": "auth.wikimedia.org"
+    },
+    {
+     "type": "domain",
+     "value": "wikiversity.org"
+    },
+    {
+     "type": "domain",
+     "value": "wikisource.org"
+    },
+    {
+     "type": "domain",
+     "value": "meta.wikimedia.org"
+    },
+    {
+     "type": "domain",
+     "value": "wikidata.org"
+    },
+    {
+     "type": "domain",
+     "value": "wikibooks.org"
+    },
+    {
+     "type": "domain",
+     "value": "species.wikimedia.org"
+    },
+    {
+     "type": "domain",
+     "value": "commons.wikimedia.org"
+    },
+    {
+     "type": "domain",
+     "value": "wikivoyage.org"
+    },
+    {
+     "type": "domain",
+     "value": "wikinews.org"
+    },
+    {
+     "type": "domain",
+     "value": "wikiquote.org"
+    }
+   ]
+  },
+  {
+   "id": "wikiwand",
+   "name": "Wikiwand",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "wikiwand.com"
+    }
+   ]
+  },
+  {
+   "id": "youtube",
+   "name": "YouTube",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve",
+    "logo": "1",
+    "oled": "0",
+    "sponsorBlock": "1"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "youtube.com"
+    },
+    {
+     "type": "url-prefix",
+     "value": "https://studio.youtube.com"
+    },
+    {
+     "type": "domain",
+     "value": "m.youtube.com"
+    }
+   ]
+  },
+  {
+   "id": "zen-browser-docs",
+   "name": "Zen Browser Docs",
+   "vars": {
+    "lightFlavor": "latte",
+    "darkFlavor": "mocha",
+    "accentColor": "mauve"
+   },
+   "matches": [
+    {
+     "type": "domain",
+     "value": "zen-browser.app"
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,11 @@
+name: Feature or plugin idea
+description: A widget, a site theme or anything else.
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: The idea
+      description: What it does and why you want it. Check IDEAS.md first; it may be planned.
+    validations:
+      required: true

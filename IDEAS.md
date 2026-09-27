@@ -8,8 +8,10 @@ colour scheme. It's meant for a broad audience, not one setup.
 
 - The core only loads plugins, config, secrets and styles, and passes events
   between them.
-- Every widget is a plugin, including the built-in ones, which are just default
-  plugins.
+- The page itself is fixed (a bar, the clock, the bookmarks), not a platform
+  of widgets: what's extensible is the menu's tabs, the shipped ones
+  included. (Decided 2026-09-27, after a user-defined grid of placeable
+  widgets proved a source of stray states.)
 - The config lets anyone declare:
   - which plugins to load;
   - their own plugin code;
@@ -74,6 +76,13 @@ Once, at install:
 
 ## First milestone: prove colours and background
 
+Built in the first prototype (2026-09-27): the helper and its data plugins,
+the live colours and wallpaper, the clock and bookmark plugins with the grid
+editor, device-local settings, and the Catppuccin site themes compiled against
+the live scheme. See the handbook. Since then: a Tree Style Tab tint towards
+primary (optional), and Nerd Font glyphs on bookmarks. Chrome support comes
+next.
+
 - The core and plugin loading.
 - The new tab's colours and background follow the scheme and change live on a
   switch.
@@ -84,11 +93,12 @@ Once, at install:
 ## Default plugins (after the milestone)
 
 - Git hosting: open PRs, issues and review requests.
-  - GitHub out of the box.
+  - GitHub out of the box: built, as the menu's GitHub tab.
   - Custom providers configurable: Forgejo (and Gitea), GitLab, Bitbucket.
 - Mail: recent and unread, over IMAP.
 - Weather.
-- Media controls for a configurable service, Spotify by default.
+- Media controls for a configurable service, Spotify by default: built, as
+  the menu's Media tab, for every MPRIS player.
 - Music servers, with Navidrome as the reference.
 - Status checks: an Uptime Kuma plugin as the generic reference.
 
@@ -151,8 +161,8 @@ Once, at install:
 
 - Check whether Firefox and the forks load an unsigned extension or need AMO
   unlisted signing, before building anything.
-- Helper language: Rust or Python.
-- A native-messaging helper (no open port) or a localhost service.
+- Helper language: settled, Rust.
+- Settled: a native-messaging helper, no open port.
 - Music servers: WebDAV only serves files; the API most music servers share is
   Subsonic's (Navidrome, Gonic, Airsonic). Decide which to build on.
 - Media controls:

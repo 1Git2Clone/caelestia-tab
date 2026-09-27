@@ -1,0 +1,137 @@
+/* The page's only global styles: the scheme's variables (with fallbacks for
+   before the helper has sent one), the bundled symbols font, and Tailwind's
+   utilities. No reset and no theme beyond the scheme: every component styles
+   itself. */
+/* Tailwind's utilities come last, so a class always wins over the base rules
+   below; unlayered CSS (the scheme's <style>, the user's own) wins over both. */
+@layer theme, base, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+@import "./user-source.css";
+
+/* The scheme as Tailwind colours: bg-primary, text-on-surface,
+   border-outline-variant … all follow the live scheme. Tailwind's own palette
+   is left out. */
+@theme inline {
+  --color-*: initial;
+  --color-primary: var(--caelestia-primary);
+  --color-on-primary: var(--caelestia-on-primary);
+  --color-primary-container: var(--caelestia-primary-container);
+  --color-on-primary-container: var(--caelestia-on-primary-container);
+  --color-secondary: var(--caelestia-secondary);
+  --color-on-secondary: var(--caelestia-on-secondary);
+  --color-secondary-container: var(--caelestia-secondary-container);
+  --color-on-secondary-container: var(--caelestia-on-secondary-container);
+  --color-tertiary: var(--caelestia-tertiary);
+  --color-on-tertiary: var(--caelestia-on-tertiary);
+  --color-tertiary-container: var(--caelestia-tertiary-container);
+  --color-on-tertiary-container: var(--caelestia-on-tertiary-container);
+  --color-error: var(--caelestia-error);
+  --color-on-error: var(--caelestia-on-error);
+  --color-error-container: var(--caelestia-error-container);
+  --color-on-error-container: var(--caelestia-on-error-container);
+  --color-background: var(--caelestia-background);
+  --color-on-background: var(--caelestia-on-background);
+  --color-surface: var(--caelestia-surface);
+  --color-on-surface: var(--caelestia-on-surface);
+  --color-surface-variant: var(--caelestia-surface-variant);
+  --color-on-surface-variant: var(--caelestia-on-surface-variant);
+  --color-surface-dim: var(--caelestia-surface-dim);
+  --color-surface-bright: var(--caelestia-surface-bright);
+  --color-surface-container-lowest: var(--caelestia-surface-container-lowest);
+  --color-surface-container-low: var(--caelestia-surface-container-low);
+  --color-surface-container: var(--caelestia-surface-container);
+  --color-surface-container-high: var(--caelestia-surface-container-high);
+  --color-surface-container-highest: var(--caelestia-surface-container-highest);
+  --color-inverse-surface: var(--caelestia-inverse-surface);
+  --color-inverse-on-surface: var(--caelestia-inverse-on-surface);
+  --color-inverse-primary: var(--caelestia-inverse-primary);
+  --color-outline: var(--caelestia-outline);
+  --color-outline-variant: var(--caelestia-outline-variant);
+  --color-shadow: var(--caelestia-shadow);
+  --color-scrim: var(--caelestia-scrim);
+  --color-transparent: transparent;
+  /* The frosted panels widgets sit on. */
+  --color-glass: color-mix(in srgb, var(--caelestia-surface) 72%, transparent);
+  --color-current: currentColor;
+  --font-sans: "Rubik", "Inter", system-ui, sans-serif;
+  --font-glyph: "caelestia-tab symbols";
+}
+
+/* A line that scrolls round and round (CtMarquee): two copies side by side,
+   moved one copy's width, so it loops without a seam. */
+@theme {
+  --animate-marquee: ct-marquee var(--speed, 10s) linear infinite;
+  @keyframes ct-marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+}
+
+@layer base {
+@font-face {
+  font-family: "caelestia-tab symbols";
+  src: url("/vendor/nerd-fonts/SymbolsNerdFont-Regular.woff2") format("woff2");
+  font-display: block;
+}
+
+/* A dark red close to caelestia's own, until the scheme arrives. The
+   scheme's <style> in the head overrides every one. */
+:root {
+  --caelestia-background: #1a1111;
+  --caelestia-surface: #1a1111;
+  --caelestia-surface-container-low: #221918;
+  --caelestia-surface-container: #271d1c;
+  --caelestia-surface-container-high: #322827;
+  --caelestia-surface-container-highest: #3d3231;
+  --caelestia-on-surface: #f1dfdc;
+  --caelestia-on-surface-variant: #d8c2be;
+  --caelestia-outline: #a08c89;
+  --caelestia-outline-variant: #534341;
+  --caelestia-primary: #ffb4a8;
+  --caelestia-on-primary: #561e16;
+  --caelestia-primary-container: #73342a;
+  --caelestia-on-primary-container: #ffdad4;
+  --caelestia-secondary: #e7bdb6;
+  --caelestia-on-secondary: #442925;
+  --caelestia-secondary-container: #5d3f3b;
+  --caelestia-on-secondary-container: #ffdad4;
+  --caelestia-tertiary: #dec48c;
+  --caelestia-on-tertiary: #3e2e04;
+  --caelestia-tertiary-container: #564419;
+  --caelestia-on-tertiary-container: #fbdfa6;
+  --caelestia-error: #ffb4ab;
+  --caelestia-on-error: #690005;
+  --caelestia-shadow: #000000;
+  --caelestia-scrim: #000000;
+  color-scheme: dark;
+}
+
+:root[data-mode="light"] {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-sans);
+  color: var(--caelestia-on-surface);
+  background: var(--caelestia-background);
+  overflow-x: hidden;
+}
+
+/* Form controls take the page's font; browsers give them their own. */
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+/* An element's own display (flex, grid) would beat the UA's [hidden]. */
+[hidden] {
+  display: none !important;
+}
+}

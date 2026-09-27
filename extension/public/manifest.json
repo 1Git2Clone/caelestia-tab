@@ -1,0 +1,37 @@
+{
+  "manifest_version": 3,
+  "name": "caelestia-tab",
+  "version": "0.1.0",
+  "description": "A new tab, and site themes, that follow the caelestia colour scheme live.",
+  "homepage_url": "https://git.hu-tao.dev/hutao/caelestia-tab",
+  "icons": {
+    "48": "icon.svg",
+    "96": "icon.svg"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "caelestia-tab@hu-tao.dev",
+      "strict_min_version": "128.0",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
+    }
+  },
+  "permissions": ["nativeMessaging", "storage", "unlimitedStorage", "scripting"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "scripts": ["vendor/less.min.js", "background.js"],
+    "type": "module"
+  },
+  "chrome_url_overrides": {
+    "newtab": "newtab.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ]
+}
