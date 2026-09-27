@@ -1,4 +1,4 @@
-// node --test tests/*.test.mjs
+// node --test tests/*.test.mjs: userstyles.js and glyphs.js.
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import test from "node:test";
@@ -34,4 +34,18 @@ test("the vendored lib takes the scheme's colours and accent", () => {
   assert.match(out, /@catppuccin: \{ @latte: \{ @rosewater: #123456;/);
   assert.match(out, /@accent: #abcdef;/);
   assert.doesNotMatch(out, /#dc8a78/, "catppuccin's own latte rosewater is gone");
+});
+
+test("glyph suggestions follow the bookmark's host and name", async () => {
+  const { words, suggest, parse } = await import("../extension/glyphs.js");
+  const index = JSON.parse(fs.readFileSync(new URL("../extension/vendor/nerd-fonts/glyphnames.json", import.meta.url), "utf8"));
+  assert.deepEqual(words("https://gist.github.com/x", "Gists"), ["gist", "github", "gists"]);
+  assert.deepEqual(words("music.hu-tao.dev", ""), ["music", "tao"]);
+  const names = suggest(index, words("https://github.com", "GitHub")).map((g) => g.name);
+  assert.ok(names.includes("fa-github") && names.includes("dev-github") && names.includes("md-github"));
+  assert.ok(names.indexOf("fa-github") < names.indexOf("dev-githubactions"), "whole-word matches come first");
+  assert.equal(parse(index, "nf-fa-github"), "");
+  assert.equal(parse(index, "f09b"), "");
+  assert.equal(parse(index, ""), "");
+  assert.equal(parse(index, "not a glyph"), null);
 });

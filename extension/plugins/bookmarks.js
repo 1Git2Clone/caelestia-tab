@@ -1,6 +1,7 @@
 // Bookmark tiles on a CSS grid the user defines in full: the grid's columns,
 // row height, gap and flow come from settings, and each tile's placement is a
 // span or any grid-column / grid-row value.
+import { words } from "../glyphs.js";
 import { cssColour, onColour } from "../scheme.js";
 
 const PRESETS = [
@@ -13,6 +14,7 @@ const item = (props) => ({
   name: "",
   url: "",
   letter: "",
+  glyph: "",
   showLetter: true,
   showName: true,
   image: "",
@@ -41,7 +43,11 @@ function tile(it, { link = true } = {}) {
     node.classList.add("has-image");
     node.style.backgroundImage = `url(${JSON.stringify(it.image)})`;
   }
-  if (it.showLetter) node.append(Object.assign(document.createElement("span"), { className: "letter", textContent: it.letter || initials(it.name) }));
+  if (it.showLetter) {
+    // A glyph takes the letters' place.
+    const className = it.glyph ? "letter glyph" : "letter";
+    node.append(Object.assign(document.createElement("span"), { className, textContent: it.glyph || it.letter || initials(it.name) }));
+  }
   if (it.showName) node.append(Object.assign(document.createElement("span"), { className: "name", textContent: it.name }));
   return node;
 }
@@ -75,7 +81,14 @@ function edit(ctx, index) {
         { key: "name", label: "Name", type: "text" },
         { key: "showName", label: "Show the name", type: "checkbox" },
         { key: "letter", label: "Letters", type: "text", hint: "A short label or an emoji. Empty uses the name's first two letters." },
-        { key: "showLetter", label: "Show the letters", type: "checkbox" },
+        {
+          key: "glyph",
+          label: "Glyph",
+          type: "glyph",
+          words: () => words(draft.url, draft.name),
+          hint: "A Nerd Font glyph, shown instead of the letters. Suggestions follow the address and the name.",
+        },
+        { key: "showLetter", label: "Show the letters or glyph", type: "checkbox" },
         { key: "image", label: "Image", type: "image", hint: "Covers the tile. Without one, the tile is a solid scheme colour." },
       ]),
       tab("Address", [{ key: "url", label: "URL", type: "url", placeholder: "https://example.com" }]),
@@ -149,10 +162,11 @@ export default {
     ...PRESETS[0].values,
     flow: "row dense",
     items: [
-      item({ name: "GitHub", url: "https://github.com", colour: "primary" }),
-      item({ name: "YouTube", url: "https://www.youtube.com", colour: "tertiary", width: 2 }),
-      item({ name: "Wikipedia", url: "https://www.wikipedia.org", colour: "secondary" }),
-      item({ name: "MDN", url: "https://developer.mozilla.org", colour: "primaryContainer" }),
+      // nf-fa-github, nf-fa-youtube, nf-fa-wikipedia_w, nf-dev-mozilla
+      item({ name: "GitHub", url: "https://github.com", colour: "primary", glyph: "" }),
+      item({ name: "YouTube", url: "https://www.youtube.com", colour: "tertiary", width: 2, glyph: "" }),
+      item({ name: "Wikipedia", url: "https://www.wikipedia.org", colour: "secondary", glyph: "" }),
+      item({ name: "MDN", url: "https://developer.mozilla.org", colour: "primaryContainer", glyph: "" }),
     ],
   },
   settings: [

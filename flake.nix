@@ -64,6 +64,10 @@
               # scripts/vendor-userstyles.mjs.
               web-ext
               nodejs
+
+              # scripts/vendor-nerd-fonts.sh
+              woff2
+              jq
             ];
 
             RUST_SRC_PATH = "${pkgs.rustPlatform.rustLibSrc}";

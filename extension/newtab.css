@@ -1,3 +1,10 @@
+/* The vendored Nerd Fonts symbols, for bookmark glyphs. */
+@font-face {
+  font-family: "caelestia-tab symbols";
+  src: url("vendor/nerd-fonts/SymbolsNerdFont-Regular.woff2") format("woff2");
+  font-display: block;
+}
+
 /* Fallbacks for before the helper has sent a scheme: a dark red close to
    caelestia's own. The scheme's <style id="scheme"> overrides every one. */
 :root {
@@ -216,6 +223,15 @@ a.tile:focus-visible {
   font-size: 1.5rem;
   font-weight: 600;
   line-height: 1;
+}
+
+.glyph {
+  font-family: "caelestia-tab symbols";
+  font-weight: normal;
+}
+
+.tile .letter.glyph {
+  font-size: 1.9rem;
 }
 
 .tile .name {
@@ -479,6 +495,32 @@ input[type="checkbox"] {
 
 .swatches button[aria-checked="true"] {
   border-color: var(--caelestia-on-surface);
+}
+
+.glyph-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+  gap: 6px;
+  max-height: 180px;
+  overflow: auto;
+}
+
+dialog .glyph-grid button {
+  padding: 8px 0;
+  font-size: 1.4rem;
+  border-radius: 10px;
+}
+
+dialog .glyph-grid button:hover {
+  background: var(--caelestia-primary);
+  color: var(--caelestia-on-primary);
+}
+
+.glyph.current {
+  min-width: 44px;
+  font-size: 1.8rem;
+  text-align: center;
+  color: var(--caelestia-primary);
 }
 
 .widgets-list {

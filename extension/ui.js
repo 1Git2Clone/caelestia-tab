@@ -1,6 +1,7 @@
 // The pieces plugins build their settings from, handed to them as ctx.ui so a
 // plugin never imports the core.
 import { COLOURS, cssColour } from "./scheme.js";
+import * as glyphs from "./glyphs.js";
 import { icon } from "./icons.js";
 
 export { icon };
@@ -49,7 +50,8 @@ export function dialog({ title, tabs, aside, onSave }) {
 //
 //   { key, label, type, hint }  with type one of checkbox, text, url, number,
 //   textarea, select (options: [[value, label]]), range (min, max, step,
-//   unit), colour (a scheme colour swatch), image (a URL or an uploaded file);
+//   unit), colour (a scheme colour swatch), image (a URL or an uploaded file),
+//   glyph (a Nerd Font glyph; `words()` returns what to suggest glyphs for);
 //   { type: "presets", label, presets: [{ label, values }] } sets several keys.
 export function form(fields, values, update) {
   const root = el("div", { className: "form" });
@@ -172,6 +174,56 @@ function field(f, values, set, redraw) {
             }),
           file,
         ),
+        hint,
+      );
+    }
+    case "glyph": {
+      const grid = el("div", { className: "glyph-grid" });
+      const typed = el("input", { type: "text", placeholder: "Paste a glyph, or nf-fa-github, or f09b" });
+      const find = el("input", { type: "search", placeholder: "Search every glyph by name" });
+      const note = el("small");
+      const pick = (g) => {
+        set({ [f.key]: g });
+        redraw();
+      };
+      const show = (list, empty) => {
+        grid.replaceChildren(
+          ...list.map((g) =>
+            el("button", {
+              type: "button",
+              className: "glyph",
+              title: `nf-${g.name}`,
+              textContent: glyphs.char(g.code),
+              onclick: () => pick(glyphs.char(g.code)),
+            }),
+          ),
+        );
+        note.textContent = list.length ? "" : empty;
+      };
+      glyphs.glyphNames().then((index) => {
+        const suggested = () => show(glyphs.suggest(index, f.words()), "No suggestions for this address. Search by name instead.");
+        suggested();
+        find.oninput = () => (find.value.trim() ? show(glyphs.search(index, find.value), "No glyph has that in its name.") : suggested());
+        typed.onchange = () => {
+          const g = glyphs.parse(index, typed.value);
+          if (g === null) note.textContent = "Not a glyph, a glyph name or a codepoint.";
+          else pick(g);
+        };
+      });
+      return el(
+        "div",
+        { className: "field" },
+        el("span", { textContent: f.label }),
+        el(
+          "div",
+          { className: "row" },
+          el("span", { className: "glyph current", textContent: value || "" }),
+          typed,
+          value && el("button", { type: "button", innerHTML: icon("close"), title: "Remove the glyph", onclick: () => pick("") }),
+        ),
+        find,
+        grid,
+        note,
         hint,
       );
     }
