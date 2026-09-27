@@ -5,6 +5,7 @@
 import plugins from "./plugins/index.js";
 import { COLOURS, cssColour, cssVars } from "./scheme.js";
 import * as ui from "./ui.js";
+import { TREE_STYLE_TAB } from "./treestyletab.js";
 import { SITES } from "./userstyles.js";
 
 const store = browser.storage.local;
@@ -19,6 +20,7 @@ const DEFAULTS = {
     { id: "bookmarks", plugin: "bookmarks", settings: {} },
   ],
   sites: SITES,
+  treeStyleTab: TREE_STYLE_TAB,
   css: "",
 };
 
@@ -108,6 +110,7 @@ function openSettings() {
     { label: "Widgets", render: widgetsTab },
     { label: "Background", render: () => ui.form(BACKGROUND, settings.background, save) },
     { label: "Websites", render: websitesTab },
+    { label: "Browser", render: browserTab },
     { label: "Advanced", render: advancedTab },
   ].map((t, i) => ({ ...t, render: () => ((current = i), t.render(redraw)) }));
   const dlg = ui.dialog({ title: "Settings", tabs });
@@ -239,6 +242,24 @@ function websitesTab() {
     ),
     filter,
     list,
+  );
+}
+
+function browserTab() {
+  const tst = (settings.treeStyleTab = { ...TREE_STYLE_TAB, ...settings.treeStyleTab });
+  return el(
+    "div",
+    {},
+    el("h4", { textContent: "Tree Style Tab" }),
+    el("p", { textContent: "Tints Tree Style Tab's sidebar towards the scheme's primary, and follows scheme switches live. Needs Tree Style Tab installed; nothing happens without it." }),
+    ui.form(
+      [
+        { key: "tint", label: "Tint the sidebar", type: "checkbox" },
+        { key: "strength", label: "Strength", type: "range", min: 0, max: 40, unit: "%" },
+      ],
+      tst,
+      save,
+    ),
   );
 }
 
