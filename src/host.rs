@@ -75,6 +75,7 @@ fn send_if_changed<'a>(
         out.write_all(&frame)?;
     }
     out.flush()?;
+    plugin.changed(&value);
     last.insert(plugin.topic(), body);
     Ok(())
 }

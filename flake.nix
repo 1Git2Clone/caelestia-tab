@@ -13,6 +13,31 @@
       forAllSystems = nixpkgs.lib.genAttrs systems;
     in
     {
+      # Adds the live-colours watcher (zen/caelestia-tab.cfg) to a wrapped Zen,
+      # for example zen-browser-flake's packages:
+      #
+      #   caelestia-tab.lib.wrapZen (zen-browser.packages.${system}.beta.override { ... })
+      #
+      # The same script `caelestia-tab install-zen` puts in a non-Nix install.
+      lib.wrapZen =
+        zen:
+        (zen.override (old: {
+          extraPrefs = (old.extraPrefs or "") + "\n" + builtins.readFile ./zen/caelestia-tab.cfg;
+        })).overrideAttrs
+          (old: {
+            buildCommand = old.buildCommand + ''
+              # The wrapper symlinks Zen's binaries into its own lib dir, and a
+              # symlinked binary runs from the unwrapped package's directory,
+              # which has none of the wrapper's autoconfig. nixpkgs' Firefox
+              # wrapper copies its binary for the same reason.
+              for bin in "$out"/lib/*/zen "$out"/lib/*/zen-bin; do
+                if [ -L "$bin" ]; then cp --remove-destination "$(readlink -f "$bin")" "$bin"; fi
+              done
+              # Unsandboxed, or the script gets prefs only: no Services, no timers.
+              echo 'pref("general.config.sandbox_enabled", false);' >> "$(echo "$out"/lib/*/defaults/pref/autoconfig.js)"
+            '';
+          });
+
       packages = forAllSystems (
         system:
         let

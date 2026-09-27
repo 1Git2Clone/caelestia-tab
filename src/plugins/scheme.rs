@@ -34,4 +34,9 @@ impl Plugin for Scheme {
         // raises another event.
         Ok(serde_json::from_slice(&fs::read(&self.path)?)?)
     }
+
+    // Zen's window can't be themed from the extension, only through a mod.
+    fn changed(&self, value: &Value) {
+        crate::zen::write_mods(value);
+    }
 }

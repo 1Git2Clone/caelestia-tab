@@ -22,6 +22,10 @@ pub trait Plugin {
     /// The current value. An error is logged and nothing is sent; the next
     /// change to a watched file tries again.
     fn read(&self) -> io::Result<Value>;
+
+    /// Runs after a new value was sent, for plugins that also write
+    /// something of their own out.
+    fn changed(&self, _value: &Value) {}
 }
 
 pub fn all() -> Vec<Box<dyn Plugin>> {
