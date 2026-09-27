@@ -5,9 +5,19 @@ import { words } from "../glyphs.js";
 import { cssColour, onColour } from "../scheme.js";
 
 const PRESETS = [
-  { label: "Tiles", values: { columns: "repeat(5, minmax(0, 1fr))", rows: "140px", gap: "20px" } },
-  { label: "List", values: { columns: "repeat(3, minmax(0, 1fr))", rows: "52px", gap: "12px" } },
+  { label: "Tiles", values: { even: true, tileWidth: "11rem", columns: "repeat(5, minmax(0, 1fr))", rows: "8.75rem", gap: "1.25rem" } },
+  { label: "List", values: { even: false, columns: "repeat(3, minmax(0, 1fr))", rows: "3.25rem", gap: "0.75rem" } },
 ];
+
+// Even rows: as many columns as tiles of at least `min` px fit, then as few
+// as still need that many rows, so 5 tiles that don't fit on one row go 3
+// and 2, never 4 and 1. `spans` is each tile's width in columns.
+export function evenColumns(width, min, gap, spans) {
+  const fit = Math.max(1, Math.floor((width + gap) / (min + gap)));
+  const total = spans.reduce((n, w) => n + Math.min(w, fit), 0);
+  if (total <= fit) return Math.max(total, 1);
+  return Math.max(Math.ceil(total / Math.ceil(total / fit)), ...spans.map((w) => Math.min(w, fit)));
+}
 
 const item = (props) => ({
   id: crypto.randomUUID(),
@@ -171,6 +181,8 @@ export default {
   },
   settings: [
     { type: "presets", label: "Start from", presets: PRESETS },
+    { key: "even", label: "Even rows", type: "checkbox", hint: "Spread the tiles evenly over as few rows as fit: 5, or 3 and 2, never 4 and 1. Columns is ignored while it's on." },
+    { key: "tileWidth", label: "Narrowest tile", type: "text", hint: "For even rows: 11rem, 160px …" },
     { key: "columns", label: "Columns", type: "text", hint: "grid-template-columns: repeat(5, minmax(0, 1fr)), 200px 1fr 2fr, repeat(auto-fill, minmax(160px, 1fr)) …" },
     { key: "rows", label: "Row height", type: "text", hint: "grid-auto-rows: 140px, minmax(52px, auto) …" },
     { key: "gap", label: "Gap", type: "text", hint: "gap: 20px, or 12px 24px for rows and columns." },
@@ -198,6 +210,21 @@ export default {
     grid.style.gridAutoRows = s.rows;
     grid.style.gap = s.gap;
     grid.style.gridAutoFlow = s.flow;
+    let observer = null;
+    if (s.even) {
+      // Resolve the width setting, whatever its unit, through the grid itself.
+      const probe = Object.assign(document.createElement("div"), { style: `position: absolute; visibility: hidden; width: ${s.tileWidth}` });
+      const spans = s.items.map((it) => it.width);
+      const layout = () => {
+        grid.append(probe);
+        const min = probe.offsetWidth || 176;
+        probe.remove();
+        const gap = parseFloat(getComputedStyle(grid).columnGap) || 0;
+        grid.style.gridTemplateColumns = `repeat(${evenColumns(grid.clientWidth, min, gap, spans)}, minmax(0, 1fr))`;
+      };
+      observer = new ResizeObserver(layout);
+      observer.observe(grid);
+    }
     for (const [i, it] of s.items.entries()) {
       if (ctx.editing) {
         grid.append(slot(ctx, it, i));
@@ -209,5 +236,6 @@ export default {
     }
     if (!s.items.length) grid.innerHTML = `<p class="empty">No bookmarks yet. Add one with the + button.</p>`;
     el.append(grid);
+    return () => observer?.disconnect();
   },
 };

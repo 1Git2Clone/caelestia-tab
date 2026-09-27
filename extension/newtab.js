@@ -33,7 +33,15 @@ let unmounts = [];
 
 const plugin = (w) => plugins.find((p) => p.id === w.plugin);
 const widgetSettings = (w) => ({ ...structuredClone(plugin(w).defaults), ...w.settings });
-const save = () => store.set({ settings });
+// What this tab wrote and hasn't seen come back yet. A slider saves on every
+// step, and a step's echo can arrive after the next step was saved: taking
+// that echo for another tab's change would roll the value back and swap out
+// the object the open dialog is editing.
+const pending = new Set();
+const save = () => {
+  pending.add(JSON.stringify(settings));
+  return store.set({ settings });
+};
 
 function context(w) {
   return {
@@ -74,10 +82,25 @@ function render() {
     button("settings", "Settings", openSettings),
   );
 
+  edges.disconnect();
+  for (const node of main.children) edges.observe(node);
+
   if (!scheme && helperError) {
     main.append(el("p", { className: "notice", textContent: `No colours yet: ${helperError}. See Settings, Status.` }));
   }
 }
+
+// Which window edges each widget touches, for square corners there. Checked
+// whenever a widget's size changes, which a window resize or zoom also does.
+const edges = new ResizeObserver((entries) => {
+  for (const { target } of entries) {
+    const r = target.getBoundingClientRect();
+    target.classList.toggle("edge-top", r.top <= 1);
+    target.classList.toggle("edge-bottom", r.bottom >= innerHeight - 1);
+    target.classList.toggle("edge-left", r.left <= 1);
+    target.classList.toggle("edge-right", r.right >= innerWidth - 1);
+  }
+});
 
 function applyScheme() {
   $("scheme").textContent = scheme ? cssVars(scheme) : "";
@@ -232,6 +255,7 @@ function websitesTab() {
           body,
         );
       });
+      list.replaceChildren(...rows);
       filter.oninput = () => rows.forEach((r) => (r.hidden = !r.title.includes(filter.value.toLowerCase())));
     });
 
@@ -341,10 +365,11 @@ store.onChanged.addListener((changes) => {
   }
   if (changes.helperError) helperError = changes.helperError.newValue ?? null;
   if (changes.settings) {
-    // Our own writes come back here too. Keep the object open dialogs are
-    // editing unless another tab changed it.
+    // Our own writes come back here too, possibly out of order. Keep the
+    // object open dialogs are editing unless another tab changed it.
     const next = changes.settings.newValue ?? structuredClone(DEFAULTS);
-    if (JSON.stringify(next) !== JSON.stringify(settings)) settings = { ...structuredClone(DEFAULTS), ...next };
+    const json = JSON.stringify(next);
+    if (!pending.delete(json) && json !== JSON.stringify(settings)) settings = { ...structuredClone(DEFAULTS), ...next };
   }
   if (changes.settings || changes.helperError || (changes.scheme && !changes.scheme.oldValue)) render();
 });
