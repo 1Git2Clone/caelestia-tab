@@ -2,6 +2,7 @@
 //! extension receives under the plugin's topic. Add one by implementing
 //! [`Plugin`] and listing it in [`all`].
 
+mod fonts;
 mod scheme;
 mod wallpaper;
 
@@ -33,6 +34,7 @@ pub fn all() -> Vec<Box<dyn Plugin>> {
     vec![
         Box::new(scheme::Scheme::new(&state)),
         Box::new(wallpaper::Wallpaper::new(&state)),
+        Box::new(fonts::Fonts),
     ]
 }
 

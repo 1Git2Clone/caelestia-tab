@@ -35,15 +35,22 @@ new tab never shows. Set `zen.urlbar.replace-newtab` to `false` in
 ## Tree Style Tab
 
 With [Tree Style Tab](https://addons.mozilla.org/en-US/firefox/addon/tree-style-tab/)
-installed, its sidebar gets a tint towards the scheme's primary, and the tint
-follows scheme switches live. Turn it off, or set its strength, in the new
-tab's *Settings*, *Browser*. It goes through TST's own API: caelestia-tab
-registers with TST and hands it a stylesheet, so it needs no permission, and
-nothing happens without TST.
+installed, its sidebar follows the scheme live, with the same choices as the
+new tab's background (*Settings*, *Browser*):
 
-The sidebar's background is the surface mixed towards black (40% in dark
-mode, 12% in light, where surfaces grey quickly), then tinted towards primary,
-so it sits a step darker than the page in both modes.
+- **A colour, tinted over the surface** (the default): the surface mixed
+  towards black (40% in dark mode, 12% in light, where surfaces grey quickly),
+  then tinted towards the colour you pick, primary by default, so it sits a
+  step darker than the page in both modes. *Strength* sets the tint.
+- **The caelestia wallpaper**, dimmed and blurred as you set, with the tabs on
+  a translucent tint of the colour. The sidebar gets a copy scaled to 900 px,
+  since TST keeps the style in every sidebar.
+- **Tree Style Tab's own** look.
+
+It goes through TST's own API: caelestia-tab registers with TST and hands it
+a stylesheet, so it needs no permission, and nothing happens without TST.
+The wallpaper option is unit-tested for the CSS it produces
+(`tests/extension.test.mjs`); how it looks in a real sidebar is unconfirmed.
 
 ## Zen's own window
 

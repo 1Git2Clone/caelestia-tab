@@ -59,3 +59,17 @@ test("even rows never leave one tile alone on a row", async () => {
   assert.equal(evenColumns(1000, 176, 20, [1, 2, 1, 1]), 5, "a wide tile counts its span");
   assert.equal(evenColumns(1000, 176, 20, [1, 1]), 2, "few tiles: only as many columns as tiles");
 });
+
+test("the Tree Style Tab sidebar follows the background's choices", async () => {
+  const { tstStyle, tstOptions } = await import("../extension/src/treestyletab.ts");
+  const colours = new Proxy({}, { get: (_, n) => ({ primary: "aa0000", tertiary: "00aa00" })[n] ?? "111111" });
+  const scheme = { mode: "dark", colours };
+  const tint = tstStyle(scheme, tstOptions({ colour: "tertiary", strength: 20 }), null);
+  assert.match(tint, /--tabbar-bg: color-mix\(in srgb, #00aa00 20%/);
+  const wall = tstStyle(scheme, tstOptions({ source: "wallpaper", dim: 30, blur: 4 }), "data:image/jpeg;base64,x");
+  assert.match(wall, /--tabbar-bg: transparent !important/);
+  assert.match(wall, /url\("data:image\/jpeg;base64,x"\)/);
+  assert.match(wall, /blur\(4px\)/);
+  assert.match(wall, /opacity: 0.3/);
+  assert.equal(tstOptions({ tint: false }).source, "none", "the old off switch still means off");
+});

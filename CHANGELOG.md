@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The clock's time and date each take their own separator and size, with a weight, a leading-zero option, four date styles, and the glass behind it optional.
 - A tile's colour can be a fixed one from the browser's colour picker as well as a scheme colour, and the scheme colours are named under their swatches. Uploaded tile images are scaled to what a tile shows.
 - A widget flush with a window edge squares its corners on that side.
+- The page is a CSS grid you define, and every widget, the toolbar included, sits where you place it. Widgets can be added and removed, and edit mode gives each one an overlay that opens its properties and placement.
+- A page font, and fonts for the clock's time and date, with the installed fonts offered (listed by the helper). Font sizes are in pt.
+- Tree Style Tab's sidebar takes the background's choices: a tint of any colour, the wallpaper dimmed and blurred, or TST's own look.
 - Nerd Font glyphs as a bookmark's mark. The symbols font is bundled, and the editor shows every glyph with a search by name, and suggests glyphs from the bookmark's address and name.
 - Zen's window follows the scheme live. The helper writes a Zen mod into every Zen profile, and `zen/caelestia-tab.cfg` (installed with `caelestia-tab install-zen`, or `lib.wrapZen` on Nix) reloads it on each change.
 - The clock sits on the same glass as the bookmarks, so it stays legible over any wallpaper, dark text in light mode included.

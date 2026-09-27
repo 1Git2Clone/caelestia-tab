@@ -31,18 +31,22 @@
 
   export const widget: WidgetInfo = {
     label: "Clock and date",
-    section: "self-center my-auto",
+    place: { justify: "center", align: "center" },
     defaults: {
       hour12: true,
       leadingZero: false,
       seconds: false,
       timeSeparator: "|",
-      timeSize: 5.5,
+      // Font sizes are in pt; `timeSize` and `dateSize` were rem and are left
+      // alone rather than read as pt.
+      timePt: 66,
+      timeFont: "",
       weight: 300,
       date: true,
       dateStyle: "long",
       dateSeparator: "/",
-      dateSize: 1.8,
+      datePt: 22,
+      dateFont: "",
       glass: true,
     },
     fields: [
@@ -50,7 +54,8 @@
       { key: "leadingZero", label: "Leading zero on the hour", type: "checkbox", hint: "Always there on a 24-hour clock." },
       { key: "seconds", label: "Show seconds", type: "checkbox" },
       { key: "timeSeparator", label: "Time separator", type: "text", placeholder: "|" },
-      { key: "timeSize", label: "Time size", type: "range", min: 2, max: 12, step: 0.25, unit: "rem" },
+      { key: "timePt", label: "Time size", type: "range", min: 16, max: 160, unit: "pt" },
+      { key: "timeFont", label: "Time font", type: "font", hint: "Empty uses the page's font." },
       { key: "weight", label: "Weight", type: "range", min: 100, max: 900, step: 100 },
       { key: "date", label: "Show the date", type: "checkbox" },
       {
@@ -65,7 +70,8 @@
         ],
       },
       { key: "dateSeparator", label: "Date separator", type: "text", placeholder: "/" },
-      { key: "dateSize", label: "Date size", type: "range", min: 0.75, max: 5, step: 0.05, unit: "rem" },
+      { key: "datePt", label: "Date size", type: "range", min: 8, max: 72, unit: "pt" },
+      { key: "dateFont", label: "Date font", type: "font", hint: "Empty uses the page's font." },
       { key: "glass", label: "On glass", type: "checkbox", hint: "Keeps it legible over a busy wallpaper." },
     ],
   };
@@ -83,7 +89,7 @@
   });
   const parts = $derived(now ? clock(settings, now) : null);
   // Shrinks with a narrow window instead of overflowing it.
-  const size = (rem: number) => `min(${rem}rem, ${rem * 1.3}vw)`;
+  const size = (pt: number) => `min(${pt}pt, ${(pt * 0.18).toFixed(2)}vw)`;
 </script>
 
 {#snippet joined(list: string[], sep: string)}
@@ -96,13 +102,13 @@
     : ''}"
   style:--weight={settings.weight}
 >
-  <div class="ct-time text-(length:--size) leading-tight" style:--size={size(settings.timeSize)}>
+  <div class="ct-time font-(family-name:--font) text-(length:--size) leading-tight" style:--size={size(settings.timePt)} style:--font={settings.timeFont || null}>
     {#if parts}
       {@render joined(parts.time, settings.timeSeparator)}{#if parts.suffix}<span class="ct-suffix ml-[0.2em] text-[0.4em]">{parts.suffix}</span>{/if}
     {:else}&nbsp;{/if}
   </div>
   {#if settings.date}
-    <div class="ct-date text-(length:--size)" style:--size={size(settings.dateSize)}>
+    <div class="ct-date font-(family-name:--font) text-(length:--size)" style:--size={size(settings.datePt)} style:--font={settings.dateFont || null}>
       {#if parts}{@render joined(parts.date, settings.dateSeparator)}{:else}&nbsp;{/if}
     </div>
   {/if}

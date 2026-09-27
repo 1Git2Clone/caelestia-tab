@@ -2,7 +2,7 @@
      over to stay in view beside it, so every change shows as it's made. -->
 <script lang="ts">
   import { getContext } from "svelte";
-  import type { Field } from "../fields.ts";
+  import { LAYOUT, PLACE, type Field } from "../fields.ts";
   import { COLOURS } from "../scheme.ts";
   import { complete, DEFAULTS, type App } from "../store.svelte.ts";
   import { button, hint, iconButton, input, primary } from "../ui.ts";
@@ -44,14 +44,36 @@
     { key: "css", label: "Your CSS", type: "textarea", rows: 6, hint: "Applied after the style, on the same pages. The scheme is in var(--caelestia-*)." },
   ];
   const TST: Field[] = [
-    { key: "tint", label: "Tint the sidebar", type: "checkbox" },
-    { key: "strength", label: "Strength", type: "range", min: 0, max: 40, unit: "%" },
+    {
+      key: "source",
+      label: "Sidebar",
+      type: "select",
+      options: [
+        ["tint", "A colour, tinted over the surface"],
+        ["wallpaper", "The caelestia wallpaper"],
+        ["none", "Tree Style Tab's own"],
+      ],
+    },
+    { key: "colour", label: "Colour", type: "colour", hint: "The tint, and the tabs' tint over the wallpaper." },
+    { key: "strength", label: "Strength", type: "range", min: 0, max: 60, unit: "%" },
+    { key: "dim", label: "Dim, over the wallpaper", type: "range", min: 0, max: 90, unit: "%" },
+    { key: "blur", label: "Blur, over the wallpaper", type: "range", min: 0, max: 40, unit: "px" },
   ];
+  const box = "m-0 rounded-2xl border border-solid border-outline-variant px-5 pt-3 pb-5";
 
-  function move(i: number, to: number) {
-    const list = app.settings.widgets;
-    if (to < 0 || to >= list.length) return;
-    list.splice(to, 0, ...list.splice(i, 1));
+  let adding = $state("CtBookmarks");
+  function add() {
+    const c = widgets.find((c) => c.name === adding)!;
+    app.settings.widgets.push({
+      id: crypto.randomUUID(),
+      component: c.name,
+      place: { area: "auto", justify: "stretch", align: "start", ...c.widget.place },
+      settings: structuredClone(c.widget.defaults),
+    });
+  }
+  function remove(i: number) {
+    const w = app.settings.widgets[i];
+    if (confirm(`Remove this ${widgets.find((c) => c.name === w.component)?.widget.label ?? w.component} and its settings?`)) app.settings.widgets.splice(i, 1);
   }
 
   // Websites: the vendored styles, filterable, each with its override.
@@ -100,24 +122,46 @@
 
   {#if tab === 0}
     <div class="grid gap-4">
+      <fieldset class={box}>
+        <legend class="px-2 font-medium">Page</legend>
+        <div class="grid gap-4">
+          <CtForm fields={[{ key: "font", label: "Font", type: "font", hint: "Every widget's, unless it sets its own." }]} values={app.settings} />
+          <details>
+            <summary class="cursor-pointer">Layout</summary>
+            <p class={hint}>The page is a CSS grid: widgets sit in its areas (each widget's placement, below or from the pen).</p>
+            <CtForm fields={LAYOUT} values={app.settings.layout} />
+          </details>
+        </div>
+      </fieldset>
       {#each app.settings.widgets as w, i (w.id)}
         {@const c = widgets.find((c) => c.name === w.component)}
-        <fieldset class="m-0 rounded-2xl border border-solid border-outline-variant px-5 pt-3 pb-5">
-          <legend class="flex items-center gap-1 px-2">
-            <span class="mr-2 font-medium">{c?.widget.label ?? w.component}</span>
-            <button type="button" class={iconButton} title="Move up" onclick={() => move(i, i - 1)}><CtIcon name="up" /></button>
-            <button type="button" class={iconButton} title="Move down" onclick={() => move(i, i + 1)}><CtIcon name="down" /></button>
-            <label class="ml-2 flex cursor-pointer items-center gap-1.5">
+        <fieldset class={box}>
+          <legend class="flex items-center gap-2 px-2">
+            <span class="font-medium">{c?.widget.label ?? w.component}</span>
+            <label class="flex cursor-pointer items-center gap-1.5">
               <input type="checkbox" class="m-0 size-4.5 accent-primary" checked={!w.hidden} onchange={(e) => (w.hidden = !e.currentTarget.checked)} /> Show
             </label>
+            <button type="button" class={iconButton} title="Remove this widget" onclick={() => remove(i)}><CtIcon name="close" /></button>
           </legend>
-          {#if c}
-            <CtForm fields={c.widget.fields} values={w.settings} />
-          {:else}
-            <p class={hint}>No component called {w.component} in this build.</p>
-          {/if}
+          <div class="grid gap-4">
+            {#if c}
+              <CtForm fields={c.widget.fields} values={w.settings} />
+            {:else}
+              <p class={hint}>No component called {w.component} in this build.</p>
+            {/if}
+            <details>
+              <summary class="cursor-pointer">Placement</summary>
+              <div class="pt-3"><CtForm fields={PLACE} values={w.place} /></div>
+            </details>
+          </div>
         </fieldset>
       {/each}
+      <div class="flex gap-2">
+        <select class={input} bind:value={adding} aria-label="Widget to add">
+          {#each widgets as c (c.name)}<option value={c.name}>{c.widget.label}</option>{/each}
+        </select>
+        <button type="button" class={primary} onclick={add}>Add</button>
+      </div>
     </div>
   {:else if tab === 1}
     <CtForm fields={BACKGROUND} values={app.settings.background} />
@@ -158,7 +202,7 @@
     </div>
   {:else if tab === 3}
     <h3 class="mt-0 text-lg font-medium">Tree Style Tab</h3>
-    <p>Tints Tree Style Tab's sidebar towards the scheme's primary, and follows scheme switches live. Needs Tree Style Tab installed; nothing happens without it.</p>
+    <p>Themes Tree Style Tab's sidebar like the new tab's background, and follows scheme switches live. Needs Tree Style Tab installed; nothing happens without it.</p>
     <CtForm fields={TST} values={app.settings.treeStyleTab} />
   {:else}
     <div class="grid gap-4">
@@ -170,7 +214,13 @@
           Not connected{app.helperError ? `: ${app.helperError}` : ""}. Install the helper and run caelestia-tab install, then restart the browser.
         {/if}
       </p>
-      <CtForm fields={[{ key: "css", label: "Custom CSS", type: "textarea", hint: "Applied to this page after its own styles. The scheme is in var(--caelestia-*)." }]} values={app.settings} />
+      <CtForm
+        fields={[
+          { key: "css", label: "Custom CSS", type: "textarea", hint: "Applied to this page after its own styles. The scheme is in var(--caelestia-*)." },
+          { key: "panel", label: "Settings panel", type: "text", hint: "The component that draws this panel: CtSettings, or one of yours. Ctrl+, opens it." },
+        ]}
+        values={app.settings}
+      />
       <h3 class="m-0 text-lg font-medium">All settings</h3>
       <textarea class="{input} font-mono text-sm" rows="12" spellcheck="false" bind:value={json}></textarea>
       <div class="flex flex-wrap gap-2">

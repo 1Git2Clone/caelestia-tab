@@ -4,7 +4,7 @@
 // the content scripts watch, so none of them depend on this page staying
 // awake. The only other state here is a cache of compiled styles.
 import { cssVars } from "./scheme.ts";
-import { isTreeStyleTab, syncTreeStyleTab } from "./treestyletab.ts";
+import { isTreeStyleTab, sidebarWallpaper, syncTreeStyleTab, tstOptions } from "./treestyletab.ts";
 import { SITES, compile, cssFor, libFor, matches } from "./userstyles.ts";
 
 const store = browser.storage.local;
@@ -43,14 +43,20 @@ browser.runtime.onConnect.addListener(connectHelper);
 // Tree Style Tab: re-send the tint on every scheme or settings change, and
 // when TST (re)starts or opens a sidebar.
 let tstSent: string | null = null;
+// The sidebar's copy of the wallpaper, scaled down once per wallpaper.
+let small: { url: string; data: Promise<string> } | null = null;
 async function syncTst(force = false) {
-  const { scheme, settings } = await store.get(["scheme", "settings"]);
+  const { scheme, settings, wallpaper } = await store.get(["scheme", "settings", "wallpaper"]);
+  const opts = tstOptions(settings?.treeStyleTab);
+  const url = opts.source === "wallpaper" ? (wallpaper?.url ?? null) : null;
   // Settings change on every keystroke in the new tab's forms; only a change
   // to what TST would get is worth a message.
-  const key = JSON.stringify([scheme?.colours, settings?.treeStyleTab]);
+  const key = JSON.stringify([scheme?.colours, opts, url?.length, url?.slice(-64)]);
   if (!force && key === tstSent) return;
   tstSent = key;
-  if (!(await syncTreeStyleTab(scheme, settings))) tstSent = null;
+  if (url && small?.url !== url) small = { url, data: sidebarWallpaper(url).catch(() => "") };
+  const data = url ? (await small!.data) || null : null;
+  if (!(await syncTreeStyleTab(scheme, settings, data))) tstSent = null;
 }
 // TST only sends `ready` to extensions it already knows, so the first
 // registration can't wait for it. When both start with the browser, TST may
@@ -74,7 +80,7 @@ async function syncTst(force = false) {
   }
 })();
 store.onChanged.addListener((changes: any) => {
-  if (changes.scheme || changes.settings) syncTst();
+  if (changes.scheme || changes.settings || changes.wallpaper) syncTst();
 });
 // Re-send when a sidebar opens, too: a new window's sidebar starts with the
 // same race.

@@ -32,7 +32,7 @@ sh scripts/setup-hooks.sh   # once per clone: the pre-commit hook
 │   │   ├── render.ts       # the new tab for svelte/server
 │   │   ├── scheme.ts       # the scheme as CSS variables, colour tokens
 │   │   ├── userstyles.ts   # compile a style, split and match @-moz-document
-│   │   ├── treestyletab.ts # the Tree Style Tab tint
+│   │   ├── treestyletab.ts # the Tree Style Tab sidebar
 │   │   └── glyphs.ts       # Nerd Font glyph suggestions and search
 │   ├── public/             # copied into dist/ as they are
 │   │   ├── manifest.json

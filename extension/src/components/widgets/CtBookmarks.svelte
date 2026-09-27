@@ -26,7 +26,7 @@
 
   export const widget: WidgetInfo = {
     label: "Bookmarks",
-    section: "-mx-3",
+    place: { justify: "stretch", align: "end" },
     defaults: {
       ...PRESETS[0].values,
       flow: "row dense",

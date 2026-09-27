@@ -17,7 +17,7 @@ is a complete example.
       { key: "who", label: "Greet", type: "text" },
       { key: "loud", label: "Shout", type: "checkbox" },
     ],
-    section: "self-center",               // optional: where it sits in the page's column
+    place: { justify: "center" },         // optional: where a new one sits on the page
   };
 </script>
 
@@ -30,12 +30,8 @@ is a complete example.
 </p>
 ```
 
-Put it in `extension/src/components/widgets/`, build, and add a widget to
-show it, from *Settings*, *Advanced*, *All settings*:
-
-```json
-{ "id": "hello", "component": "CtHello", "settings": {} }
-```
+Put it in `extension/src/components/widgets/`, build, and add it from
+*Settings*, *Widgets*, *Add*. Place it with its *Placement*, or the pen.
 
 ## What a component gets
 
@@ -51,10 +47,18 @@ show it, from *Settings*, *Advanced*, *All settings*:
 
 `extension/src/fields.ts` lists the field types: `checkbox`, `text`, `url`,
 `number`, `textarea`, `select`, `range`, `colour` (a scheme colour or a fixed
-one), `image` (a URL or an upload), `glyph` (a Nerd Font glyph, with
+one), `font` (a font-family, with the installed fonts offered), `image` (a URL
+or an upload), `glyph` (a Nerd Font glyph, with
 suggestions for the words its `words(values)` returns) and `presets` (buttons
 that set several keys at once). `CtForm` draws them, bound to an object, and
 works inside your own components too.
+
+## Edit mode
+
+With the pen on, `editing` is true and the widget gets an overlay. The default
+one (`CtEditOverlay`) opens the widget's fields and placement. Set
+`widget.overlay` to a component of your own (it gets `{ widget, app }`), or to
+`false` for none, when the widget edits itself in place.
 
 ## Actions
 
@@ -70,8 +74,9 @@ Tailwind the same colours are `var(--caelestia-primary)` and so on. `scheme.ts`
 exports `COLOURS` (the colours offered in pickers), `cssColour(token)` and
 `onColour(token)` (the text colour for a background colour).
 
-Give the root element a `ct-<name>` class, so custom CSS can find it, and
-square the corners that meet a window edge with
+Font sizes are in `pt`, everything else in `rem`. Give the root element a
+`ct-<name>` class, so custom CSS can find it, and square the corners that
+meet a window edge with
 `in-[.ct-edge-bottom]:rounded-b-none` and its siblings.
 
 ## The `Ct` prefix is reserved

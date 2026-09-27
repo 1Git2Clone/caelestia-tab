@@ -26,11 +26,14 @@ The settings are one object under `storage.local.settings`:
 
 ```ts
 {
+  layout: { columns, rows, areas, gap, padding },  // the page's CSS grid
+  font: "",                                        // the page's font-family; empty for the default
+  panel: "CtSettings",                             // the component that draws settings
   background: { source: "wallpaper" | "colour" | "none", colour, dim, blur },
-  widgets: [ { id, component, hidden?, settings }, … ],  // page order
+  widgets: [ { id, component, hidden?, place: { area, justify, align }, settings }, … ],
   sites: { enabled, off: [styleId, …], accent, overrides },
-  treeStyleTab: { tint, strength },
-  css: "",                                               // custom CSS for the new tab
+  treeStyleTab: { source: "tint" | "wallpaper" | "none", colour, strength, dim, blur },
+  css: "",                                         // custom CSS for the new tab
 }
 ```
 
@@ -39,11 +42,36 @@ yours), so the same component can appear twice with different settings. When
 settings load, each widget's `settings` are filled in from its component's
 `defaults`, so a component that gains a setting needs no migration. Settings
 saved before the Svelte rewrite name a `plugin` (`clock`, `bookmarks`), which
-is mapped to the component on load.
+is mapped to the component on load, and settings from before the page grid get
+the toolbar added, since it was part of the page then.
 
 Settings are local to the device: `storage.local`, not `storage.sync`.
 *Settings*, *Advanced*, *All settings* shows the whole object as JSON, to back
 up, copy to another machine, or edit by hand.
+
+## The page
+
+The page is a CSS grid the user defines: `layout`'s columns, rows, named areas,
+gap and padding, typed as CSS in *Settings*, *Widgets*, *Page*. Each widget
+sits on it by its `place`: an `area` (one of the layout's names, or any
+`grid-area` value) and its alignment in that cell. The default layout is one
+column of three areas, `toolbar`, `clock` and `bookmarks`. Nothing about the
+page is fixed; the toolbar is a widget too (`CtToolbar`), with the pen and the
+settings button, and Ctrl+, opens settings without it.
+
+`font` is the page's font, inherited by every widget unless it sets its own
+(the clock's time and date each can). The font fields offer the installed
+fonts, which the helper lists with `fc-list`, since a web page can't; without
+the helper, they take a name typed in. Font sizes are in `pt`; everything else
+is in `rem`, apart from grid tracks (`fr`) and the like.
+
+## Edit mode
+
+The pen turns on edit mode, and every widget gets an overlay: by default
+`CtEditOverlay`, an outline and a chip with the widget's name that opens its
+properties and placement (`CtWidgetEditor`). A widget can bring its own
+overlay (`WidgetInfo.overlay`), or none, and can do more in edit mode itself
+through its `editing` prop, as the bookmarks' per-tile controls do.
 
 ## Saving and syncing
 
@@ -72,7 +100,9 @@ applies it on Save.
 
 A widget's form is drawn from its component's `fields` (see
 [Writing a component](../guides/plugins.md)): the settings panel knows nothing
-about clocks or bookmarks.
+about clocks or bookmarks. Widgets are added and removed there too, and the
+panel itself is a component named in settings (`panel`), so it can be
+replaced.
 
 ## Styling
 
@@ -124,13 +154,14 @@ and the TLD, and the name's words are matched against the 11 000 glyph names:
 a whole-word match (`fa-github`) ranks above a word inside a longer name
 (`dev-githubactions`). `glyphs.ts` does the matching.
 
-The pen button turns on edit mode. Each tile gets a bar under its content to
-move it earlier or later, drag it (HTML drag and drop, dropping on another
-tile's position), edit it, or remove it.
+In edit mode each tile also gets a bar under its content to move it earlier
+or later, drag it (HTML drag and drop, dropping on another tile's position),
+edit it, or remove it.
 
 ## Clock
 
-`CtClock` shows the time and the date, each with its own separator and size.
+`CtClock` shows the time and the date, each with its own separator, size (in
+`pt`) and font.
 The hour can be 12- or 24-hour, with or without a leading zero; the date comes
 in four styles. Its sizes shrink with a narrow window instead of overflowing
 it. It renders no time until it's mounted, since a copy of the page rendered
