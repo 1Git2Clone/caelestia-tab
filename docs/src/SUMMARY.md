@@ -3,6 +3,7 @@
 # Summary
 
 [Introduction](introduction.md)
+[Screenshots](screenshots.md)
 
 # Guides
 
