@@ -1,6 +1,17 @@
 <script module lang="ts">
   import type { WidgetInfo } from "../../fields.ts";
   import CtBookmarkEditor from "../CtBookmarkEditor.svelte";
+  import { edit, type App as State } from "../../store.svelte.ts";
+
+  // Opens a bookmark in the side panel; a new one is added first, so the
+  // page shows it while it's being filled in.
+  function editItem(app: State, settings: any, index: number) {
+    if (index < 0) {
+      settings.items.push(item({ name: "New bookmark", url: "" }));
+      index = settings.items.length - 1;
+    }
+    edit(app, settings.items[index].name || "Bookmark", CtBookmarkEditor, { settings, index });
+  }
 
   const PRESETS = [
     { label: "Tiles", values: { even: true, tileWidth: "11rem", columns: "repeat(5, minmax(0, 1fr))", rows: "8.75rem", gap: "1.25rem" } },
@@ -57,7 +68,7 @@
         ],
       },
     ],
-    actions: [{ icon: "add", title: "Add a bookmark", run: (settings, app) => (app.dialog = { component: CtBookmarkEditor, props: { settings, index: -1 } }) }],
+    actions: [{ icon: "add", title: "Add a bookmark", run: (settings, app) => editItem(app, settings, -1) }],
   };
 </script>
 
@@ -96,7 +107,7 @@
     const [it] = settings.items.splice(from, 1);
     settings.items.splice(to, 0, it);
   }
-  const edit = (index: number) => (app.dialog = { component: CtBookmarkEditor, props: { settings, index } });
+
   function remove(index: number) {
     if (confirm(`Remove ${settings.items[index].name || "this bookmark"}?`)) settings.items.splice(index, 1);
   }
@@ -150,7 +161,7 @@
             <button type="button" class={control} title="Move earlier" onclick={() => move(i, i - 1)}><CtIcon name="left" /></button>
             <span class="{control} cursor-grab" title="Drag to move"><CtIcon name="drag" /></span>
             <button type="button" class={control} title="Move later" onclick={() => move(i, i + 1)}><CtIcon name="right" /></button>
-            <button type="button" class={control} title="Edit" onclick={() => edit(i)}><CtIcon name="edit" /></button>
+            <button type="button" class={control} title="Edit" onclick={() => editItem(app, settings, i)}><CtIcon name="edit" /></button>
             <button type="button" class={control} title="Remove" onclick={() => remove(i)}><CtIcon name="close" /></button>
           </div>
         </div>

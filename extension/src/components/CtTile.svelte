@@ -6,6 +6,8 @@
   // `slot`: in edit mode, with the control bar under it, so square at the bottom.
   let { it, link = true, slot = false }: { it: any; link?: boolean; slot?: boolean } = $props();
   const mark = $derived(it.glyph || it.letter || it.name.trim().slice(0, 2));
+  // An address typed without a scheme is taken as https.
+  const href = $derived(!it.url ? undefined : /^[a-z][\w+.-]*:/i.test(it.url) ? it.url : `https://${it.url}`);
   const hover =
     "transition-[translate,box-shadow] duration-150 hover:-translate-y-[3px] hover:shadow-[0_0.5rem_1.25rem_color-mix(in_srgb,var(--caelestia-shadow)_45%,transparent)] focus-visible:-translate-y-[3px] focus-visible:outline-none";
   // On an image the labels take the accent, over a soft shade to stay legible.
@@ -15,7 +17,7 @@
 
 <svelte:element
   this={link ? "a" : "div"}
-  href={link ? it.url : undefined}
+  href={link ? href : undefined}
   class="ct-tile relative box-border flex min-w-0 items-end gap-2.5 overflow-hidden border-0 border-solid border-primary bg-(--tile) bg-cover bg-center bg-no-repeat px-3.5 py-2.5 text-(--on-tile) no-underline
     {slot ? 'min-h-0 flex-1 rounded-t-xl' : 'rounded-xl border-b-3'} {link ? hover : ''} {it.image ? image : ''}"
   style:--tile={cssColour(it.colour)}

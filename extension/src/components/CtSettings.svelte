@@ -1,5 +1,7 @@
 <!-- Settings, docked to the window's right edge and not modal: the page moves
-     over to stay in view beside it, so every change shows as it's made. -->
+     over to stay in view beside it, so every change shows as it's made. It's
+     also where every editor opens (app.focus): a widget's properties from the
+     pen, a bookmark. There are no pop-ups. -->
 <script lang="ts">
   import { getContext } from "svelte";
   import { LAYOUT, PLACE, type Field } from "../fields.ts";
@@ -114,10 +116,17 @@
   class="ct-settings fixed inset-y-0 right-0 z-10 box-border w-[min(30rem,100vw)] overflow-auto bg-surface-container p-6 text-on-surface shadow-[0_0_2rem_color-mix(in_srgb,var(--caelestia-shadow)_40%,transparent)]"
   aria-label="Settings"
 >
-  <header class="mb-4 flex items-center justify-between">
-    <h2 class="m-0 text-2xl font-normal">Settings</h2>
-    <button type="button" class={iconButton} title="Close" onclick={() => (app.panel = false)}><CtIcon name="close" /></button>
+  <header class="mb-4 flex items-center gap-2">
+    {#if app.focus}
+      <button type="button" class={iconButton} title="Back to settings" onclick={() => (app.focus = null)}><CtIcon name="left" /></button>
+    {/if}
+    <h2 class="m-0 min-w-0 flex-1 truncate text-2xl font-normal">{app.focus?.title ?? "Settings"}</h2>
+    <button type="button" class={iconButton} title="Close" onclick={() => ((app.focus = null), (app.panel = false))}><CtIcon name="close" /></button>
   </header>
+  {#if app.focus}
+    {@const Focus = app.focus.component}
+    <Focus {...app.focus.props} onclose={() => (app.focus = null)} />
+  {:else}
   <CtTabs tabs={["Widgets", "Background", "Websites", "Browser", "Advanced"]} bind:current={tab} />
 
   {#if tab === 0}
@@ -229,5 +238,6 @@
         <button type="button" class={button} onclick={reset}>Reset everything</button>
       </div>
     </div>
+  {/if}
   {/if}
 </aside>

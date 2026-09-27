@@ -17,12 +17,15 @@
   $effect(() => {
     document.documentElement.dataset.mode = app.scheme?.mode ?? "dark";
   });
-  const Dialog = $derived(app.dialog?.component);
   // The settings panel is a component like the rest; the setting names it.
   const Panel = $derived(components[app.settings.panel] ?? CtSettings);
 
   function keydown(e: KeyboardEvent) {
-    if (e.key === "Escape" && !app.dialog) app.panel = false;
+    // Escape steps back out of an editor first, then closes the panel.
+    if (e.key === "Escape") {
+      if (app.focus) app.focus = null;
+      else app.panel = false;
+    }
     // Settings are reachable even with no toolbar on the page.
     if (e.key === "," && (e.ctrlKey || e.metaKey)) {
       e.preventDefault();
@@ -37,10 +40,9 @@
 </svelte:head>
 <svelte:window onkeydown={keydown} />
 
-<!-- The page's font, for everything under it, the dialogs included. -->
+<!-- The page's font, for everything under it, the panel included. -->
 <div class="contents font-(family-name:--ct-font)" style:--ct-font={app.settings.font || "var(--font-sans)"}>
   <CtBackground />
   <CtLayout />
   {#if app.panel}<Panel />{/if}
-  {#if Dialog}<Dialog {...app.dialog!.props} onclose={() => (app.dialog = null)} />{/if}
 </div>

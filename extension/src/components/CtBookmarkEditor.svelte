@@ -1,19 +1,14 @@
-<!-- Edits one bookmark (index), or adds one (-1), on a copy: nothing changes
-     until Save. -->
+<!-- One bookmark, in the side panel. It edits the tile itself, so every change
+     shows on the page as it's made; there's nothing to save. -->
 <script lang="ts">
   import type { Field } from "../fields.ts";
   import { words } from "../glyphs.ts";
-  import { button, primary } from "../ui.ts";
-  import CtDialog from "./CtDialog.svelte";
+  import { button } from "../ui.ts";
   import CtForm from "./CtForm.svelte";
   import CtTabs from "./CtTabs.svelte";
-  import CtTile from "./CtTile.svelte";
-  import { item } from "./widgets/CtBookmarks.svelte";
 
   let { settings, index, onclose }: { settings: any; index: number; onclose: () => void } = $props();
-
-  // svelte-ignore state_referenced_locally
-  const draft = $state(structuredClone(index < 0 ? item({ name: "New bookmark" }) : $state.snapshot(settings.items[index])));
+  const it = $derived(settings.items[index]);
   let tab = $state(0);
 
   const TABS: [string, Field[]][] = [
@@ -35,7 +30,7 @@
         { key: "colour", label: "Colour", type: "colour", hint: "Fills the tile when it has no image. A scheme colour follows the scheme." },
       ],
     ],
-    ["Address", [{ key: "url", label: "URL", type: "url", placeholder: "https://example.com" }]],
+    ["Address", [{ key: "url", label: "URL", type: "url", placeholder: "https://example.com", hint: "Without a scheme, https:// is assumed." }]],
     [
       "Layout",
       [
@@ -47,34 +42,17 @@
     ],
   ];
 
-  function save() {
-    draft.url = draft.url.trim();
-    if (!draft.url) {
-      tab = 1;
-      alert("A bookmark needs a URL.");
-      return;
-    }
-    if (!/^[a-z][\w+.-]*:/i.test(draft.url)) draft.url = `https://${draft.url}`;
-    const it = $state.snapshot(draft);
-    if (index < 0) settings.items.push(it);
-    else settings.items[index] = it;
+  function remove() {
+    if (!confirm(`Remove ${it.name || "this bookmark"}?`)) return;
     onclose();
+    settings.items.splice(index, 1);
   }
 </script>
 
-<CtDialog title={index < 0 ? "Add a bookmark" : `Edit ${settings.items[index]?.name ?? ""}`} {onclose}>
+{#if it}
   <CtTabs tabs={TABS.map(([t]) => t)} bind:current={tab} />
-  <div class="flex flex-col-reverse items-start gap-8 md:flex-row">
-    <div class="w-full min-w-0 flex-1">
-      <CtForm fields={TABS[tab][1]} values={draft} />
-    </div>
-    <div class="sticky top-0 grid w-full grid-rows-[auto_9.5rem] justify-items-stretch gap-2 text-primary md:w-60">
-      <small class="text-center">Preview</small>
-      <CtTile it={draft} link={false} />
-    </div>
+  <CtForm fields={TABS[tab][1]} values={it} />
+  <div class="mt-6 flex gap-2">
+    <button type="button" class={button} onclick={remove}>Remove</button>
   </div>
-  {#snippet footer()}
-    <button type="button" class={button} onclick={onclose}>Cancel</button>
-    <button type="button" class={primary} onclick={save}>Save</button>
-  {/snippet}
-</CtDialog>
+{/if}

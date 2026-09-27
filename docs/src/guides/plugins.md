@@ -40,8 +40,11 @@ Put it in `extension/src/components/widgets/`, build, and add it from
   saved, and every open tab shows it. There's no save call.
 - `editing`: whether the pen button is on. Offer rearranging and editing then.
 - The whole app state, `getContext<App>("ct")` (see
-  [The new tab](../architecture/newtab.md#state)), for opening a dialog:
-  `app.dialog = { component, props }`. The dialog gets an `onclose` prop.
+  [The new tab](../architecture/newtab.md#state)), for opening an editor in
+  the side panel: `edit(app, title, component, props)` from
+  `store.svelte.ts`. The editor gets an `onclose` prop. There are no pop-ups:
+  an editor changes the widget's settings directly, so the page shows it
+  live.
 
 ## Fields
 

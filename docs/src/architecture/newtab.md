@@ -18,7 +18,7 @@ every component through Svelte's context (`getContext("ct")`):
   wallpaper,    // a blob: URL of the caelestia wallpaper, or null
   editing,      // the pen button
   panel,        // the settings panel is open
-  dialog,       // the open modal: { component, props }, or null
+  focus,        // the editor the panel shows instead of its tabs, or null
 }
 ```
 
@@ -95,8 +95,13 @@ once, so the page's style doesn't carry a copy of the image as text.
 
 The settings are a panel docked to the window's right edge, not a modal: the
 page moves over to stay in view beside it, so a change shows as it's made.
-The bookmark editor is a modal (`CtDialog`), because it edits a copy and
-applies it on Save.
+Every editor opens in the same panel, never in a pop-up: a widget's properties
+from the pen, a bookmark from its edit button or the +. `edit(app, title,
+component, props)` puts one there (`app.focus`), with a back arrow to the
+settings, and Escape steps back. Editors change the real settings, not a
+copy, so the page shows each change as it's made and there's nothing to save.
+A new bookmark is added before its editor opens, so it's on the page while
+it's filled in.
 
 A widget's form is drawn from its component's `fields` (see
 [Writing a component](../guides/plugins.md)): the settings panel knows nothing

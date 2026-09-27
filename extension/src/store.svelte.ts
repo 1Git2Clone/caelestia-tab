@@ -51,8 +51,10 @@ export interface App {
   data: Record<string, any>;
   editing: boolean;
   panel: boolean;
-  // The open modal, if any: a component and its props. It gets an onclose.
-  dialog: { component: Component<any>; props: Record<string, any> } | null;
+  // What the side panel is editing instead of its tabs: a component and its
+  // props (a widget's properties, one bookmark). There are no pop-ups: every
+  // editor is a view in the panel, beside the page, applying as it changes.
+  focus: { title: string; component: Component<any>; props: Record<string, any> } | null;
 }
 
 export const DEFAULTS: Settings = {
@@ -111,6 +113,12 @@ const store = browser.storage.local;
 // The helper's topics that widgets read through app.data.
 const TOPICS = ["github", "media"];
 
+// Opens an editor in the side panel.
+export function edit(app: App, title: string, component: Component<any>, props: Record<string, any>) {
+  app.focus = { title, component, props };
+  app.panel = true;
+}
+
 // Sends a widget's command to one of the helper's plugins.
 export const tell = (message: { topic: string; command: string; [k: string]: unknown }) => browser.runtime.sendMessage({ type: "helper", message }).catch(() => {});
 
@@ -125,7 +133,7 @@ export async function start(): Promise<App> {
     data: Object.fromEntries(TOPICS.map((t) => [t, got[t] ?? null])),
     editing: false,
     panel: false,
-    dialog: null,
+    focus: null,
   });
   wallpaper(app, got.wallpaper);
 

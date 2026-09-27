@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The clock's time and date each take their own separator and size, with a weight, a leading-zero option, four date styles, and the glass behind it optional.
 - A tile's colour can be a fixed one from the browser's colour picker as well as a scheme colour, and the scheme colours are named under their swatches. Uploaded tile images are scaled to what a tile shows.
 - A widget flush with a window edge squares its corners on that side.
-- The page is a CSS grid you define, and every widget, the toolbar included, sits where you place it. Widgets can be added and removed, and edit mode gives each one an overlay that opens its properties and placement.
+- The page is a CSS grid you define, and every widget, the toolbar included, sits where you place it. Widgets can be added and removed, and edit mode gives each one an overlay that opens its properties and placement in the side panel. Every editor, a bookmark's included, opens there and applies as you type; there are no pop-ups.
 - A page font, and fonts for the clock's time and date, with the installed fonts offered (listed by the helper). Font sizes are in pt.
 - Tree Style Tab's sidebar takes the background's choices: a tint of any colour, the wallpaper dimmed and blurred, or TST's own look.
 - A media widget for any MPRIS player (the Spotify app, mpv, a browser): what's playing, its cover and progress, and previous, play or pause, next and seek.
