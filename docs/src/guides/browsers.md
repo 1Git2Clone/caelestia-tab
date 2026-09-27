@@ -41,15 +41,17 @@ tab's *Settings*, *Browser*. It goes through TST's own API: caelestia-tab
 registers with TST and hands it a stylesheet, so it needs no permission, and
 nothing happens without TST.
 
-## Zen's own sidebar
+The sidebar's background is the surface mixed towards black (40% in dark
+mode, 12% in light, where surfaces grey quickly), then tinted towards primary,
+so it sits a step darker than the page in both modes.
 
-Zen's sidebar (its vertical tabs and the rest of its window) is browser
-chrome, not a page. An extension can only colour it through the theme API,
-which CaelestiaFox already drives, and a second extension setting a theme
-would fight it. So caelestia-tab leaves it alone. In a test on 2026-09-27,
-Zen 1.22.3b's sidebar stayed neutral grey across a scheme switch with
-CaelestiaFox installed, but that test couldn't confirm CaelestiaFox was
-connected. What Zen's sidebar takes from a theme is still open.
+## Zen's own window
+
+Zen ignores the WebExtension theme API: a test extension that set every theme
+colour to something garish recoloured Firefox completely and changed nothing
+in Zen 1.22.3b (2026-09-27). So CaelestiaFox doesn't reach Zen's window
+either, and nothing an extension does can. The way in is Zen's own mods (CSS
+in the profile), which Zen reloads only on restart or when a mod is toggled.
 
 ## Tested with
 

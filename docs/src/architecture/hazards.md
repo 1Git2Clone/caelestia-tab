@@ -65,6 +65,11 @@ the hard way.
   `moz-extension://<uuid>/sidebar/sidebar.html`, with the UUID pinned through
   `extensions.webextensions.uuids`. The real sidebar runs in another process,
   and the chrome context can't read its document (2026-09-27).
+- **Zen ignores `browser.theme`.** Neither caelestia-tab nor CaelestiaFox
+  can colour Zen's window through it; see the Browsers chapter (2026-09-27).
+- **Firefox caches a temporary add-on's files.** Reloading the page after
+  editing the extension's CSS shows the old CSS; restart `web-ext run`
+  (started with `--no-reload`) to see the change (2026-09-27).
 - **The Chrome DevTools MCP can't find Chrome on NixOS**; it looks in
   `/opt/google/chrome`. To look at the new tab outside a browser, serve
   `extension/` with a stub `browser` object and screenshot it with
