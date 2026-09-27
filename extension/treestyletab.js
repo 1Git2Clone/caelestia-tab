@@ -13,7 +13,10 @@ export const TREE_STYLE_TAB = { tint: true, strength: 14 };
 // :root rules TST sets under several selectors of its own.
 export function tstStyle(scheme, { strength }) {
   const c = (name) => `#${scheme.colours[name]}`;
-  const mix = (n) => `color-mix(in srgb, ${c("primary")} ${n}%, ${c("surface")})`;
+  // Darker than the surface in both modes, so the sidebar sits below the page:
+  // towards the scheme's shadow, less in light mode, where it greys quickly.
+  const base = `color-mix(in srgb, ${c("surface")}, ${c("shadow")} ${scheme.mode === "light" ? 12 : 40}%)`;
+  const mix = (n) => `color-mix(in srgb, ${c("primary")} ${n}%, ${base})`;
   return `:root {
   --browser-background: ${mix(strength)} !important;
   --tabbar-bg: ${mix(strength)} !important;

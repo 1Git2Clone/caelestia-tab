@@ -149,7 +149,12 @@ svg {
 .widget-clock {
   align-self: center;
   text-align: center;
-  text-shadow: 0 2px 12px color-mix(in srgb, var(--caelestia-background) 70%, transparent);
+  /* On the same glass as the bookmarks: a text shadow alone isn't enough
+     over a busy wallpaper, least of all dark text in light mode. */
+  padding: 8px 36px 14px;
+  border-radius: 28px;
+  background: var(--glass);
+  backdrop-filter: blur(10px);
   margin-bottom: auto;
   margin-top: auto;
 }
