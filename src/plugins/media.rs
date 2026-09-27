@@ -171,10 +171,13 @@ async fn player(bus: &Connection, name: &str) -> zbus::Result<Value> {
             .ok()
             .or_else(|| u64::try_from(v.clone()).ok().map(|n| n as i64))
     });
-    let track = meta
-        .get("mpris:trackid")
-        .and_then(|v| OwnedObjectPath::try_from(v.clone()).ok())
-        .map(|p| p.to_string());
+    // An object path, as MPRIS has it, or a string, as Spotify sends it.
+    let track = meta.get("mpris:trackid").and_then(|v| {
+        OwnedObjectPath::try_from(v.clone())
+            .map(|p| p.to_string())
+            .ok()
+            .or_else(|| String::try_from(v.clone()).ok())
+    });
     let bool_of = async |k: &str| p.get_property::<bool>(k).await.unwrap_or(false);
     let now = SystemTime::now()
         .duration_since(UNIX_EPOCH)

@@ -146,7 +146,13 @@ impl Plugin for GitHub {
                 }
             }
         }
-        Ok(json!({ "results": results, "auth": from }))
+        // When these results are from, for the tab's "Updated at": a 304 is
+        // a refresh too, though nothing else in the value changed.
+        let at = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|d| d.as_millis() as u64)
+            .unwrap_or(0);
+        Ok(json!({ "results": results, "auth": from, "at": at }))
     }
 }
 
