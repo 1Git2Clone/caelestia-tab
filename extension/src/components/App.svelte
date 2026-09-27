@@ -40,8 +40,9 @@
 </svelte:head>
 <svelte:window onkeydown={keydown} />
 
-<!-- The page's font, for everything under it, the panel included. -->
-<div class="contents font-(family-name:--ct-font)" style:--ct-font={app.settings.font || "var(--font-sans)"}>
+<!-- The page's font, for everything under it, the panel included. The default
+     follows it, so a name that isn't a font (half-typed, say) falls back. -->
+<div class="contents font-(family-name:--ct-font)" style:--ct-font={app.settings.font ? `${app.settings.font}, var(--font-sans)` : "var(--font-sans)"}>
   <CtBackground />
   <CtLayout />
   {#if app.panel}<Panel />{/if}

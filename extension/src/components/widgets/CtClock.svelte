@@ -102,13 +102,13 @@
     : ''}"
   style:--weight={settings.weight}
 >
-  <div class="ct-time font-(family-name:--font) text-(length:--size) leading-tight" style:--size={size(settings.timePt)} style:--font={settings.timeFont || null}>
+  <div class="ct-time font-(family-name:--font) text-(length:--size) leading-tight" style:--size={size(settings.timePt)} style:--font={settings.timeFont ? `${settings.timeFont}, var(--ct-font)` : null}>
     {#if parts}
       {@render joined(parts.time, settings.timeSeparator)}{#if parts.suffix}<span class="ct-suffix ml-[0.2em] text-[0.4em]">{parts.suffix}</span>{/if}
     {:else}&nbsp;{/if}
   </div>
   {#if settings.date}
-    <div class="ct-date font-(family-name:--font) text-(length:--size)" style:--size={size(settings.datePt)} style:--font={settings.dateFont || null}>
+    <div class="ct-date font-(family-name:--font) text-(length:--size)" style:--size={size(settings.datePt)} style:--font={settings.dateFont ? `${settings.dateFont}, var(--ct-font)` : null}>
       {#if parts}{@render joined(parts.date, settings.dateSeparator)}{:else}&nbsp;{/if}
     </div>
   {/if}

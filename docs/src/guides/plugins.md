@@ -31,7 +31,7 @@ is a complete example.
 ```
 
 Put it in `extension/src/components/widgets/`, build, and add it from
-*Settings*, *Page*, *Add a widget*. It's then edited from the page, with the
+*Settings*, *General*, *Add a widget*. It's then edited from the page, with the
 pen.
 
 ## What a component gets

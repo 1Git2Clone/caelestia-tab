@@ -115,12 +115,12 @@
     {@const Focus = app.focus.component}
     <Focus {...app.focus.props} onclose={() => (app.focus = null)} />
   {:else}
-  <CtTabs tabs={["Page", "Background", "Websites", "Browser", "Advanced"]} bind:current={tab} />
+  <CtTabs tabs={["General", "Background", "Websites", "Browser", "Advanced"]} bind:current={tab} />
 
   {#if tab === 0}
     <div class="grid gap-4">
+      <CtForm fields={[{ key: "font", label: "Font", type: "font", hint: "The whole page's, unless a widget sets its own." }]} values={app.settings} />
       <p class="m-0 {hint}">Each widget is edited from the page: turn on the pen and pick one.</p>
-      <CtForm fields={[{ key: "font", label: "Font", type: "font", hint: "Every widget's, unless it sets its own." }]} values={app.settings} />
       <h3 class="m-0 text-lg font-medium">Layout</h3>
       <p class="m-0 {hint}">The page is a CSS grid, and each widget sits in one of its areas (its placement, from the pen).</p>
       <CtForm fields={LAYOUT} values={app.settings.layout} />

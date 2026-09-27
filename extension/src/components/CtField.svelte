@@ -1,14 +1,12 @@
 <script lang="ts">
-  import { getContext } from "svelte";
   import type { Field } from "../fields.ts";
-  import type { App } from "../store.svelte.ts";
   import { button, hint, input } from "../ui.ts";
   import CtColour from "./CtColour.svelte";
+  import CtFontPicker from "./CtFontPicker.svelte";
   import CtGlyphPicker from "./CtGlyphPicker.svelte";
   import CtImage from "./CtImage.svelte";
 
   let { field, values }: { field: Field; values: Record<string, any> } = $props();
-  const app = getContext<App>("ct");
 </script>
 
 {#snippet note(text?: string)}
@@ -68,16 +66,7 @@
 {:else if field.type === "glyph"}
   <CtGlyphPicker label={field.label} hint={field.hint} words={field.words?.(values) ?? []} bind:value={values[field.key]} />
 {:else if field.type === "font"}
-  <label class="grid gap-1.5">
-    <span>{field.label}</span>
-    <!-- Shown in the font it names, as a preview. -->
-    <input type="text" class="{input} font-(family-name:--font)" list="ct-fonts" placeholder="Default" bind:value={values[field.key]} style:--font={values[field.key] || null} />
-    {@render note(field.hint ?? (app.fonts.length ? undefined : "Type a font's name. The installed ones are offered once the helper is connected."))}
-  </label>
-  <!-- One list for every font field on the page; the same id each time. -->
-  <datalist id="ct-fonts">
-    {#each app.fonts as font (font)}<option value={font}></option>{/each}
-  </datalist>
+  <CtFontPicker label={field.label} hint={field.hint} bind:value={values[field.key]} />
 {:else}
   <label class="grid gap-1.5">
     <span>{field.label}</span>

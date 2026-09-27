@@ -52,7 +52,7 @@ up, copy to another machine, or edit by hand.
 ## The page
 
 The page is a CSS grid the user defines: `layout`'s columns, rows, named areas,
-gap and padding, typed as CSS in *Settings*, *Page*. Each widget
+gap and padding, typed as CSS in *Settings*, *General*. Each widget
 sits on it by its `place`: an `area` (one of the layout's names, or any
 `grid-area` value) and its alignment in that cell. The default layout is one
 column of three areas, `toolbar`, `clock` and `bookmarks`. Nothing about the
@@ -60,9 +60,13 @@ page is fixed; the toolbar is a widget too (`CtToolbar`), with the pen and the
 settings button, and Ctrl+, opens settings without it.
 
 `font` is the page's font, inherited by every widget unless it sets its own
-(the clock's time and date each can). The font fields offer the installed
-fonts, which the helper lists with `fc-list`, since a web page can't; without
-the helper, they take a name typed in. Font sizes are in `pt`; everything else
+(the clock's time and date each can). A font field autocompletes from the
+installed fonts, each shown in its own face, which the helper lists with
+`fc-list`, since a web page can't; without the helper (or with one from before
+the `fonts` plugin) it takes a name typed in. Any text is accepted, a whole
+`font-family` list included, and the next font down always follows it: the
+page's default after the page font, the page font after a widget's. So a name
+that isn't a font, half-typed say, changes nothing. Font sizes are in `pt`; everything else
 is in `rem`, apart from grid tracks (`fr`) and the like.
 
 ## Edit mode
