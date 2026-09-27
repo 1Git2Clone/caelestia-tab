@@ -61,7 +61,9 @@ export interface App {
 export const DEFAULTS: Settings = {
   layout: {
     columns: "minmax(0, 1fr)",
-    rows: "auto 1fr auto",
+    // minmax(0, …): a tall widget scrolls inside its row instead of growing it
+    // and pushing the rest of the page off the screen.
+    rows: "auto minmax(0, 1fr) auto",
     areas: '"toolbar" "clock" "bookmarks"',
     gap: "2rem",
     padding: "1rem 2.5rem 0",
@@ -112,7 +114,7 @@ export function complete(saved: any): Settings {
 const store = browser.storage.local;
 
 // The helper's topics that widgets read through app.data.
-const TOPICS = ["github", "media"];
+const TOPICS = ["github", "media", "lyrics"];
 
 // Opens an editor in the side panel.
 export function edit(app: App, title: string | (() => string), component: Component<any>, props: Record<string, any>) {

@@ -7,6 +7,7 @@
 @layer theme, base, utilities;
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/utilities.css" layer(utilities);
+@import "./user-source.css";
 
 /* The scheme as Tailwind colours: bg-primary, text-on-surface,
    border-outline-variant … all follow the live scheme. Tailwind's own palette

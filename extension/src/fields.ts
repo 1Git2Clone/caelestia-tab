@@ -69,7 +69,7 @@ export const PLACE: Field[] = [
 // The page's grid (Settings.layout), typed as CSS.
 export const LAYOUT: Field[] = [
   { key: "columns", label: "Columns", type: "text", hint: "grid-template-columns: minmax(0, 1fr), 20rem 1fr …" },
-  { key: "rows", label: "Rows", type: "text", hint: "grid-template-rows: auto 1fr auto …" },
+  { key: "rows", label: "Rows", type: "text", hint: "grid-template-rows: auto minmax(0, 1fr) auto … minmax(0, 1fr) rather than 1fr lets a tall widget scroll instead of pushing the page longer." },
   { key: "areas", label: "Areas", type: "textarea", rows: 3, hint: 'grid-template-areas, one quoted row per line: "toolbar toolbar" "clock bookmarks". Widgets name them in their placement.' },
   { key: "gap", label: "Gap", type: "text", hint: "gap: 2rem, or 1rem 2rem." },
   { key: "padding", label: "Padding", type: "text", hint: "Around the page: 1rem 2.5rem 0." },

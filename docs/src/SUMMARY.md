@@ -10,7 +10,7 @@
 - [Installing](guides/installing.md)
 - [Browsers](guides/browsers.md)
 - [Zen's window](guides/zen.md)
-- [The widgets](guides/widgets.md)
+- [Widgets and their data](guides/widgets.md)
 - [Writing a component](guides/plugins.md)
 - [Theming your own sites](guides/own-styles.md)
 - [Development](guides/development.md)

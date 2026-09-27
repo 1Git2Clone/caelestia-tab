@@ -4,6 +4,7 @@
 
 mod fonts;
 mod github;
+mod lyrics;
 mod media;
 mod scheme;
 mod settings;
@@ -55,6 +56,7 @@ pub fn all() -> Vec<Box<dyn Plugin>> {
         Box::new(fonts::Fonts),
         Box::new(github::GitHub::new()),
         Box::new(media::Media),
+        Box::new(lyrics::Lyrics::new()),
         Box::new(settings::Settings::new()),
     ]
 }

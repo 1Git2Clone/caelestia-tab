@@ -105,3 +105,28 @@ test("edits survive a reload", async ({ page }) => {
   await expect(page.locator(".ct-clock")).toContainText("~");
   await expect(page.locator(".ct-tile").first()).toContainText("Kept");
 });
+
+test("a user component is offered, placed and edited like ours", async ({ page }) => {
+  await page.getByTitle("Settings", { exact: true }).click();
+  await panel(page).getByLabel("Widget to add").selectOption("Hello");
+  await panel(page).getByRole("button", { name: "Add", exact: true }).click();
+  await expect(page.locator(".hello")).toHaveText("Hello, world");
+  await expect(title(page)).toHaveText("Hello");
+  await box(page, "Greet").fill("caelestia");
+  await expect(page.locator(".hello")).toHaveText("Hello, caelestia");
+});
+
+test("a widget whose component isn't built stays removable from edit mode", async ({ page }) => {
+  await page.evaluate(async () => {
+    const { settings } = await (window as any).browser.storage.local.get("settings");
+    const s = settings ?? {};
+    s.widgets = [...(s.widgets ?? []), { id: "gone", component: "NotBuilt", place: { area: "auto", justify: "start", align: "start" }, settings: {} }];
+    await (window as any).browser.storage.local.set({ settings: s });
+  });
+  await page.reload();
+  await page.getByTitle("Edit", { exact: true }).click();
+  await expect(page.getByText("No component called NotBuilt in this build.")).toBeVisible();
+  await page.getByTitle("Edit NotBuilt").click();
+  await panel(page).getByRole("button", { name: "Remove this widget" }).click();
+  await expect(page.getByText("No component called NotBuilt")).toHaveCount(0);
+});

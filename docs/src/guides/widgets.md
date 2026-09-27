@@ -23,33 +23,38 @@ glass behind it can be turned off.
 Tiles on a CSS grid you define, or in even rows. See
 [The new tab](../architecture/newtab.md#bookmarks).
 
-## Media
+## Data for your own widgets
 
-What a media player is playing, with its cover, progress and controls:
-previous, play or pause, next, and a click on the progress bar to seek. It
-works with any player that speaks MPRIS on the session bus: the Spotify app,
-mpv, Firefox's own media, and so on. *Prefer* picks a player by part of its
-name (`spotify`); without a match, it shows whichever is playing.
+caelestia-tab's own widgets are the three above. The rest is data the helper
+gathers for widgets you write (see
+[Writing a component](plugins.md#your-own-components)); a widget reads it from
+`app.data[topic]` and asks for it with `tell({ topic, command, … })`:
 
-The helper's `media` plugin reads the players over D-Bus and runs the
-commands; nothing but play, pause, next, previous and seek is reachable
-through it. MPRIS doesn't announce the position as it moves, so the widget
-moves it on itself between updates. Spotify's app is known to report no
-position over MPRIS, which would leave its progress bar at the start; checked
-on 2026-09-27 with Firefox's media only, so that's unconfirmed here.
+- **`media`**: every MPRIS player on the session bus (the Spotify app, mpv,
+  Firefox's own media …), with its title, artist, album, year, cover, length
+  and position, and the controls: `PlayPause`, `Play`, `Pause`, `Next`,
+  `Previous` and `SetPosition`, and nothing else on the bus. MPRIS doesn't
+  announce the position as it moves, so each player carries the position
+  with the time it was read (`at`) and its `rate`, for a widget to move it on
+  itself. Spotify's app is known to report no position; checked with
+  Firefox's media only.
+- **`lyrics`**: a track's lyrics from [LRCLIB](https://lrclib.net), after a
+  widget sends `{ command: "get", artist, title, album, seconds }`, timed
+  (`synced: [{ ms, text }]`) when LRCLIB has them, plain otherwise, or
+  `none`. The artist, title and album go to lrclib.net, and only when a widget
+  asks. Some players send lyrics themselves (`lyrics` on the player).
+- **`github`**: GitHub searches, after a widget sends
+  `{ command: "queries", widget: id, queries }` (its own list, replacing its
+  last one). The helper runs every widget's every 90 seconds and on
+  `{ command: "refresh" }`, and an unchanged result comes back as a `304`,
+  which doesn't count against GitHub's rate limit. Every open tab reads the
+  same results from storage, so ten open tabs make no more requests than one.
 
-## GitHub
+A menu down the left of the page, with a GitHub feed and a player with its
+lyrics, is one such widget: see
+[Your own components](plugins.md#your-own-components).
 
-Your pull requests and issues, as GitHub searches: one per line, as
-`Label: query` in GitHub's search syntax. The defaults are your open pull
-requests (`is:open is:pr author:@me`), the ones waiting for your review
-(`review-requested:@me`) and the issues assigned to you. The helper runs the
-searches every 90 seconds and whenever you press refresh; an unchanged result
-comes back as a `304`, which doesn't count against GitHub's rate limit. Every
-open tab reads the same results from storage, so ten open tabs make no more
-requests than one.
-
-### The token
+### GitHub's token
 
 No setup, if you use `gh` or git with GitHub already. The helper takes the
 first token it finds:

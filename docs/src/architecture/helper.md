@@ -27,6 +27,7 @@ These ship today:
 | `wallpaper` | `$XDG_STATE_HOME/caelestia/wallpaper/path.txt`, then the image it names | `{ path, url }`, where `url` is a `data:` URL of the image | the file changes |
 | `fonts` | `fc-list : family` | the installed font families, sorted | once, at start |
 | `github` | GitHub's search API, with the token from the chain in [The widgets](../guides/widgets.md#the-token) | `{ results: { query: { total, items } }, auth, error? }` | every 90 s, and on a command |
+| `lyrics` | LRCLIB, for the track a widget asks about | `{ key, synced, plain, none }` | a `get` command |
 | `savedSettings` | `$XDG_CONFIG_HOME/caelestia-tab/settings.json` | `{ settings, mtime }`; a `save` command writes it | the file changes |
 | `media` | every MPRIS player on the session bus | `{ players: [{ player, identity, status, title, artist, art, length, position, at, … }] }` | a player's properties change, it seeks, or a player comes or goes |
 

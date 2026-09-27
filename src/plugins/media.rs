@@ -159,6 +159,10 @@ fn player(conn: &Connection, name: &str) -> zbus::Result<Value> {
         "title": text("xesam:title"),
         "artist": list("xesam:artist").join(", "),
         "album": text("xesam:album"),
+        // xesam:contentCreated is a date; the year is what's shown.
+        "year": text("xesam:contentCreated").and_then(|d| d.get(..4).map(str::to_owned)),
+        // Some players send the lyrics themselves.
+        "lyrics": text("xesam:asText"),
         "art": text("mpris:artUrl").map(|u| art(&u)),
         "track": track,
         "length": length,

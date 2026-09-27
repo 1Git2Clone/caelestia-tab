@@ -19,10 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A page font (*Settings*, *General*), and fonts for the clock's time and date. Font fields autocomplete from the installed fonts, listed by the helper, each shown in its own face. Font sizes are in pt.
 - Tree Style Tab's sidebar takes the background's choices and fields: a colour dimmed towards the surface, the wallpaper dimmed and blurred, or TST's own look.
 - Settings only show a field when it applies: a colour when the source is a colour, a blur when it's the wallpaper.
-- A media widget for any MPRIS player (the Spotify app, mpv, a browser): what's playing, its cover and progress, and previous, play or pause, next and seek.
-- A GitHub widget: your pull requests and issues as GitHub searches you choose. The helper finds a token without setup (`gh`, git's credential helper or the environment), caches with ETags, and keeps the token to itself.
 - Secrets by alias in `~/.config/caelestia-tab/secrets.toml`: from SOPS (nested keys), a command, a file or the environment. Values never reach the extension.
 - The helper takes commands from the extension, for widgets that control something on the machine.
+- Your own components, from `~/.config/caelestia-tab/components`, built into the extension with ours; a `Ct` name is refused. They reach ours through `$ct`, and can use Tailwind, plain CSS or SCSS.
+- Data for your widgets from the helper: every MPRIS player (the Spotify app, mpv, a browser) with its year, cover and controls; lyrics from LRCLIB, timed where it has them; and GitHub searches, with a token found without setup (`gh`, git's credential helper or the environment), cached with ETags, and kept in the helper.
 - Settings are kept in `~/.config/caelestia-tab/settings.json` as well, so they survive a browser restart dropping a temporary add-on's storage, and can be edited by hand or kept in dotfiles; a hand edit reaches open tabs live.
 - Nerd Font glyphs as a bookmark's mark. The symbols font is bundled, and the editor shows every glyph with a search by name, and suggests glyphs from the bookmark's address and name.
 - Zen's window follows the scheme live. The helper writes a Zen mod into every Zen profile, and `zen/caelestia-tab.cfg` (installed with `caelestia-tab install-zen`, or `lib.wrapZen` on Nix) reloads it on each change.

@@ -1,12 +1,31 @@
 import { svelte } from "@sveltejs/vite-plugin-svelte";
 import tailwindcss from "@tailwindcss/vite";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { defineConfig } from "vite";
+
+// The user's own components, built in with ours: every .svelte file there.
+// Ours are named Ct*; a user file with that prefix would stand in for one of
+// ours (or be shadowed by it), so the build refuses it.
+const user = path.resolve(process.env.CAELESTIA_TAB_COMPONENTS ?? path.join(os.homedir(), ".config/caelestia-tab/components"));
+const files = fs.existsSync(user) ? (fs.readdirSync(user, { recursive: true }) as string[]).filter((f) => f.endsWith(".svelte")) : [];
+const taken = files.filter((f) => path.basename(f).startsWith("Ct"));
+if (taken.length) {
+  throw new Error(`${taken.map((f) => path.join(user, f)).join(", ")}: the Ct prefix is reserved for caelestia-tab's own components; rename ${taken.length > 1 ? "them" : "it"}.`);
+}
+// Tailwind scans the user's folder too, through an @source this writes (it
+// can't read an environment variable itself). Generated; not committed.
+fs.writeFileSync(path.resolve("src/user-source.css"), files.length ? `@source ${JSON.stringify(user)};\n` : "/* No user components. */\n");
 
 // Two builds into dist/ (see package.json): the extension's pages, and, with
 // --ssr, the same components compiled for svelte/server, which the background
 // uses to render the new tab ahead of time (src/render.ts).
 export default defineConfig(({ isSsrBuild }) => ({
   plugins: [tailwindcss(), svelte()],
+  // $ct is ours, for user components to import from; $user is theirs.
+  resolve: { alias: { $ct: path.resolve("src"), $user: user } },
+  server: { fs: { allow: [".", user] } },
   // Extension pages load from moz-extension://<id>/, so every URL is relative.
   base: "./",
   build: {

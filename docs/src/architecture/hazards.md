@@ -126,3 +126,9 @@ the hard way.
   watches directories, and a watch on one that isn't there yet fails, so a
   file created there later is never seen. The settings plugin creates
   `~/.config/caelestia-tab/` at start for that reason (2026-09-27).
+- **A widget spanning an `auto` grid row sizes that row.** The menu spans the
+  toolbar's row and the clock's, and its content grew the toolbar's row,
+  pushing the bookmarks off the screen whatever the middle row said. A widget
+  that should fill its area and scroll takes `h-0 min-h-full`, so its content
+  doesn't count towards the rows; a row that should shrink is
+  `minmax(0, 1fr)`, not `1fr` (2026-09-27).

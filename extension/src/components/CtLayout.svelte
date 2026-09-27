@@ -38,6 +38,14 @@
         <c.component id={w.id} settings={w.settings} editing={app.editing} />
         {#if app.editing && Overlay}<Overlay widget={w} {app} />{/if}
       </section>
+    {:else if !c && app.editing}
+      <!-- A widget whose component isn't in this build (a user component built
+           without, say): kept, with its settings, and shown in edit mode so
+           it can be removed. -->
+      <section class="ct-widget relative min-w-0 [grid-area:var(--area)]" style:--area={w.place.area}>
+        <p class="m-0 rounded-2xl bg-glass p-4 text-on-surface-variant">No component called {w.component} in this build.</p>
+        <CtEditOverlay widget={w} {app} />
+      </section>
     {/if}
   {/each}
   {#if !app.scheme && app.helperError}

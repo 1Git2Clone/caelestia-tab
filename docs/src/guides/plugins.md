@@ -30,9 +30,11 @@ is a complete example.
 </p>
 ```
 
-Put it in `extension/src/components/widgets/`, build, and add it from
+Put it in your components folder (see
+[Your own components](#your-own-components)), build, and add it from
 *Settings*, *General*, *Add a widget*. It's then edited from the page, with the
-pen.
+pen. The same goes for a widget of caelestia-tab's own, in
+`extension/src/components/widgets/`.
 
 ## What a component gets
 
@@ -85,10 +87,38 @@ Font sizes are in `pt`, everything else in `rem`. Give the root element a
 meet a window edge with
 `in-[.ct-edge-bottom]:rounded-b-none` and its siblings.
 
+## Your own components
+
+Yours go in `~/.config/caelestia-tab/components/` (or wherever
+`CAELESTIA_TAB_COMPONENTS` points), and the next build takes them in:
+
+```sh
+npm run --prefix extension build
+```
+
+Every `.svelte` file there is compiled with ours. One that exports `widget` is
+a widget, offered in *Settings*, *General*, *Add a widget*; the rest are
+components your widgets import (`import Marquee from "./Marquee.svelte"`).
+They reach ours through `$ct`: `$ct/fields.ts`, `$ct/store.svelte.ts` (`tell`,
+`edit`, the `App` type), `$ct/components/CtIcon.svelte` and so on. Style them
+however you like: Tailwind's classes and the scheme's colours work in them (the
+build scans the folder), and so do `<style>`, `lang="scss"` and plain CSS.
+
+A widget whose component isn't in a build, because it was built without your
+folder, keeps its settings: it just doesn't show, except as a placeholder in
+edit mode, where it can be removed.
+
+A build without that folder is a build without your components, so an
+extension built elsewhere (or signed for a store) won't have them. They need a
+build of your own, which an unsigned install accepts on Firefox Developer
+Edition, Nightly and forks with signing off (see
+[Installing](installing.md#the-extension)).
+
 ## The `Ct` prefix is reserved
 
-Components whose names start with `Ct` are the project's. Name yours
-anything else.
+Components whose names start with `Ct` are the project's, and the build
+refuses a file of yours named that way, since it would stand in for one of
+ours.
 
 ## Components that need data from outside the browser
 

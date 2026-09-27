@@ -145,6 +145,9 @@ fn search(token: &str, q: &str, etag: Option<&str>) -> io::Result<Option<(String
     let mut response = request
         .config()
         .http_status_as_error(false)
+        // The host reads plugins one at a time, so a request that hangs
+        // would hold up every other plugin.
+        .timeout_global(Some(std::time::Duration::from_secs(10)))
         .build()
         .call()
         .map_err(io::Error::other)?;

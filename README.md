@@ -27,10 +27,11 @@ and Firefox-based browsers (Floorp, Zen, LibreWolf, Waterfox).
   variables, plus a `caelestia-scheme` event, for Stylus and userscripts.
 - **Nerd Font glyphs** on bookmarks, bundled, with suggestions from the
   address: a GitHub bookmark is offered every GitHub glyph.
-- **Media controls** for any MPRIS player (the Spotify app, mpv, your
-  browser), and **your GitHub pull requests and issues**, with no setup if
-  you use `gh` or git already. Secrets stay in the helper, named by alias,
-  from SOPS, a command, a file or the environment.
+- **Your own widgets**, built in from `~/.config/caelestia-tab/components`,
+  with data from the helper: any MPRIS player (the Spotify app, mpv, your
+  browser) with its controls and lyrics, and your GitHub pull requests and
+  issues, with no setup if you use `gh` or git already. Secrets stay in the
+  helper, named by alias, from SOPS, a command, a file or the environment.
 - **Tree Style Tab**'s sidebar in the scheme too, live: a tint, or the
   wallpaper.
 - **Zen's window** in the scheme too, live: Zen ignores the theme API, so
@@ -65,7 +66,7 @@ The [handbook](https://pages.hu-tao.dev/hutao/caelestia-tab/docs/) (source in
 | [Installing](docs/src/guides/installing.md) | The helper, the extension, Nix and Home Manager |
 | [Browsers](docs/src/guides/browsers.md) | Where each browser looks for the helper, per-browser quirks |
 | [Zen's window](docs/src/guides/zen.md) | The Zen mod, and the script that reloads it live |
-| [The widgets](docs/src/guides/widgets.md) | The clock, bookmarks, media and GitHub widgets, and secrets |
+| [Widgets and their data](docs/src/guides/widgets.md) | The built-in widgets, the helper's media, lyrics and GitHub data, and secrets |
 | [Writing a component](docs/src/guides/plugins.md) | Widget components and their settings, and data plugins in the helper |
 | [Theming your own sites](docs/src/guides/own-styles.md) | The `--caelestia-*` variables in Stylus and userscripts |
 | [Development](docs/src/guides/development.md) | The dev shell, checks, running it, refreshing the vendored styles |
