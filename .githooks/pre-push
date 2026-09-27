@@ -16,4 +16,7 @@ npm run --prefix extension --silent build >/dev/null
 echo "pre-push • tests/e2e-firefox.mjs (headless Firefox)"
 nix shell nixpkgs#firefox nixpkgs#geckodriver -c node tests/e2e-firefox.mjs
 
+echo "pre-push • playwright (the new tab's UI)"
+npm run --prefix extension --silent test
+
 echo "pre-push • OK"

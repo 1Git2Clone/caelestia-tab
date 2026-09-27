@@ -16,6 +16,8 @@
 
   const app = getContext<App>("ct");
   let tab = $state(0);
+  const focus = $derived(app.focus);
+  const title = $derived(typeof focus?.title === "function" ? focus.title() || "Untitled" : (focus?.title ?? "Settings"));
 
   // The new tab's background and Tree Style Tab's sidebar take the same
   // choices; `none` is what "no background of ours" means for each.
@@ -108,12 +110,13 @@
     {#if app.focus}
       <button type="button" class={iconButton} title="Back to settings" onclick={() => (app.focus = null)}><CtIcon name="left" /></button>
     {/if}
-    <h2 class="m-0 min-w-0 flex-1 truncate text-2xl font-normal">{app.focus?.title ?? "Settings"}</h2>
+    <h2 class="m-0 min-w-0 flex-1 truncate text-2xl font-normal">{title}</h2>
     <button type="button" class={iconButton} title="Close" onclick={() => ((app.focus = null), (app.panel = false))}><CtIcon name="close" /></button>
   </header>
-  {#if app.focus}
-    {@const Focus = app.focus.component}
-    <Focus {...app.focus.props} onclose={() => (app.focus = null)} />
+  {#if focus}
+    <!-- The editor's props come from `focus`, not app.focus: closing an editor
+         nulls app.focus while its handler (a remove, say) is still running. -->
+    <focus.component {...focus.props} onclose={() => (app.focus = null)} />
   {:else}
   <CtTabs tabs={["General", "Background", "Websites", "Browser", "Advanced"]} bind:current={tab} />
 

@@ -10,7 +10,8 @@
       settings.items.push(item({ name: "New bookmark", url: "" }));
       index = settings.items.length - 1;
     }
-    edit(app, settings.items[index].name || "Bookmark", CtBookmarkEditor, { settings, index });
+    const it = settings.items[index];
+    edit(app, () => it.name || "Bookmark", CtBookmarkEditor, { settings, index });
   }
 
   const PRESETS = [

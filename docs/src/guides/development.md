@@ -79,6 +79,29 @@ override loads, the helper's scheme and wallpaper arrive, a scheme file renamed
 into place reaches the open tab live, and a matching page gets the variables and
 its compiled Catppuccin style.
 
+The UI has Playwright tests (`extension/tests/newtab.spec.ts`), run by the
+pre-push hook and CI:
+
+```sh
+npm run --prefix extension build && npm run --prefix extension test
+```
+
+They drive the built new tab like a user: the pen opening a widget in the
+side panel and editing it live, a bookmark's tile and the panel's title
+following its name, glyph suggestions following the name, adding and
+removing a widget, fields that only show when they apply, Escape, and edits
+surviving a reload. Any uncaught error on the page fails a test. A new
+interaction gets a test.
+
+Playwright can't install an add-on into Firefox (it does extensions in
+Chromium only), so these load `dist/newtab.html` as a page, served by
+`vite preview`, with the extension API stood in by
+`extension/tests/browser-shim.js`: storage in `localStorage`, no helper. What
+needs the real extension (the helper, storage between pages, site injection)
+is the e2e test's. The browsers come from nixpkgs (`PLAYWRIGHT_BROWSERS_PATH`
+in the dev shell), and `@playwright/test` is pinned to the same version;
+bump both together.
+
 To check the site styles themselves against the live sites, which takes about
 ten minutes and needs the network, run this by hand after vendoring a new
 catppuccin/userstyles revision:

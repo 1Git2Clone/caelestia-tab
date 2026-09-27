@@ -44,7 +44,7 @@
   <span>{label}</span>
   <div class="flex items-center gap-2">
     <span class="min-w-11 text-center font-glyph text-3xl text-primary">{value}</span>
-    <input type="search" class={input} placeholder="Search glyphs by name: github, folder, arrow …" bind:value={query} />
+    <input type="search" class={input} aria-label="{label}: search by name" placeholder="Search glyphs by name: github, folder, arrow …" bind:value={query} />
     {#if value}
       <button type="button" class={iconButton} title="Remove the glyph" onclick={() => (value = "")}><CtIcon name="close" /></button>
     {/if}

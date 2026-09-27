@@ -31,7 +31,7 @@
     {#if uploaded}
       <em class="flex-1">Uploaded image</em>
     {:else}
-      <input type="url" class={input} placeholder="https://example.com/image.jpg" bind:value />
+      <input type="url" class={input} aria-label={label} placeholder="https://example.com/image.jpg" bind:value />
     {/if}
     <button type="button" class={button} onclick={() => file.click()}>Upload</button>
     {#if value}

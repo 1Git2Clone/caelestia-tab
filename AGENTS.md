@@ -118,7 +118,11 @@ Match CI locally before pushing:
 - `mdbook build docs` when the docs changed
 
 For anything that touches the helper, storage or injection, run
-`tests/e2e-firefox.mjs` (see the Development chapter). The pre-push hook runs
+`tests/e2e-firefox.mjs` (see the Development chapter); for anything a user
+does on the new tab, the Playwright tests (`npm run --prefix extension test`),
+and add a test for a new interaction. Use Playwright's locators by role and
+label, which is also why every field's label names its control and nothing
+else. The pre-push hook runs
 it; CI can't, so a push that skips the hook skips the test. For anything visible on
 the new tab, look at it: `web-ext run`, or a screenshot through the e2e test's
 WebDriver session.

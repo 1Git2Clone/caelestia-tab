@@ -16,8 +16,9 @@
 
   function remove() {
     if (!confirm(`Remove this ${info?.label ?? widget.component} and its settings?`)) return;
+    const i = app.settings.widgets.indexOf(widget);
     onclose();
-    app.settings.widgets.splice(app.settings.widgets.indexOf(widget), 1);
+    if (i >= 0) app.settings.widgets.splice(i, 1);
   }
 </script>
 

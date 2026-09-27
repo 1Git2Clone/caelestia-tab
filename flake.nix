@@ -96,6 +96,11 @@
             ];
 
             RUST_SRC_PATH = "${pkgs.rustPlatform.rustLibSrc}";
+            # The UI tests' browsers, from nixpkgs rather than Playwright's own
+            # download, which doesn't run on NixOS. extension/package.json pins
+            # @playwright/test to this same version; bump both together.
+            PLAYWRIGHT_BROWSERS_PATH = "${pkgs.playwright-driver.browsers}";
+            PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS = "true";
           };
         }
       );

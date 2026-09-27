@@ -47,8 +47,9 @@
 </script>
 
 <div class="relative grid gap-1.5">
-  <span>{label}</span>
+  <label for="{uid}-input">{label}</label>
   <input
+    id="{uid}-input"
     type="text"
     role="combobox"
     aria-expanded={open}

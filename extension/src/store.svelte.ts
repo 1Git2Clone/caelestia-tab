@@ -54,7 +54,8 @@ export interface App {
   // What the side panel is editing instead of its tabs: a component and its
   // props (a widget's properties, one bookmark). There are no pop-ups: every
   // editor is a view in the panel, beside the page, applying as it changes.
-  focus: { title: string; component: Component<any>; props: Record<string, any> } | null;
+  // `title` can be a function, for a title that follows what's being edited.
+  focus: { title: string | (() => string); component: Component<any>; props: Record<string, any> } | null;
 }
 
 export const DEFAULTS: Settings = {
@@ -114,7 +115,7 @@ const store = browser.storage.local;
 const TOPICS = ["github", "media"];
 
 // Opens an editor in the side panel.
-export function edit(app: App, title: string, component: Component<any>, props: Record<string, any>) {
+export function edit(app: App, title: string | (() => string), component: Component<any>, props: Record<string, any>) {
   app.focus = { title, component, props };
   app.panel = true;
 }

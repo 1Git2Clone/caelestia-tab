@@ -51,6 +51,10 @@ jobs:
         run: nix develop -c npm run --prefix extension build
       - name: web-ext lint
         run: nix develop -c web-ext lint --source-dir extension/dist --self-hosted
+      # The UI, in Playwright's Firefox from nixpkgs; unlike the e2e test it
+      # needs no installed browser or home directory.
+      - name: playwright
+        run: nix develop -c npm run --prefix extension test
 
   nix:
     runs-on: nix-node
