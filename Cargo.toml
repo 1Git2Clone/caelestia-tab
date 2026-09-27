@@ -1,0 +1,13 @@
+[package]
+name = "caelestia-tab"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.88"
+description = "Native messaging helper that streams the caelestia colour scheme and wallpaper to the caelestia-tab extension"
+license = "MIT"
+repository = "https://git.hu-tao.dev/hutao/caelestia-tab"
+
+[dependencies]
+base64 = "0.22"
+notify = "8"
+serde_json = "1"
