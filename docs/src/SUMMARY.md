@@ -8,6 +8,7 @@
 
 - [Installing](guides/installing.md)
 - [Browsers](guides/browsers.md)
+- [Zen's window](guides/zen.md)
 - [Writing a plugin](guides/plugins.md)
 - [Theming your own sites](guides/own-styles.md)
 - [Development](guides/development.md)

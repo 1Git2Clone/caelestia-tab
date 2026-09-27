@@ -29,6 +29,8 @@ and Firefox-based browsers (Floorp, Zen, LibreWolf, Waterfox).
   address: a GitHub bookmark is offered every GitHub glyph.
 - **Tree Style Tab**'s sidebar tinted towards the scheme's primary, live, and
   optional.
+- **Zen's window** in the scheme too, live: Zen ignores the theme API, so
+  it's done with a Zen mod and a small autoconfig script.
 - **Everything is a plugin**, the built-in widgets included.
 
 The browser's window frame is [CaelestiaFox](https://addons.mozilla.org/en-US/firefox/addon/caelestiafox)'s
@@ -56,6 +58,7 @@ The [handbook](https://pages.hu-tao.dev/hutao/caelestia-tab/docs/) (source in
 | --- | --- |
 | [Installing](docs/src/guides/installing.md) | The helper, the extension, Nix and Home Manager |
 | [Browsers](docs/src/guides/browsers.md) | Where each browser looks for the helper, per-browser quirks |
+| [Zen's window](docs/src/guides/zen.md) | The Zen mod, and the script that reloads it live |
 | [Writing a plugin](docs/src/guides/plugins.md) | The widget API, and data plugins in the helper |
 | [Theming your own sites](docs/src/guides/own-styles.md) | The `--caelestia-*` variables in Stylus and userscripts |
 | [Development](docs/src/guides/development.md) | The dev shell, checks, running it, refreshing the vendored styles |

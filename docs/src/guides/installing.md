@@ -60,6 +60,11 @@ It isn't on addons.mozilla.org yet. Until it is:
   honours that preference depends on how it was built; see
   [Browsers](browsers.md).
 
+## Zen
+
+Zen's window needs one more step, a script in Zen's install directory; see
+[Zen's window](zen.md).
+
 ## Site themes
 
 Firefox asks for "Access your data for all websites" separately in Manifest V3.

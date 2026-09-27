@@ -50,8 +50,8 @@ so it sits a step darker than the page in both modes.
 Zen ignores the WebExtension theme API: a test extension that set every theme
 colour to something garish recoloured Firefox completely and changed nothing
 in Zen 1.22.3b (2026-09-27). So CaelestiaFox doesn't reach Zen's window
-either, and nothing an extension does can. The way in is Zen's own mods (CSS
-in the profile), which Zen reloads only on restart or when a mod is toggled.
+either. caelestia-tab colours it with a Zen mod, kept live by a small
+autoconfig script; see [Zen's window](zen.md).
 
 ## Tested with
 

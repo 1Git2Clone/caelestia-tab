@@ -16,6 +16,7 @@ sh scripts/setup-hooks.sh   # once per clone: the pre-commit hook
 │   ├── main.rs             # the CLI: install, uninstall, manifest, or run as the host
 │   ├── host.rs             # native messaging: framing, parts, file watching
 │   ├── install.rs          # where each browser looks for the manifest
+│   ├── zen.rs              # the Zen mod, and install-zen
 │   └── plugins/            # data plugins: scheme, wallpaper
 ├── extension/              # the extension, plain ES modules with no build step
 │   ├── manifest.json
@@ -30,6 +31,7 @@ sh scripts/setup-hooks.sh   # once per clone: the pre-commit hook
 │   ├── plugins/            # widgets: clock, bookmarks
 │   ├── userstyles/         # vendored catppuccin/userstyles + index.json
 │   └── vendor/             # vendored less.js and the Nerd Fonts symbols
+├── zen/                    # Zen's autoconfig: the pref file and the watcher script
 ├── scripts/vendor-userstyles.mjs   # refreshes extension/userstyles and less.js
 ├── scripts/vendor-nerd-fonts.sh    # refreshes extension/vendor/nerd-fonts
 ├── tests/                  # node --test for userstyles.js and glyphs.js, and the Firefox e2e test

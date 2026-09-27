@@ -66,7 +66,20 @@ the hard way.
   `extensions.webextensions.uuids`. The real sidebar runs in another process,
   and the chrome context can't read its document (2026-09-27).
 - **Zen ignores `browser.theme`.** Neither caelestia-tab nor CaelestiaFox
-  can colour Zen's window through it; see the Browsers chapter (2026-09-27).
+  can colour Zen's window through it; `src/zen.rs` writes a Zen mod instead
+  (2026-09-27).
+- **Zen sets its background gradient inline on `#zen-browser-background`.**
+  A `:root` override loses to it there, because custom properties inherit and
+  the element's own value wins; the mod targets that element too, and the
+  `-old` variables Zen crossfades from (2026-09-27).
+- **Zen only reloads mods when `zen.mods.updated-value-observer` flips.**
+  Rewriting the CSS alone changes nothing until a restart (2026-09-27).
+- **Autoconfig has three traps.** zen-browser-flake's wrapper symlinks the
+  binary, so the wrapper's `mozilla.cfg` never runs; the default sandbox gives
+  the script `pref()` and nothing else (no `Components`, no `Services`); and
+  the script runs before a profile exists, so anything touching the profile
+  waits for `final-ui-startup`. `lib.wrapZen` and `zen/caelestia-tab.cfg`
+  handle all three (2026-09-27).
 - **Firefox caches a temporary add-on's files.** Reloading the page after
   editing the extension's CSS shows the old CSS; restart `web-ext run`
   (started with `--no-reload`) to see the change (2026-09-27).

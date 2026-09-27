@@ -28,6 +28,10 @@ Two ship today:
 To add one: a new file in `src/plugins/`, an entry in `plugins::all()`, and the
 extension reads `storage.local[topic]`.
 
+A plugin can also implement `changed(&value)`, which runs after a new value
+was sent. The scheme plugin uses it to write the Zen mod (`src/zen.rs`; see
+[Zen's window](../guides/zen.md)).
+
 ## Watching
 
 The helper watches each watched file's parent directory, not the file itself.
