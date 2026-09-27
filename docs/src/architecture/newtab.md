@@ -49,7 +49,8 @@ Settings are local to the device: `storage.local`, not `storage.sync`, and,
 with the helper, `~/.config/caelestia-tab/settings.json` too. The browser's
 copy is lost when a temporary add-on is removed, which a browser restart does;
 the file isn't, and can live in a dotfiles repo. The background saves every
-change to the file a second after it's made, and takes the file's settings
+change to the file a second after it's made (and, when there's no file yet,
+the settings it has as soon as the helper connects), and takes the file's settings
 when storage has none (a restart, a fresh install) or when the file changed
 after the last change in the browser (a hand edit), so an older file never
 rolls back newer edits. *Settings*, *Advanced*, *All settings* shows the whole

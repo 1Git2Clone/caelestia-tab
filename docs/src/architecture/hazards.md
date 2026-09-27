@@ -132,3 +132,8 @@ the hard way.
   that should fill its area and scroll takes `h-0 min-h-full`, so its content
   doesn't count towards the rows; a row that should shrink is
   `minmax(0, 1fr)`, not `1fr` (2026-09-27).
+- **A running browser keeps its old helper after a rebuild.** Nix's browser
+  wrappers link the helper's manifest into `~/.mozilla/native-messaging-hosts`
+  when the browser starts, so a browser started before the rebuild still
+  starts the old helper, and a plugin added since answers "a command for no
+  plugin" or never sends. Restart the browser (2026-09-27).

@@ -68,8 +68,13 @@ store.onChanged.addListener((changes: any) => {
   }, 1000);
 });
 async function restore(saved: { settings: any; mtime?: number } | null) {
-  if (!saved?.settings) return;
   const { settings, settingsChangedAt = 0 } = await store.get(["settings", "settingsChangedAt"]);
+  // No file yet, but settings here (from before the helper kept one): save
+  // them now rather than at the next change.
+  if (!saved?.settings) {
+    if (settings) helper?.postMessage({ topic: "savedSettings", command: "save", settings });
+    return;
+  }
   if (settings && (saved.mtime ?? 0) <= settingsChangedAt) return;
   if (JSON.stringify(settings) === JSON.stringify(saved.settings)) return;
   store.set({ settings: saved.settings });
