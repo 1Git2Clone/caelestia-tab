@@ -32,6 +32,25 @@ Out of the box Zen opens its command bar instead of a new tab page, so the
 new tab never shows. Set `zen.urlbar.replace-newtab` to `false` in
 `about:config` (it defaults to `true` in Zen 1.22.3b).
 
+## Tree Style Tab
+
+With [Tree Style Tab](https://addons.mozilla.org/en-US/firefox/addon/tree-style-tab/)
+installed, its sidebar gets a tint towards the scheme's primary, and the tint
+follows scheme switches live. Turn it off, or set its strength, in the new
+tab's *Settings*, *Browser*. It goes through TST's own API: caelestia-tab
+registers with TST and hands it a stylesheet, so it needs no permission, and
+nothing happens without TST.
+
+## Zen's own sidebar
+
+Zen's sidebar (its vertical tabs and the rest of its window) is browser
+chrome, not a page. An extension can only colour it through the theme API,
+which CaelestiaFox already drives, and a second extension setting a theme
+would fight it. So caelestia-tab leaves it alone. In a test on 2026-09-27,
+Zen 1.22.3b's sidebar stayed neutral grey across a scheme switch with
+CaelestiaFox installed, but that test couldn't confirm CaelestiaFox was
+connected. What Zen's sidebar takes from a theme is still open.
+
 ## Tested with
 
 Checked on 2026-09-27, each with the extension loaded through `web-ext run`,

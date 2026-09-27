@@ -55,6 +55,17 @@ it uses the colour's matching "on" colour (`onPrimary` on `primary`, and so
 on). Uploaded images are stored in settings as `data:` URLs, which is why the
 extension asks for `unlimitedStorage`.
 
+A tile's mark, in its corner, is either up to a few letters (an emoji
+works) or a Nerd Font glyph. The glyphs come from the vendored symbols-only
+Nerd Font, so nothing needs installing. The editor suggests glyphs from the
+bookmark's address and name. The host's labels, without `www` and the TLD,
+and the name's words are matched against the 11 000 glyph names: a whole-word
+match (`fa-github`) ranks above a word inside a longer name
+(`dev-githubactions`). You can also search every glyph by name, or type one
+in as the glyph itself, `nf-fa-github`, or a codepoint like `f09b`.
+`glyphs.js` does the matching; `tests/extension.test.mjs` pins it against the
+real index.
+
 The pen button turns on edit mode. Each tile gets a bar to move it earlier or
 later, drag it (HTML drag and drop, dropping on another tile's position), edit
 it, or remove it.

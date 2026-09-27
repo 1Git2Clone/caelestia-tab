@@ -25,6 +25,10 @@ and Firefox-based browsers (Floorp, Zen, LibreWolf, Waterfox).
   compiled against the live scheme instead of a Catppuccin flavour.
 - **Your own styles**: every page gets the scheme as `--caelestia-*` CSS
   variables, plus a `caelestia-scheme` event, for Stylus and userscripts.
+- **Nerd Font glyphs** on bookmarks, bundled, with suggestions from the
+  address: a GitHub bookmark is offered every GitHub glyph.
+- **Tree Style Tab**'s sidebar tinted towards the scheme's primary, live, and
+  optional.
 - **Everything is a plugin**, the built-in widgets included.
 
 The browser's window frame is [CaelestiaFox](https://addons.mozilla.org/en-US/firefox/addon/caelestiafox)'s
@@ -76,5 +80,8 @@ Contributors and agents: read [AGENTS.md](AGENTS.md) first.
 ## Licence
 
 MIT, see [LICENSE](LICENSE). The vendored
-[catppuccin/userstyles](extension/userstyles/LICENSE) are MIT and
-[less.js](extension/vendor/less.LICENSE) is Apache-2.0.
+[catppuccin/userstyles](extension/userstyles/LICENSE) are MIT,
+[less.js](extension/vendor/less.LICENSE) is Apache-2.0, and the
+[Nerd Fonts symbols](extension/vendor/nerd-fonts/LICENSE) are MIT, with each
+glyph set under its own licence
+([Nerd Fonts' licence audit](https://github.com/ryanoasis/nerd-fonts/blob/master/license-audit.md)).

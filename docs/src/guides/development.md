@@ -25,11 +25,14 @@ sh scripts/setup-hooks.sh   # once per clone: the pre-commit hook
 │   ├── ui.js               # dialog and forms, handed to plugins
 │   ├── scheme.js           # the scheme as CSS variables, colour tokens
 │   ├── userstyles.js       # compile a style, split and match @-moz-document
+│   ├── treestyletab.js     # the Tree Style Tab tint
+│   ├── glyphs.js           # Nerd Font glyph suggestions and parsing
 │   ├── plugins/            # widgets: clock, bookmarks
 │   ├── userstyles/         # vendored catppuccin/userstyles + index.json
-│   └── vendor/             # vendored less.js
-├── scripts/vendor-userstyles.mjs   # refreshes extension/userstyles and vendor
-├── tests/                  # node --test for userstyles.js, and the Firefox e2e test
+│   └── vendor/             # vendored less.js and the Nerd Fonts symbols
+├── scripts/vendor-userstyles.mjs   # refreshes extension/userstyles and less.js
+├── scripts/vendor-nerd-fonts.sh    # refreshes extension/vendor/nerd-fonts
+├── tests/                  # node --test for userstyles.js and glyphs.js, and the Firefox e2e test
 └── docs/                   # this handbook
 ```
 
@@ -94,6 +97,16 @@ compiles each style once to find its URL rules, and rewrites
 `extension/userstyles/` and `extension/vendor/`. Bump `REV` to update, run it,
 then run `node --test tests/*.test.mjs`. A style that stops compiling is
 skipped with a warning, not dropped silently.
+
+## Refreshing the Nerd Fonts symbols
+
+```sh
+sh scripts/vendor-nerd-fonts.sh
+```
+
+It downloads the symbols-only font of the release pinned in the script
+(`VERSION`), converts it to WOFF2 (about 1 MB instead of 2.4), and writes a
+name-to-codepoint index of every glyph for the editor's suggestions.
 
 ## The handbook
 

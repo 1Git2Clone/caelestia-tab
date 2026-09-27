@@ -50,6 +50,21 @@ the hard way.
   runs a temporary copy, next to the running browser, and deletes it on exit.
   The copy restores the session and extensions like Tab Session Manager, so
   the start URL may open behind other tabs (2026-09-27).
+- **TST paints its sidebar with `--browser-background` first.** It's set
+  inline from the browser theme, so overriding only `--tabbar-bg` changes
+  nothing whenever a theme is active; `treestyletab.js` overrides both, with
+  `!important` (2026-09-27).
+- **A starting TST sidebar drops registrations.** It replaces its list of
+  extensions with a snapshot it asked TST's background for, so a
+  `register-self` that lands in between is lost. `background.js` re-sends once,
+  5 seconds after the first registration, and on every `sidebar-show`
+  (2026-09-27).
+- **TST sends `ready` only to extensions it already knows.** The first
+  registration has to be retried until TST answers, not wait for `ready`.
+- **Check TST's sidebar in a test by opening it as a tab**:
+  `moz-extension://<uuid>/sidebar/sidebar.html`, with the UUID pinned through
+  `extensions.webextensions.uuids`. The real sidebar runs in another process,
+  and the chrome context can't read its document (2026-09-27).
 - **The Chrome DevTools MCP can't find Chrome on NixOS**; it looks in
   `/opt/google/chrome`. To look at the new tab outside a browser, serve
   `extension/` with a stub `browser` object and screenshot it with

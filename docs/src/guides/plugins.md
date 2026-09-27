@@ -46,7 +46,8 @@ Then add it to `plugins/index.js`, and add a widget to show it, from
     calls `update(patch)` as they change, after assigning the patch into
     `values`. The field types are listed in `extension/ui.js`: `checkbox`,
     `text`, `url`, `number`, `textarea`, `select`, `range`, `colour` (a scheme
-    colour), `image` (a URL or an upload) and `presets`.
+    colour), `image` (a URL or an upload), `glyph` (a Nerd Font glyph, with
+    suggestions for the words its `words()` returns) and `presets`.
   - `ui.el(tag, props, ...children)` and `ui.icon(name)`.
 
 `mount` runs again on every settings change and every edit-mode toggle, so

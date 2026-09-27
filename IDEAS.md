@@ -77,7 +77,8 @@ Once, at install:
 Built in the first prototype (2026-09-27): the helper and its data plugins,
 the live colours and wallpaper, the clock and bookmark plugins with the grid
 editor, device-local settings, and the Catppuccin site themes compiled against
-the live scheme. See the handbook. Chrome support and Tree Style Tab come
+the live scheme. See the handbook. Since then: a Tree Style Tab tint towards
+primary (optional), and Nerd Font glyphs on bookmarks. Chrome support comes
 next.
 
 - The core and plugin loading.
