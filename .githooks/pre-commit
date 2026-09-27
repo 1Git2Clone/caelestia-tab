@@ -1,0 +1,17 @@
+#!/bin/sh
+# Fast pre-commit gate, the same checks CI runs. Bypass with `git commit --no-verify`.
+set -e
+
+echo "pre-commit • cargo fmt --check"
+cargo fmt --check
+
+echo "pre-commit • cargo clippy"
+cargo clippy --all-targets -- -D warnings
+
+echo "pre-commit • node --test"
+node --test tests/*.test.mjs
+
+echo "pre-commit • web-ext lint"
+web-ext lint --source-dir extension --self-hosted >/dev/null
+
+echo "pre-commit • OK"

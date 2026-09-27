@@ -1,0 +1,39 @@
+# Builds the handbook and uploads it as the `pages` artifact. The VPS's
+# pages-pull discovers every public repo holding one and serves it at
+# https://pages.hu-tao.dev/hutao/caelestia-tab/docs/ (same as nixos-dotfiles).
+name: Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  pages:
+    runs-on: nix-node
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Build
+        run: nix develop -c mdbook build docs
+
+      # The staging directory name is the `/docs/` in the published URL.
+      - name: Stage
+        run: |
+          rm -rf _site
+          mkdir -p _site/docs
+          cp -r docs/book/. _site/docs/
+
+      # forgejo/, not actions/: upstream's v4 mistakes Forgejo for GitHub
+      # Enterprise Server and throws before uploading.
+      - name: Publish
+        uses: forgejo/upload-artifact@v5
+        with:
+          name: pages
+          path: _site/
+          # An empty upload would otherwise leave the last good site up forever.
+          if-no-files-found: error

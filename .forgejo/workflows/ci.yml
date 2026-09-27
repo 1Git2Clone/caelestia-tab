@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+# Cancel superseded runs when a branch is pushed repeatedly.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# The helper's jobs mirror serenity-discord-bot's: ubuntu-latest, whose image
+# carries node for `uses:`, with a rustup toolchain. Third-party actions need
+# their full github.com URL; the runner's default registry is code.forgejo.org.
+# The extension and the flake run on nix-node, the vps repo's runner label that
+# carries both nix and node, so they use the same dev shell a contributor does.
+jobs:
+  fmt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: https://github.com/actions/checkout@v5
+      - uses: https://github.com/dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - run: cargo fmt --check
+
+  clippy:
+    runs-on: ubuntu-latest
+    env:
+      CARGO_PROFILE_DEV_DEBUG: 0
+    steps:
+      - uses: https://github.com/actions/checkout@v5
+      - uses: https://github.com/dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: https://github.com/Swatinem/rust-cache@v2
+      - run: cargo clippy --all-targets -- -D warnings
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: https://github.com/actions/checkout@v5
+      - uses: https://github.com/dtolnay/rust-toolchain@stable
+      - uses: https://github.com/Swatinem/rust-cache@v2
+      - run: cargo test --verbose
+
+  extension:
+    runs-on: nix-node
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - name: node --test
+        run: nix develop -c node --test tests/*.test.mjs
+      - name: web-ext lint
+        run: nix develop -c web-ext lint --source-dir extension --self-hosted
+
+  nix:
+    runs-on: nix-node
+    steps:
+      - uses: actions/checkout@v7.0.1
+      # Builds the helper the way a flake user gets it, manifest included.
+      - run: nix build -L .#default && test -s result/lib/mozilla/native-messaging-hosts/caelestia_tab.json
+      # The whole path in a real headless Firefox, against the helper just built.
+      - name: End to end
+        run: HELPER=$PWD/result/bin/caelestia-tab nix shell nixpkgs#firefox nixpkgs#geckodriver nixpkgs#nodejs -c node tests/e2e-firefox.mjs
