@@ -1,28 +1,30 @@
-# Writing a component
+# Writing a menu tab
 
-A widget on the new tab is a Svelte component that also exports `widget`: its
-label, its defaults, and the fields its settings take. The settings panel
-draws a form from those fields, and what the user sets arrives as the
-component's `settings` prop. The clock (`extension/src/components/widgets/CtClock.svelte`)
-is a complete example.
+The page itself is fixed (the bar, the clock, the bookmarks); what you add to
+it is a tab in the menu. A tab is a Svelte component that also exports `tab`:
+its label, a Nerd Font glyph for its button, its defaults, and the fields its
+settings take. With the pen on, the open tab's chip opens a form drawn from
+those fields in the side panel, and what the user sets arrives as the
+component's `settings` prop. The Media tab
+(`extension/src/components/tabs/CtMedia.svelte`) is a complete example.
 
 ```svelte
 <script module lang="ts">
-  import type { WidgetInfo } from "../../fields.ts";
+  import type { TabInfo } from "$ct/fields.ts";
 
-  export const widget: WidgetInfo = {
-    label: "Hello",                       // shown in Settings, Widgets
+  export const tab: TabInfo = {
+    label: "Hello",                       // its button on the menu's bar
+    glyph: "\uf256",                      // nf-fa-hand_paper_o
     defaults: { who: "world", loud: false },
-    fields: [                             // the form Settings draws for it
+    fields: [                             // the form the pen opens for it
       { key: "who", label: "Greet", type: "text" },
       { key: "loud", label: "Shout", type: "checkbox" },
     ],
-    place: { justify: "center" },         // optional: where a new one sits on the page
   };
 </script>
 
 <script lang="ts">
-  let { settings, editing }: { settings: any; editing: boolean } = $props();
+  let { settings }: { settings: any } = $props();
 </script>
 
 <p class="ct-hello rounded-2xl bg-glass p-4 text-on-surface">
@@ -31,23 +33,26 @@ is a complete example.
 ```
 
 Put it in your components folder (see
-[Your own components](#your-own-components)), build, and add it from
-*Settings*, *General*, *Add a widget*. It's then edited from the page, with the
-pen. The same goes for a widget of caelestia-tab's own, in
-`extension/src/components/widgets/`.
+[Your own components](#your-own-components)) and build: it's a tab after
+caelestia-tab's own (GitHub, Media), in the order of the file names. The
+clock, the toolbar and the bookmarks take the same `fields` (their `widget`
+export), which is how the pen edits them too.
 
-## What a component gets
+## What a tab gets
 
-- `settings`: this widget's settings, `defaults` filled in with what's saved.
-  It's live state: assign to it (`settings.who = "you"`) and the change is
-  saved, and every open tab shows it. There's no save call.
-- `editing`: whether the pen button is on. Offer rearranging and editing then.
+- `settings`: this tab's settings, `defaults` filled in with what's saved,
+  under `menu.tabs.<ComponentName>`. It's live state: assign to it
+  (`settings.who = "you"`) and the change is saved, and every open tab shows
+  it. There's no save call.
 - The whole app state, `getContext<App>("ct")` (see
-  [The new tab](../architecture/newtab.md#state)), for opening an editor in
-  the side panel: `edit(app, title, component, props)` from
-  `store.svelte.ts`. The editor gets an `onclose` prop. There are no pop-ups:
-  an editor changes the widget's settings directly, so the page shows it
-  live.
+  [The new tab](../architecture/newtab.md#state)): the helper's data in
+  `app.data`, `tell()` for a command to a helper plugin, and
+  `edit(app, title, component, props)` from `store.svelte.ts` for an editor of
+  your own in the side panel. The editor gets an `onclose` prop. There are no
+  pop-ups: an editor changes the settings directly, so the page shows it live.
+
+The tab fills the panel under the bar and scrolls when it's taller; a
+`h-full` root can divide the height itself, as Media does.
 
 ## Fields
 
@@ -61,26 +66,15 @@ to show only when it applies, like a colour only when the source is a colour.
 `CtForm` draws them, bound to an object, and works inside your own components
 too.
 
-## Edit mode
-
-With the pen on, `editing` is true and the widget gets an overlay. The default
-one (`CtEditOverlay`) opens the widget's fields and placement. Set
-`widget.overlay` to a component of your own (it gets `{ widget, app }`), or to
-`false` for none, when the widget edits itself in place.
-
-## Actions
-
-`widget.actions` puts buttons in the toolbar while the widget is shown:
-`{ icon, title, run(settings, app) }`. The bookmarks' + is one.
-
 ## Colours and style
 
 The `Ct*` components use Tailwind utilities only, and the scheme is
 Tailwind's palette: `bg-primary`, `text-on-surface`, `border-outline-variant`,
 `bg-glass` for the frosted panels. They follow the scheme live. Outside
 Tailwind the same colours are `var(--caelestia-primary)` and so on. `scheme.ts`
-exports `COLOURS` (the colours offered in pickers), `cssColour(token)` and
-`onColour(token)` (the text colour for a background colour).
+exports `COLOURS` (the colours offered in pickers), `cssColour(token)`,
+`onColour(token)` (the text colour for a background colour) and
+`complement(token)` (the accent that goes with it, as under a bookmark).
 
 Font sizes are in `pt`, everything else in `rem`. Give the root element a
 `ct-<name>` class, so custom CSS can find it, and square the corners that
@@ -96,17 +90,17 @@ Yours go in `~/.config/caelestia-tab/components/` (or wherever
 npm run --prefix extension build
 ```
 
-Every `.svelte` file there is compiled with ours. One that exports `widget` is
-a widget, offered in *Settings*, *General*, *Add a widget*; the rest are
-components your widgets import (`import Marquee from "./Marquee.svelte"`).
+Every `.svelte` file there is compiled with ours. One that exports `tab` is a
+menu tab; the rest are components your tabs import
+(`import Card from "./Card.svelte"`).
 They reach ours through `$ct`: `$ct/fields.ts`, `$ct/store.svelte.ts` (`tell`,
-`edit`, the `App` type), `$ct/components/CtIcon.svelte` and so on. Style them
+`edit`, the `App` type), `$ct/components/CtIcon.svelte`,
+`$ct/components/CtMarquee.svelte` and so on. Style them
 however you like: Tailwind's classes and the scheme's colours work in them (the
 build scans the folder), and so do `<style>`, `lang="scss"` and plain CSS.
 
-A widget whose component isn't in a build, because it was built without your
-folder, keeps its settings: it just doesn't show, except as a placeholder in
-edit mode, where it can be removed.
+A tab whose component isn't in a build, because it was built without your
+folder, keeps its settings: it just isn't on the bar.
 
 A build without that folder is a build without your components, so an
 extension built elsewhere (or signed for a store) won't have them. They need a

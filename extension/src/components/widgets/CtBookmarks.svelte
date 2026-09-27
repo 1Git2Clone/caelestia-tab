@@ -29,6 +29,9 @@
     showName: true,
     image: "",
     colour: "primary",
+    // The line under it: "auto" (the colour's complement), "none" or "colour".
+    line: "auto",
+    lineColour: "primary",
     width: 1,
     height: 1,
     column: "",
@@ -38,7 +41,6 @@
 
   export const widget: WidgetInfo = {
     label: "Bookmarks",
-    place: { justify: "stretch", align: "end" },
     defaults: {
       ...PRESETS[0].values,
       flow: "row dense",

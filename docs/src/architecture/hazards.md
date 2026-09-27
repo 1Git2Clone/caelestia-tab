@@ -143,3 +143,21 @@ the hard way.
   and every other plugin's value, a media command's included, queued behind
   them, arriving tens of seconds late with no error anywhere. The host
   ignores access events (2026-09-27).
+- **Spotify sends `mpris:trackid` as a string.** MPRIS says an object path,
+  and reading it as one gave Spotify no track, so `SetPosition` (which needs
+  the track) could never be sent and a lyric click did nothing, silently. The
+  media plugin takes either (2026-09-27).
+- **An implicit grid column is `auto`, and grows to its content.** A grid
+  with no `grid-template-columns` sizes its one column to the widest child,
+  so a long line (a marquee's) pushed the Media tab's cover column past its
+  cell instead of scrolling inside it. Give such grids
+  `grid-cols-[minmax(0,1fr)]` (2026-09-27).
+- **An effect that reads a derived object re-runs on every update.** Each
+  helper value is a new object, so an effect meant for "a new song" that read
+  `p?.track` through `p` ran on every position update and ended the lyrics'
+  hold each time. Derive the primitive first (`const track = $derived(p?.track)`)
+  and read that (2026-09-27).
+- **A glyph is a button's accessible name.** A Nerd Font glyph is a
+  private-use character, and as a button's only text it becomes its name,
+  which no label or locator matches. Mark the glyph `aria-hidden="true"`
+  and name the button (2026-09-27).

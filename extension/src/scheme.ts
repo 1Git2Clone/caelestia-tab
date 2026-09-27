@@ -39,3 +39,18 @@ export function onColour(token: string) {
   }
   return token.startsWith("surface") ? "onSurface" : `on${token[0].toUpperCase()}${token.slice(1)}`;
 }
+
+// The accent that goes with a colour, for the line under a bookmark: a solid
+// colour takes the one after it round primary, secondary, tertiary; a
+// container takes its own solid colour; a surface, primary. A fixed colour
+// takes primary.
+const COMPLEMENT: Record<string, string> = {
+  primary: "tertiary",
+  secondary: "primary",
+  tertiary: "secondary",
+  primaryContainer: "primary",
+  secondaryContainer: "secondary",
+  tertiaryContainer: "tertiary",
+  error: "errorContainer",
+};
+export const complement = (token: string) => COMPLEMENT[token] ?? "primary";

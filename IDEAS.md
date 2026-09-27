@@ -8,8 +8,10 @@ colour scheme. It's meant for a broad audience, not one setup.
 
 - The core only loads plugins, config, secrets and styles, and passes events
   between them.
-- Every widget is a plugin, including the built-in ones, which are just default
-  plugins.
+- The page itself is fixed (a bar, the clock, the bookmarks), not a platform
+  of widgets: what's extensible is the menu's tabs, the shipped ones
+  included. (Decided 2026-09-27, after a user-defined grid of placeable
+  widgets proved a source of stray states.)
 - The config lets anyone declare:
   - which plugins to load;
   - their own plugin code;
@@ -91,11 +93,12 @@ next.
 ## Default plugins (after the milestone)
 
 - Git hosting: open PRs, issues and review requests.
-  - GitHub out of the box.
+  - GitHub out of the box: built, as the menu's GitHub tab.
   - Custom providers configurable: Forgejo (and Gitea), GitLab, Bitbucket.
 - Mail: recent and unread, over IMAP.
 - Weather.
-- Media controls for a configurable service, Spotify by default.
+- Media controls for a configurable service, Spotify by default: built, as
+  the menu's Media tab, for every MPRIS player.
 - Music servers, with Navidrome as the reference.
 - Status checks: an Uptime Kuma plugin as the generic reference.
 

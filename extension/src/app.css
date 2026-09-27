@@ -58,6 +58,17 @@
   --font-glyph: "caelestia-tab symbols";
 }
 
+/* A line that scrolls round and round (CtMarquee): two copies side by side,
+   moved one copy's width, so it loops without a seam. */
+@theme {
+  --animate-marquee: ct-marquee var(--speed, 10s) linear infinite;
+  @keyframes ct-marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+}
+
 @layer base {
 @font-face {
   font-family: "caelestia-tab symbols";

@@ -1,19 +1,17 @@
-# The widgets
+# The page and its tabs
 
-Every widget is a component placed on the page's grid (see
-[The new tab](../architecture/newtab.md#the-page)). Add one from *Settings*,
-*General*, *Add a widget*: it goes on the page with its editor open beside it.
-After that, a widget is edited from the page: turn on the pen and pick it for
-its properties, its placement, whether it shows, or to remove it.
+The page is fixed: a bar along the top with the menu button, the menu's tabs
+and the toolbar; the clock under it; and the bookmarks at the bottom. Open the
+menu and its tab covers the clock (see
+[The new tab](../architecture/newtab.md#the-page)). Everything is edited from
+the page: turn on the pen and pick a part (the toolbar, the clock, the
+bookmarks, or the open tab) for its settings in the side panel.
 
 ## Toolbar
 
-The pen, the settings button and each shown widget's own buttons (the
-bookmarks' +). Each group can be turned off. Without a toolbar on the page,
-Ctrl+, still opens settings. It's drawn above the other widgets, and edit
-mode's outlines and pens above everything, so a widget placed over its area
-(a menu across the top, say) never hides them. Such a widget can find it at
-`.ct-toolbar` to keep its own buttons clear of it.
+The bookmarks' +, the pen and the settings button, each of which can be
+turned off, and which side of the bar it sits on (the menu's tabs take the
+other). Without the settings button, Ctrl+, still opens settings.
 
 ## Clock and date
 
@@ -23,39 +21,52 @@ glass behind it can be turned off.
 
 ## Bookmarks
 
-Tiles on a CSS grid you define, or in even rows. See
+Tiles on a CSS grid you define, or in even rows, each with a line under it in
+the colour that goes with the tile's, one of your own, or none. See
 [The new tab](../architecture/newtab.md#bookmarks).
 
-## Data for your own widgets
+## The menu's tabs
 
-caelestia-tab's own widgets are the three above. The rest is data the helper
-gathers for widgets you write (see
-[Writing a component](plugins.md#your-own-components)); a widget reads it from
-`app.data[topic]` and asks for it with `tell({ topic, command, … })`:
+Open or closed, and the tab it's on, stay as you left them, in every new tab.
+Tabs of your own come after these (see [Writing a menu tab](plugins.md)).
+
+- **GitHub**: each of your searches (one per line, `Label: query`) as a
+  column of compact cards, and when the helper last searched, as
+  *Updated at 22:31*, *Updated at yesterday, 22:31* or
+  *Updated at 26-09-2026 22:31*: the words and the three formats are settings.
+- **Media**: a tab per player at the top (four a row, two on a narrow page,
+  the last row's sharing the whole width), then the one picked, or the one
+  playing: its cover, title, album and artist, year and controls, and the
+  lyrics beside them when there's room, under them when there isn't. The
+  cover's size and its column's width are settings. Timed lyrics follow the
+  song and a line clicked plays from there; scroll them yourself and they stop
+  following until you've stopped with the current line in view. Lyrics
+  without times say so.
+
+## The helper's data
+
+The tabs read what the helper gathers from `app.data[topic]`, and ask for it
+with `tell({ topic, command, … })`. A tab of your own can too:
 
 - **`media`**: every MPRIS player on the session bus (the Spotify app, mpv,
   Firefox's own media …), with its title, artist, album, year, cover, length
   and position, and the controls: `PlayPause`, `Play`, `Pause`, `Next`,
   `Previous` and `SetPosition`, and nothing else on the bus. MPRIS doesn't
   announce the position as it moves, so each player carries the position
-  with the time it was read (`at`) and its `rate`, for a widget to move it on
-  itself. Spotify's app is known to report no position; checked with
-  Firefox's media only.
+  with the time it was read (`at`) and its `rate`, for a tab to move it on
+  itself. Checked with Firefox's media and the Spotify app.
 - **`lyrics`**: a track's lyrics from [LRCLIB](https://lrclib.net), after a
-  widget sends `{ command: "get", artist, title, album, seconds }`, timed
+  tab sends `{ command: "get", artist, title, album, seconds }`, timed
   (`synced: [{ ms, text }]`) when LRCLIB has them, plain otherwise, or
-  `none`. The artist, title and album go to lrclib.net, and only when a widget
+  `none`. The artist, title and album go to lrclib.net, and only when a tab
   asks. Some players send lyrics themselves (`lyrics` on the player).
-- **`github`**: GitHub searches, after a widget sends
+- **`github`**: GitHub searches, after a tab sends
   `{ command: "queries", widget: id, queries }` (its own list, replacing its
-  last one). The helper runs every widget's every 90 seconds and on
-  `{ command: "refresh" }`, and an unchanged result comes back as a `304`,
-  which doesn't count against GitHub's rate limit. Every open tab reads the
-  same results from storage, so ten open tabs make no more requests than one.
-
-A menu down the left of the page, with a GitHub feed and a player with its
-lyrics, is one such widget: see
-[Your own components](plugins.md#your-own-components).
+  last one). The helper runs all of them every 90 seconds and on
+  `{ command: "refresh" }`, side by side, and an unchanged result comes back
+  as a `304`, which doesn't count against GitHub's rate limit. Every open tab
+  reads the same results from storage, so ten open tabs make no more requests
+  than one.
 
 ### GitHub's token
 

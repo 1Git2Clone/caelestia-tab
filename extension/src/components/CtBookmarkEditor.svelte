@@ -28,6 +28,17 @@
         { key: "showLetter", label: "Show the glyph or letters", type: "checkbox" },
         { key: "image", label: "Image", type: "image", hint: "Covers the tile. Without one, the tile is its colour." },
         { key: "colour", label: "Colour", type: "colour", hint: "Fills the tile when it has no image. A scheme colour follows the scheme." },
+        {
+          key: "line",
+          label: "Line under it",
+          type: "select",
+          options: [
+            ["auto", "Matching its colour"],
+            ["colour", "A colour of my own"],
+            ["none", "None"],
+          ],
+        },
+        { key: "lineColour", label: "Line colour", type: "colour", when: (v) => v.line === "colour" },
       ],
     ],
     ["Address", [{ key: "url", label: "URL", type: "url", placeholder: "https://example.com", hint: "Without a scheme, https:// is assumed." }]],

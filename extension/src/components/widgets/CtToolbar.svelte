@@ -3,25 +3,33 @@
 
   export const widget: WidgetInfo = {
     label: "Toolbar",
-    place: { justify: "end", align: "start" },
-    defaults: { actions: true, edit: true, settings: true },
+    defaults: { side: "end", actions: true, edit: true, settings: true },
     fields: [
-      { key: "actions", label: "Widgets' buttons", type: "checkbox", hint: "Like the bookmarks' +." },
+      {
+        key: "side",
+        label: "Side",
+        type: "select",
+        hint: "Where it sits on the bar. The menu's tabs take the other side, or the left when it's in the middle.",
+        options: [
+          ["start", "Left"],
+          ["center", "Middle"],
+          ["end", "Right"],
+        ],
+      },
+      { key: "actions", label: "The bookmarks' +", type: "checkbox" },
       { key: "edit", label: "The pen, for edit mode", type: "checkbox" },
       { key: "settings", label: "Settings", type: "checkbox", hint: "Without it, Ctrl+, still opens them." },
     ],
   };
 </script>
 
-<!-- The pill of buttons: each shown widget's actions, the pen for edit mode
-     and the settings. A widget like any other, placed where the user wants,
-     and drawn above the others (z-2): a widget laid over its area, like a
-     menu, can't hide the way out of edit mode. -->
+<!-- The pill of buttons on the bar: the bookmarks' +, the pen for edit mode
+     and the settings. -->
 <script lang="ts">
   import { getContext } from "svelte";
   import type { App } from "../../store.svelte.ts";
-  import { widgets } from "../../widgets.ts";
   import CtIcon from "../CtIcon.svelte";
+  import { widget as bookmarks } from "./CtBookmarks.svelte";
 
   let { settings }: { settings: any } = $props();
   const app = getContext<App>("ct");
@@ -30,14 +38,13 @@
   const on = `${base} bg-primary text-on-primary`;
 </script>
 
-<nav class="ct-toolbar relative z-2 flex gap-0.5 rounded-full bg-glass p-1 backdrop-blur-md">
+<!-- On glass of its own, always: over the open menu it's a shade darker,
+     but taking it away when the menu opens left it bare while the panel was
+     still growing in. -->
+<nav class="ct-toolbar flex gap-0.5 rounded-full bg-glass p-1 backdrop-blur-md">
   {#if settings.actions}
-    {#each app.settings.widgets as w (w.id)}
-      {#if !w.hidden}
-        {#each widgets.find((c) => c.name === w.component)?.widget.actions ?? [] as a (a.title)}
-          <button type="button" class={off} title={a.title} aria-label={a.title} onclick={() => a.run(w.settings, app)}><CtIcon name={a.icon} /></button>
-        {/each}
-      {/if}
+    {#each bookmarks.actions ?? [] as a (a.title)}
+      <button type="button" class={off} title={a.title} aria-label={a.title} onclick={() => a.run(app.settings.bookmarks, app)}><CtIcon name={a.icon} /></button>
     {/each}
   {/if}
   {#if settings.edit}

@@ -1,6 +1,6 @@
 // What a user does on the new tab: the pen, the side panel's editors, live
-// edits, adding and removing widgets, and settings surviving a reload. Every
-// test fails on any uncaught error on the page. A new interaction gets a test.
+// edits, the menu and its tabs, and settings surviving a reload. Every test
+// fails on any uncaught error on the page. A new interaction gets a test.
 import { expect, test, type Page } from "@playwright/test";
 import path from "node:path";
 
@@ -58,19 +58,6 @@ test("glyph suggestions follow the bookmark's name", async ({ page }) => {
   await expect(panel(page).getByTitle("nf-fa-github", { exact: true })).toHaveCount(0);
 });
 
-test("adding a widget opens its editor, and removing it takes it off the page", async ({ page }) => {
-  const widgets = page.locator(".ct-widget");
-  const before = await widgets.count();
-  await page.getByTitle("Settings", { exact: true }).click();
-  await panel(page).getByLabel("Widget to add").selectOption("CtClock");
-  await panel(page).getByRole("button", { name: "Add", exact: true }).click();
-  await expect(widgets).toHaveCount(before + 1);
-  await expect(title(page)).toHaveText("Clock and date");
-  await panel(page).getByRole("button", { name: "Remove this widget" }).click();
-  await expect(widgets).toHaveCount(before);
-  await expect(title(page)).toHaveText("Settings");
-});
-
 test("a field only shows when it applies", async ({ page }) => {
   await page.getByTitle("Settings", { exact: true }).click();
   await panel(page).getByRole("tab", { name: "Background" }).click();
@@ -106,40 +93,185 @@ test("edits survive a reload", async ({ page }) => {
   await expect(page.locator(".ct-tile").first()).toContainText("Kept");
 });
 
-test("a user component is offered, placed and edited like ours", async ({ page }) => {
-  await page.getByTitle("Settings", { exact: true }).click();
-  await panel(page).getByLabel("Widget to add").selectOption("Hello");
-  await panel(page).getByRole("button", { name: "Add", exact: true }).click();
+// Puts values in storage as the helper would, then loads the page again.
+async function seed(page: Page, values: Record<string, unknown>) {
+  await page.evaluate(async (v) => {
+    const { settings } = await (window as any).browser.storage.local.get("settings");
+    const s = settings ?? {};
+    for (const [k, x] of Object.entries(v)) if (k === "settings") Object.assign(s, x);
+    await (window as any).browser.storage.local.set({ ...v, settings: s });
+  }, values);
+  await page.reload();
+}
+const menuButton = (page: Page) => page.getByRole("button", { name: /the menu$/ });
+const tabButton = (page: Page, name: string) => page.locator(".ct-menu nav").getByRole("button", { name, exact: true });
+
+test("the menu opens on the tab last shown, and stays as it was left after a reload", async ({ page }) => {
+  await expect(menuButton(page)).toHaveAttribute("aria-expanded", "false");
+  await menuButton(page).click();
+  await expect(page.locator(".ct-clock")).toHaveCount(0);
+  await tabButton(page, "Media").click();
+  await expect(tabButton(page, "Media")).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator(".ct-media")).toBeVisible();
+  await page.waitForTimeout(300);
+  await page.reload();
+  await expect(menuButton(page)).toHaveAttribute("aria-expanded", "true");
+  await expect(page.locator(".ct-media")).toBeVisible();
+  await menuButton(page).click();
+  await expect(page.locator(".ct-clock")).toBeVisible();
+});
+
+test("the clock can't be edited while a tab covers it, and the open tab can", async ({ page }) => {
+  await page.getByTitle("Edit", { exact: true }).click();
+  await expect(page.getByTitle("Edit Clock and date")).toBeVisible();
+  await menuButton(page).click();
+  await tabButton(page, "GitHub").click();
+  await expect(page.getByTitle("Edit Clock and date")).toHaveCount(0);
+  await page.getByTitle("Edit GitHub").click();
+  await expect(title(page)).toHaveText("GitHub");
+  await box(page, "Before the time of the last search").fill("Last refresh:");
+  await seed(page, { github: { at: Date.now(), results: {} } });
+  await expect(page.locator(".ct-github header")).toContainText("Last refresh:");
+});
+
+test("GitHub's last search shows in the tab's formats", async ({ page }) => {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  yesterday.setHours(9, 5);
+  await seed(page, { github: { at: yesterday.getTime(), results: {} }, settings: { menu: { open: true, tab: "CtGitHub", tabs: {} } } });
+  await expect(page.locator(".ct-github header")).toContainText("Updated at yesterday, 09:05");
+});
+
+test("the toolbar on the left puts the menu on the right, its button at the edge", async ({ page }) => {
+  await page.getByTitle("Edit", { exact: true }).click();
+  await page.getByTitle("Edit Toolbar").click();
+  await panel(page).getByRole("combobox", { name: "Side" }).selectOption("start");
+  await page.keyboard.press("Escape");
+  await page.keyboard.press("Escape");
+  await menuButton(page).click();
+  const toolbar = (await page.locator(".ct-toolbar").boundingBox())!;
+  const menu = (await menuButton(page).boundingBox())!;
+  const github = (await tabButton(page, "GitHub").boundingBox())!;
+  expect(menu.x).toBeGreaterThan(toolbar.x);
+  expect(menu.x).toBeGreaterThan(github.x);
+});
+
+test("a user's tab is offered and edited like ours", async ({ page }) => {
+  await menuButton(page).click();
+  await tabButton(page, "Hello").click();
   await expect(page.locator(".hello")).toHaveText("Hello, world");
-  await expect(title(page)).toHaveText("Hello");
+  await page.getByTitle("Edit", { exact: true }).click();
+  await page.getByTitle("Edit Hello").click();
   await box(page, "Greet").fill("caelestia");
   await expect(page.locator(".hello")).toHaveText("Hello, caelestia");
 });
 
-test("a widget whose component isn't built stays removable from edit mode", async ({ page }) => {
-  await page.evaluate(async () => {
-    const { settings } = await (window as any).browser.storage.local.get("settings");
-    const s = settings ?? {};
-    s.widgets = [...(s.widgets ?? []), { id: "gone", component: "NotBuilt", place: { area: "auto", justify: "start", align: "start" }, settings: {} }];
-    await (window as any).browser.storage.local.set({ settings: s });
-  });
-  await page.reload();
-  await page.getByTitle("Edit", { exact: true }).click();
-  await expect(page.getByText("No component called NotBuilt in this build.")).toBeVisible();
-  await page.getByTitle("Edit NotBuilt").click();
-  await panel(page).getByRole("button", { name: "Remove this widget" }).click();
-  await expect(page.getByText("No component called NotBuilt")).toHaveCount(0);
+const players = (n: number) => ({
+  players: Array.from({ length: n }, (_, i) => ({
+    player: `org.mpris.MediaPlayer2.p${i}`,
+    identity: `Player ${i}`,
+    status: i === 1 ? "Playing" : "Paused",
+    title: `Song ${i}`,
+    artist: "Artist",
+    album: "Album",
+    position: 0,
+    at: Date.now(),
+    rate: 1,
+    canSeek: true,
+    track: `/t/${i}`,
+  })),
 });
 
-test("a widget laid over the toolbar leaves its buttons clickable", async ({ page }) => {
+test("each player is a tab, and the last row of them fills the width", async ({ page }) => {
+  await page.setViewportSize({ width: 1400, height: 900 });
+  await seed(page, { media: players(5), settings: { menu: { open: true, tab: "CtMedia", tabs: {} } } });
+  const tabs = page.getByRole("group", { name: "Players" }).getByRole("button");
+  await expect(tabs).toHaveCount(5);
+  // The one playing is shown until another is picked.
+  await expect(page.locator(".ct-media")).toContainText("Song 1");
+  const first = (await tabs.nth(0).boundingBox())!;
+  const last = (await tabs.nth(4).boundingBox())!;
+  expect(last.width).toBeGreaterThan(first.width * 3.5);
+  await tabs.nth(3).click();
+  await expect(page.locator(".ct-media")).toContainText("Song 3");
+  await expect(page.locator(".ct-media")).toContainText("Album • Artist");
+});
+
+test("a lyric line clicked plays from its start", async ({ page }) => {
+  await seed(page, {
+    media: players(1),
+    lyrics: { key: "artist\u001fsong 0", synced: [{ ms: 0, text: "one" }, { ms: 12500, text: "two" }] },
+    settings: { menu: { open: true, tab: "CtMedia", tabs: {} } },
+  });
+  await page.getByRole("button", { name: "two" }).click();
+  const sent = () => page.evaluate(() => (window as any).__sent?.map((m: any) => m.message) ?? []);
+  await expect.poll(async () => (await sent()).find((m: any) => m.command === "SetPosition")).toMatchObject({ player: "org.mpris.MediaPlayer2.p0", track: "/t/0", position: 12500000 });
+});
+
+test("scrolling the lyrics stops them following, until the current line is back in view", async ({ page }) => {
+  const at = (line: number) => ({ players: [{ ...players(1).players[0], status: "Paused", position: line * 2000 * 1000, at: Date.now() }] });
+  await seed(page, {
+    media: at(30),
+    lyrics: { key: "artist\u001fsong 0", synced: Array.from({ length: 60 }, (_, i) => ({ ms: i * 2000, text: `line ${i}` })) },
+    settings: { menu: { open: true, tab: "CtMedia", tabs: {} } },
+  });
+  const lyrics = page.locator(".ct-lyrics");
+  const top = () => lyrics.evaluate((el) => el.scrollTop);
+  const shown = (text: string) =>
+    lyrics.evaluate((el, text) => {
+      const line = [...el.querySelectorAll("button")].find((b) => b.textContent === text)!.getBoundingClientRect();
+      const box = el.getBoundingClientRect();
+      return line.bottom > box.top && line.top < box.bottom;
+    }, text);
+  await expect.poll(() => shown("line 30")).toBe(true);
+  await expect.poll(top).toBeGreaterThan(100);
+
+  // Scrolled away from the current line: it stays where you left it.
+  await lyrics.hover();
+  // Firefox caps how far one wheel event goes: several, like a real wheel.
+  for (let i = 0; i < 30 && (await top()) > 0; i++) await page.mouse.wheel(0, -400);
+  await expect.poll(top).toBe(0);
+  await page.waitForTimeout(2000);
+  expect(await top()).toBe(0);
+  await page.evaluate((media) => (window as any).browser.storage.local.set({ media }), at(40));
+  await page.waitForTimeout(600);
+  expect(await top()).toBe(0);
+
+  // Scrolled back to it: after a moment, it follows again.
+  while (!(await shown("line 40"))) await page.mouse.wheel(0, 200);
+  await page.waitForTimeout(2000);
+  await page.evaluate((media) => (window as any).browser.storage.local.set({ media }), at(55));
+  await expect.poll(() => shown("line 55")).toBe(true);
+});
+
+test("a bookmark's line matches its colour, or is its own, or none", async ({ page }) => {
+  const tile = page.locator(".ct-tile").first();
+  await expect(tile).toHaveCSS("border-bottom-width", "3px");
+  await page.getByTitle("Edit", { exact: true }).click();
+  await page.locator(".ct-controls").first().getByTitle("Edit").click();
+  const line = panel(page).getByRole("combobox", { name: "Line under it" });
+  await expect(panel(page).getByRole("radiogroup", { name: "Line colour" })).toHaveCount(0);
+  await line.selectOption("colour");
+  await expect(panel(page).getByRole("radiogroup", { name: "Line colour" })).toBeVisible();
+  await line.selectOption("none");
+  await page.getByTitle("Done editing").click();
+  await expect(tile).toHaveCSS("border-bottom-width", "0px");
+});
+
+test("settings from when the page was a grid of widgets keep each part's", async ({ page }) => {
   await page.evaluate(async () => {
-    const { settings } = await (window as any).browser.storage.local.get("settings");
-    const s = settings ?? {};
-    s.widgets = [...(s.widgets ?? []), { id: "over", component: "Hello", place: { area: "toolbar", justify: "stretch", align: "stretch" }, settings: {} }];
-    await (window as any).browser.storage.local.set({ settings: s });
+    await (window as any).browser.storage.local.set({
+      settings: {
+        layout: { areas: '"toolbar" "clock" "bookmarks"' },
+        widgets: [
+          { id: "toolbar", component: "CtToolbar", place: {}, settings: { settings: true, edit: true, actions: true } },
+          { id: "clock", component: "CtClock", place: {}, settings: { timeSeparator: "~" } },
+          { id: "bookmarks", component: "CtBookmarks", place: {}, settings: { items: [{ id: "a", name: "Kept", url: "", colour: "primary", showName: true, width: 1, height: 1 }] } },
+        ],
+      },
+    });
   });
   await page.reload();
-  await expect(page.locator(".hello")).toBeVisible();
-  await page.getByTitle("Settings", { exact: true }).click({ timeout: 2000 });
-  await expect(panel(page)).toBeVisible();
+  await expect(page.locator(".ct-clock")).toContainText("~");
+  await expect(page.locator(".ct-tile")).toHaveText(/Kept/);
 });

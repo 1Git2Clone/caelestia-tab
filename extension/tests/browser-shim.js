@@ -27,7 +27,8 @@
   };
   window.browser = {
     storage: { local },
-    runtime: { connect: () => ({}), sendMessage: async () => {} },
+    // Messages for the helper go nowhere, but are kept for tests to look at.
+    runtime: { connect: () => ({}), sendMessage: async (m) => void (window.__sent ??= []).push(m) },
     permissions: { contains: async () => true, request: async () => true },
   };
 })();

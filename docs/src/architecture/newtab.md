@@ -25,25 +25,22 @@ every component through Svelte's context (`getContext("ct")`):
 The settings are one object under `storage.local.settings`:
 
 ```ts
-{
-  layout: { columns, rows, areas, gap, padding },  // the page's CSS grid
-  font: "",                                        // the page's font-family; empty for the default
+{  font: "",                                        // the page's font-family; empty for the default
   panel: "CtSettings",                             // the component that draws settings
-  background: { source: "wallpaper" | "colour" | "none", colour, dim, blur },
-  widgets: [ { id, component, hidden?, place: { area, justify, align }, settings }, … ],
+  background: { source: "wallpaper" | "colour" | "none", colour, dim, blur },  clock: { … }, toolbar: { side, … }, bookmarks: { items, … },  // each part's settings
+  menu: { open, tab, tabs: { CtGitHub: { … }, CtMedia: { … }, … } },
   sites: { enabled, off: [styleId, …], accent, overrides },
   treeStyleTab: { source: "tint" | "wallpaper" | "none", colour, strength, dim, blur },
   css: "",                                         // custom CSS for the new tab
 }
 ```
 
-A widget is an instance of a component (`CtClock`, `CtBookmarks`, or one of
-yours), so the same component can appear twice with different settings. When
-settings load, each widget's `settings` are filled in from its component's
-`defaults`, so a component that gains a setting needs no migration. Settings
-saved before the Svelte rewrite name a `plugin` (`clock`, `bookmarks`), which
-is mapped to the component on load, and settings from before the page grid get
-the toolbar added, since it was part of the page then.
+Each part's settings, and each menu tab's, are filled in from its
+component's `defaults` when settings load, so a component that gains a setting
+needs no migration. Settings from when the page was a grid of widgets
+(`layout`, `widgets`) keep each part's settings and drop the placement; the
+menu widget's become the menu's. Settings saved before the Svelte rewrite
+name a `plugin` (`clock`, `bookmarks`), which is mapped to the component.
 
 Settings are local to the device: `storage.local`, not `storage.sync`, and,
 with the helper, `~/.config/caelestia-tab/settings.json` too. The browser's
@@ -58,33 +55,38 @@ object as JSON as well.
 
 ## The page
 
-The page is a CSS grid the user defines: `layout`'s columns, rows, named areas,
-gap and padding, typed as CSS in *Settings*, *General*. Each widget
-sits on it by its `place`: an `area` (one of the layout's names, or any
-`grid-area` value) and its alignment in that cell. The default layout is one
-column of three areas, `toolbar`, `clock` and `bookmarks`. Nothing about the
-page is fixed; the toolbar is a widget too (`CtToolbar`), with the pen and the
-settings button, and Ctrl+, opens settings without it.
+The page is fixed (`CtLayout`): the menu's section above the bookmarks. The
+section (`CtMenu`) has a bar along its top, with the menu button and the
+menu's tabs on one side and the toolbar (`CtToolbar`: the bookmarks' +, the
+pen, settings) on the other, and under the bar the clock. Opened, the menu is
+a panel over the whole section, growing out of the menu button (and shrinking
+back into it), with the open tab under the bar; the clock isn't drawn while
+it's covered. Switching tabs slides the new one in from the side its button
+is on. Whether the menu is open, and on which tab, is saved, so a new tab
+opens as the last one was left.
 
-`font` is the page's font, inherited by every widget unless it sets its own
+The toolbar's `side` puts it on the right (the tabs on the left), the left
+(the tabs on the right, mirrored so the menu button stays at the edge) or in
+the middle (the tabs on the left). Ctrl+, opens settings without it.
+
+`font` is the page's font, inherited by every part unless it sets its own
 (the clock's time and date each can). A font field autocompletes from the
 installed fonts, each shown in its own face, which the helper lists with
 `fc-list`, since a web page can't; without the helper (or with one from before
 the `fonts` plugin) it takes a name typed in. Any text is accepted, a whole
 `font-family` list included, and the next font down always follows it: the
-page's default after the page font, the page font after a widget's. So a name
+page's default after the page font, the page font after a part's. So a name
 that isn't a font, half-typed say, changes nothing. Font sizes are in `pt`; everything else
-is in `rem`, apart from grid tracks (`fr`) and the like.
+is in `rem`.
 
 ## Edit mode
 
-The pen turns on edit mode, and every widget gets an overlay: by default
-`CtEditOverlay`, an outline and a chip with the widget's name that opens its
-properties and placement (`CtWidgetEditor`), whether it shows, and removing
-it. A hidden widget stays on the page in edit mode, faded, so the pen can
-bring it back. A widget can bring its own
-overlay (`WidgetInfo.overlay`), or none, and can do more in edit mode itself
-through its `editing` prop, as the bookmarks' per-tile controls do.
+The pen turns on edit mode, and each part shown gets `CtEditOverlay`: an
+outline and a chip with its name, which opens its fields in the side panel
+(`CtPartEditor`). The parts are the toolbar, the clock (while the menu is
+closed), the bookmarks and the open tab. Nothing covered can be edited,
+since nothing covered is drawn. The bookmarks also do more in edit mode
+through their `editing` prop: each tile's controls.
 
 ## Saving and syncing
 
@@ -108,20 +110,19 @@ once, so the page's style doesn't carry a copy of the image as text.
 
 The settings are a panel docked to the window's right edge, not a modal: the
 page moves over to stay in view beside it, so a change shows as it's made.
-Every editor opens in the same panel, never in a pop-up: a widget's properties
-from the pen, a bookmark from its edit button or the +. `edit(app, title,
+Every editor opens in the same panel, never in a pop-up: a part's settings from the pen, a bookmark from its edit button or the +. `edit(app, title,
 component, props)` puts one there (`app.focus`), with a back arrow to the
 settings, and Escape steps back. Editors change the real settings, not a
 copy, so the page shows each change as it's made and there's nothing to save.
 A new bookmark is added before its editor opens, so it's on the page while
 it's filled in.
 
-A widget's form is drawn from its component's `fields` (see
-[Writing a component](../guides/plugins.md)): the settings panel knows nothing
-about clocks or bookmarks. Settings itself has no per-widget section: its
-*General* tab holds the page's font and grid and adds widgets, and everything
-about one widget is edited from the page with the pen. The panel is a
-component named in settings (`panel`), so it can be replaced.
+A part's form is drawn from its component's `fields` (see
+[Writing a menu tab](../guides/plugins.md)): the settings panel knows nothing
+about clocks or bookmarks. Settings itself has no per-part section: its
+*General* tab holds the page's font, and everything about one part is edited
+from the page with the pen. The panel is a component named in settings
+(`panel`), so it can be replaced.
 
 ## Styling
 
@@ -139,9 +140,9 @@ The `Ct*` components use Tailwind classes only. A value only known at run time
 Each component also carries a stable `ct-*` class (`ct-tile`, `ct-clock`,
 `ct-bookmarks` …) for your custom CSS to target.
 
-A widget's wrapper gets `ct-edge-top`, `-bottom`, `-left` and `-right` while
-it touches that edge of the window (`edges` in `layout.ts`, rechecked on
-resize and zoom). A widget squares its corners there with
+The bookmarks' wrapper gets `ct-edge-top`, `-bottom`, `-left` and `-right`
+while it touches that edge of the window (`edges` in `layout.ts`, rechecked on
+resize and zoom), and squares its corners there with
 `in-[.ct-edge-bottom]:rounded-b-none`.
 
 ## Bookmarks
@@ -161,7 +162,10 @@ so five tiles that don't fit on one row go 3 and 2, never 4 and 1
 A tile shows its image, or its colour when it has none: a scheme colour, which
 follows the scheme, or a fixed one from the browser's colour picker. Text on a
 scheme colour uses its "on" colour (`onPrimary` on `primary`); on a fixed one,
-black or white, whichever reads better. Uploaded images are scaled to 512 px
+black or white, whichever reads better. The line under a tile takes the accent that
+goes with its colour (`complement` in `scheme.ts`: tertiary under primary, a
+container's own colour under the container …), a colour of its own, or none,
+set per bookmark on its *Look* tab. Uploaded images are scaled to 512 px
 and stored in settings as WebP `data:` URLs, which is why the extension asks
 for `unlimitedStorage`.
 

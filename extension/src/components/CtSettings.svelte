@@ -1,18 +1,16 @@
 <!-- Settings, docked to the window's right edge and not modal: the page moves
      over to stay in view beside it, so every change shows as it's made. It's
-     also where every editor opens (app.focus): a widget's properties from the
+     also where every editor opens (app.focus): a part's settings from the
      pen, a bookmark. There are no pop-ups. -->
 <script lang="ts">
   import { getContext } from "svelte";
-  import { LAYOUT, type Field } from "../fields.ts";
+  import type { Field } from "../fields.ts";
   import { COLOURS } from "../scheme.ts";
-  import { complete, DEFAULTS, edit, type App, type Widget } from "../store.svelte.ts";
+  import { complete, DEFAULTS, type App } from "../store.svelte.ts";
   import { button, hint, iconButton, input, primary } from "../ui.ts";
-  import { widgets } from "../widgets.ts";
   import CtForm from "./CtForm.svelte";
   import CtIcon from "./CtIcon.svelte";
   import CtTabs from "./CtTabs.svelte";
-  import CtWidgetEditor from "./CtWidgetEditor.svelte";
 
   const app = getContext<App>("ct");
   let tab = $state(0);
@@ -52,22 +50,6 @@
     { key: "when", label: "Also on pages matching", type: "text", hint: "A CSS selector, checked once the page has loaded: the style applies wherever it matches." },
     { key: "css", label: "Your CSS", type: "textarea", rows: 6, hint: "Applied after the style, on the same pages. The scheme is in var(--caelestia-*)." },
   ];
-  // A new widget goes on the page and straight into its editor, with the pen
-  // on, so it can be placed where it should be.
-  let adding = $state("CtBookmarks");
-  function add() {
-    const c = widgets.find((c) => c.name === adding)!;
-    const widget: Widget = {
-      id: crypto.randomUUID(),
-      component: c.name,
-      place: { area: "auto", justify: "stretch", align: "start", ...c.widget.place },
-      settings: structuredClone(c.widget.defaults),
-    };
-    app.settings.widgets.push(widget);
-    app.editing = true;
-    edit(app, c.widget.label, CtWidgetEditor, { widget: app.settings.widgets.at(-1) });
-  }
-
   // Websites: the vendored styles, filterable, each with its override.
   let styles: { id: string; name: string }[] = $state([]);
   let filter = $state("");
@@ -122,18 +104,8 @@
 
   {#if tab === 0}
     <div class="grid gap-4">
-      <CtForm fields={[{ key: "font", label: "Font", type: "font", hint: "The whole page's, unless a widget sets its own." }]} values={app.settings} />
-      <p class="m-0 {hint}">Each widget is edited from the page: turn on the pen and pick one.</p>
-      <h3 class="m-0 text-lg font-medium">Layout</h3>
-      <p class="m-0 {hint}">The page is a CSS grid, and each widget sits in one of its areas (its placement, from the pen).</p>
-      <CtForm fields={LAYOUT} values={app.settings.layout} />
-      <h3 class="m-0 text-lg font-medium">Add a widget</h3>
-      <div class="flex gap-2">
-        <select class={input} bind:value={adding} aria-label="Widget to add">
-          {#each widgets as c (c.name)}<option value={c.name}>{c.widget.label}</option>{/each}
-        </select>
-        <button type="button" class={primary} onclick={add}>Add</button>
-      </div>
+      <CtForm fields={[{ key: "font", label: "Font", type: "font", hint: "The whole page's, unless a part sets its own." }]} values={app.settings} />
+      <p class="m-0 {hint}">The clock, the toolbar, the bookmarks and each of the menu's tabs are edited from the page: turn on the pen and pick one.</p>
     </div>
   {:else if tab === 1}
     <CtForm fields={BACKGROUND} values={app.settings.background} />

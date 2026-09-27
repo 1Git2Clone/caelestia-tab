@@ -1,10 +1,11 @@
-<!-- A user component, for the UI tests: it's built in from this folder
+<!-- A user's menu tab, for the UI tests: it's built in from this folder
      (CAELESTIA_TAB_COMPONENTS), imports from $ct, and takes a setting. -->
 <script module lang="ts">
-  import type { WidgetInfo } from "$ct/fields.ts";
+  import type { TabInfo } from "$ct/fields.ts";
 
-  export const widget: WidgetInfo = {
+  export const tab: TabInfo = {
     label: "Hello",
+    glyph: "", // nf-fa-hand_paper_o
     defaults: { who: "world" },
     fields: [{ key: "who", label: "Greet", type: "text" }],
   };

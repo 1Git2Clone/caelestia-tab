@@ -6,34 +6,22 @@ import type { Component } from "svelte";
 import { tstOptions, TREE_STYLE_TAB } from "./treestyletab.ts";
 import type { Scheme } from "./types.ts";
 import { SITES } from "./userstyles.ts";
-import { widgets } from "./widgets.ts";
-
-// Where a widget sits on the page's grid: any grid-area value (an area's
-// name, or 1 / 1 / 2 / 3), and its alignment in that cell.
-export interface Place {
-  area: string;
-  justify: "start" | "center" | "end" | "stretch";
-  align: "start" | "center" | "end" | "stretch";
-}
-
-export interface Widget {
-  id: string;
-  // The component's name: CtClock, CtBookmarks, or a user component's.
-  component: string;
-  hidden?: boolean;
-  place: Place;
-  settings: Record<string, any>;
-}
+import { parts, tabs } from "./widgets.ts";
 
 export interface Settings {
-  // The page is a CSS grid the user defines; widgets are placed on it.
-  layout: { columns: string; rows: string; areas: string; gap: string; padding: string };
   // The page's font, CSS font-family; empty for the default.
   font: string;
   // The component that draws the settings panel.
   panel: string;
   background: { source: "wallpaper" | "colour" | "none"; colour: string; dim: number; blur: number };
-  widgets: Widget[];
+  // The page is fixed: the bar (the menu's tabs, the toolbar), the clock or
+  // the open tab under it, and the bookmarks. Each part's settings:
+  clock: Record<string, any>;
+  toolbar: Record<string, any>;
+  bookmarks: Record<string, any>;
+  // Whether the menu is open and on which tab (kept, so a new tab opens as
+  // the last one was left), and each tab's settings, by its component's name.
+  menu: { open: boolean; tab: string; tabs: Record<string, Record<string, any>> };
   sites: typeof SITES;
   treeStyleTab: typeof TREE_STYLE_TAB;
   css: string;
@@ -52,30 +40,20 @@ export interface App {
   editing: boolean;
   panel: boolean;
   // What the side panel is editing instead of its tabs: a component and its
-  // props (a widget's properties, one bookmark). There are no pop-ups: every
+  // props (a part's settings, one bookmark). There are no pop-ups: every
   // editor is a view in the panel, beside the page, applying as it changes.
   // `title` can be a function, for a title that follows what's being edited.
   focus: { title: string | (() => string); component: Component<any>; props: Record<string, any> } | null;
 }
 
 export const DEFAULTS: Settings = {
-  layout: {
-    columns: "minmax(0, 1fr)",
-    // minmax(0, …): a tall widget scrolls inside its row instead of growing it
-    // and pushing the rest of the page off the screen.
-    rows: "auto minmax(0, 1fr) auto",
-    areas: '"toolbar" "clock" "bookmarks"',
-    gap: "2rem",
-    padding: "1rem 2.5rem 0",
-  },
   font: "",
   panel: "CtSettings",
   background: { source: "wallpaper", colour: "surfaceContainer", dim: 20, blur: 0 },
-  widgets: [
-    { id: "toolbar", component: "CtToolbar", place: { area: "toolbar", justify: "end", align: "start" }, settings: {} },
-    { id: "clock", component: "CtClock", place: { area: "clock", justify: "center", align: "center" }, settings: {} },
-    { id: "bookmarks", component: "CtBookmarks", place: { area: "bookmarks", justify: "stretch", align: "end" }, settings: {} },
-  ],
+  clock: {},
+  toolbar: {},
+  bookmarks: {},
+  menu: { open: false, tab: "", tabs: {} },
   sites: SITES,
   treeStyleTab: TREE_STYLE_TAB,
   css: "",
@@ -85,29 +63,39 @@ export const DEFAULTS: Settings = {
 const RENAMED: Record<string, string> = { clock: "CtClock", bookmarks: "CtBookmarks" };
 
 // Fills in what an older or partial settings object lacks: top-level keys,
-// each widget's place and settings from its component's defaults, and the
-// toolbar, which was part of the page before it was a widget.
+// each part's and each tab's settings from its defaults. Settings from when
+// the page was a grid of widgets (`widgets`, `layout`) keep each part's
+// settings, and the menu widget's, and drop the placement.
 export function complete(saved: any): Settings {
   const s: Settings = { ...structuredClone(DEFAULTS), ...saved };
-  s.layout = { ...DEFAULTS.layout, ...s.layout };
   s.sites = { ...SITES, ...s.sites };
   s.treeStyleTab = tstOptions(s.treeStyleTab);
   s.background = { ...DEFAULTS.background, ...s.background };
-  if (saved?.widgets && !saved.layout && !saved.widgets.some((w: any) => w.component === "CtToolbar")) {
-    s.widgets = [structuredClone(DEFAULTS.widgets[0]), ...s.widgets];
+  s.menu = { ...structuredClone(DEFAULTS.menu), ...s.menu };
+  if (Array.isArray(saved?.widgets)) {
+    const find = (c: string) => saved.widgets.find((w: any) => (w.component ?? RENAMED[w.plugin] ?? w.plugin) === c)?.settings;
+    s.clock = { ...find("CtClock"), ...saved.clock };
+    s.toolbar = { ...find("CtToolbar"), ...saved.toolbar };
+    s.bookmarks = { ...find("CtBookmarks"), ...saved.bookmarks };
+    const menu = find("Menu");
+    if (menu && !saved.menu) {
+      s.menu.open = !!menu.open;
+      s.menu.tab = { github: "CtGitHub", media: "CtMedia" }[menu.tab as string] ?? "";
+      s.menu.tabs.CtGitHub = { searches: menu.searches, limit: menu.limit };
+      s.menu.tabs.CtMedia = { lyrics: menu.lyrics };
+    }
   }
-  s.widgets = s.widgets.map((w: any) => {
-    const component = w.component ?? RENAMED[w.plugin] ?? w.plugin;
-    const info = widgets.find((c) => c.name === component)?.widget;
-    const fallback = DEFAULTS.widgets.find((d) => d.component === component)?.place;
-    const { plugin: _, ...rest } = w;
-    return {
-      ...rest,
-      component,
-      place: { area: "auto", justify: "stretch", align: "start", ...fallback, ...info?.place, ...w.place },
-      settings: { ...structuredClone(info?.defaults ?? {}), ...w.settings },
-    };
-  });
+  delete (s as any).widgets;
+  delete (s as any).layout;
+  for (const [key, info] of Object.entries(parts)) {
+    s[key as "clock"] = { ...structuredClone(info.defaults), ...s[key as "clock"] };
+  }
+  // Bookmarks from before the line under a tile was a setting.
+  s.bookmarks.items = (s.bookmarks.items ?? []).map((it: any) => ({ line: "auto", lineColour: "primary", ...it }));
+  for (const t of tabs) {
+    s.menu.tabs[t.name] = { ...structuredClone(t.tab.defaults), ...s.menu.tabs[t.name] };
+  }
+  if (!tabs.some((t) => t.name === s.menu.tab)) s.menu.tab = tabs[0]?.name ?? "";
   return s;
 }
 

@@ -31,7 +31,6 @@
 
   export const widget: WidgetInfo = {
     label: "Clock and date",
-    place: { justify: "center", align: "center" },
     defaults: {
       hour12: true,
       leadingZero: false,

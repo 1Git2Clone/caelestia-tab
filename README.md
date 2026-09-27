@@ -18,26 +18,28 @@ A new tab, and site themes, that follow the
 and Firefox-based browsers (Floorp, Zen, LibreWolf, Waterfox).
 
 - **The new tab** takes the scheme's colours and the current wallpaper, and
-  changes the moment you switch schemes. It has a clock, and bookmarks on a
-  CSS grid you define yourself. A bookmark shows an image or a solid scheme
-  colour, and the pen button lets you rearrange and edit bookmarks in place.
+  changes the moment you switch schemes. It has a clock, bookmarks on a CSS
+  grid you define yourself, and a menu over the clock with a GitHub tab (your
+  pull requests and issues) and a Media tab (any MPRIS player, the Spotify
+  app, mpv or your browser, with its controls and timed lyrics). The pen edits
+  every part of it in place.
 - **Site themes**: the 134 [catppuccin/userstyles](https://github.com/catppuccin/userstyles),
   compiled against the live scheme instead of a Catppuccin flavour.
 - **Your own styles**: every page gets the scheme as `--caelestia-*` CSS
   variables, plus a `caelestia-scheme` event, for Stylus and userscripts.
 - **Nerd Font glyphs** on bookmarks, bundled, with suggestions from the
   address: a GitHub bookmark is offered every GitHub glyph.
-- **Your own widgets**, built in from `~/.config/caelestia-tab/components`,
-  with data from the helper: any MPRIS player (the Spotify app, mpv, your
-  browser) with its controls and lyrics, and your GitHub pull requests and
-  issues, with no setup if you use `gh` or git already. Secrets stay in the
-  helper, named by alias, from SOPS, a command, a file or the environment.
+- **Your own menu tabs**, built in from `~/.config/caelestia-tab/components`,
+  with the helper's data. GitHub needs no setup if you use `gh` or git
+  already; secrets stay in the helper, named by alias, from SOPS, a command, a
+  file or the environment.
 - **Tree Style Tab**'s sidebar in the scheme too, live: a tint, or the
   wallpaper.
 - **Zen's window** in the scheme too, live: Zen ignores the theme API, so
   it's done with a Zen mod and a small autoconfig script.
-- **Everything is a component**: the widgets are Svelte components whose
-  settings forms are drawn from what they declare, the built-in ones included.
+- **Every part is a component**: the clock, the toolbar, the bookmarks and
+  the tabs are Svelte components whose settings forms are drawn from what
+  they declare.
 
 The browser's window frame is [CaelestiaFox](https://addons.mozilla.org/en-US/firefox/addon/caelestiafox)'s
 job; the two work side by side.
@@ -66,8 +68,8 @@ The [handbook](https://pages.hu-tao.dev/hutao/caelestia-tab/docs/) (source in
 | [Installing](docs/src/guides/installing.md) | The helper, the extension, Nix and Home Manager |
 | [Browsers](docs/src/guides/browsers.md) | Where each browser looks for the helper, per-browser quirks |
 | [Zen's window](docs/src/guides/zen.md) | The Zen mod, and the script that reloads it live |
-| [Widgets and their data](docs/src/guides/widgets.md) | The built-in widgets, the helper's media, lyrics and GitHub data, and secrets |
-| [Writing a component](docs/src/guides/plugins.md) | Widget components and their settings, and data plugins in the helper |
+| [The page and its tabs](docs/src/guides/widgets.md) | The page's parts, the GitHub and Media tabs, the helper's data, and secrets |
+| [Writing a menu tab](docs/src/guides/plugins.md) | Tabs of your own and their settings, and data plugins in the helper |
 | [Theming your own sites](docs/src/guides/own-styles.md) | The `--caelestia-*` variables in Stylus and userscripts |
 | [Development](docs/src/guides/development.md) | The dev shell, checks, running it, refreshing the vendored styles |
 | [How the pieces talk](docs/src/architecture/overview.md) | Helper, storage, new tab, content scripts |
