@@ -12,40 +12,30 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-# The helper's jobs mirror serenity-discord-bot's: ubuntu-latest, whose image
-# carries node for `uses:`, with a rustup toolchain. Third-party actions need
-# their full github.com URL; the runner's default registry is code.forgejo.org.
-# The extension and the flake run on nix-node, the vps repo's runner label that
-# carries both nix and node, so they use the same dev shell a contributor does.
+# Every job runs on nix-node, the vps repo's runner label that carries both
+# nix and node, and uses the dev shell, so CI has the toolchain a contributor
+# and the pre-commit hook have. The Rust jobs first ran on ubuntu-latest with
+# rustup, as serenity-discord-bot's do, and all three failed within 6-32s on
+# this repo's first run (2026-09-27; cause unconfirmed, the logs weren't read),
+# while the nix-node jobs passed.
 jobs:
   fmt:
-    runs-on: ubuntu-latest
+    runs-on: nix-node
     steps:
-      - uses: https://github.com/actions/checkout@v5
-      - uses: https://github.com/dtolnay/rust-toolchain@stable
-        with:
-          components: rustfmt
-      - run: cargo fmt --check
+      - uses: actions/checkout@v7.0.1
+      - run: nix develop -c cargo fmt --check
 
   clippy:
-    runs-on: ubuntu-latest
-    env:
-      CARGO_PROFILE_DEV_DEBUG: 0
+    runs-on: nix-node
     steps:
-      - uses: https://github.com/actions/checkout@v5
-      - uses: https://github.com/dtolnay/rust-toolchain@stable
-        with:
-          components: clippy
-      - uses: https://github.com/Swatinem/rust-cache@v2
-      - run: cargo clippy --all-targets -- -D warnings
+      - uses: actions/checkout@v7.0.1
+      - run: nix develop -c cargo clippy --all-targets -- -D warnings
 
   test:
-    runs-on: ubuntu-latest
+    runs-on: nix-node
     steps:
-      - uses: https://github.com/actions/checkout@v5
-      - uses: https://github.com/dtolnay/rust-toolchain@stable
-      - uses: https://github.com/Swatinem/rust-cache@v2
-      - run: cargo test --verbose
+      - uses: actions/checkout@v7.0.1
+      - run: nix develop -c cargo test --verbose
 
   extension:
     runs-on: nix-node
