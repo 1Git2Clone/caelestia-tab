@@ -1,77 +1,89 @@
-# Writing a plugin
+# Writing a component
 
-A widget on the new tab is a plugin: an ES module in `extension/plugins/`
-whose default export describes it, listed in `extension/plugins/index.js`. The
-clock and the bookmarks are plugins like any other; read
-`extension/plugins/clock.js` for the smallest complete one.
+A widget on the new tab is a Svelte component that also exports `widget`: its
+label, its defaults, and the fields its settings take. The settings panel
+draws a form from those fields, and what the user sets arrives as the
+component's `settings` prop. The clock (`extension/src/components/widgets/CtClock.svelte`)
+is a complete example.
 
-```js
-export default {
-  id: "hello",                 // stored in settings.widgets[].plugin
-  name: "Hello",               // shown in Settings, Widgets
-  defaults: { who: "world" },  // this widget's settings before any are saved
-  settings: [                  // the form Settings renders for it
-    { key: "who", label: "Greet", type: "text" },
-  ],
-  actions: [                   // optional toolbar buttons
-    { icon: "add", title: "Say it louder", run: (ctx) => ctx.save({ ...ctx.settings, who: ctx.settings.who.toUpperCase() }) },
-  ],
-  mount(el, ctx) {             // draw into el; return a cleanup function or nothing
-    el.textContent = `Hello, ${ctx.settings.who}`;
-  },
-};
+```svelte
+<script module lang="ts">
+  import type { WidgetInfo } from "../../fields.ts";
+
+  export const widget: WidgetInfo = {
+    label: "Hello",                       // shown in Settings, Widgets
+    defaults: { who: "world", loud: false },
+    fields: [                             // the form Settings draws for it
+      { key: "who", label: "Greet", type: "text" },
+      { key: "loud", label: "Shout", type: "checkbox" },
+    ],
+    section: "self-center",               // optional: where it sits in the page's column
+  };
+</script>
+
+<script lang="ts">
+  let { settings, editing }: { settings: any; editing: boolean } = $props();
+</script>
+
+<p class="ct-hello rounded-2xl bg-glass p-4 text-on-surface">
+  Hello, {settings.loud ? settings.who.toUpperCase() : settings.who}
+</p>
 ```
 
-Then add it to `plugins/index.js`, and add a widget to show it, from
-*Settings*, *Advanced*, *All settings*:
+Put it in `extension/src/components/widgets/`, build, and add a widget to
+show it, from *Settings*, *Advanced*, *All settings*:
 
 ```json
-{ "id": "hello", "plugin": "hello", "settings": {} }
+{ "id": "hello", "component": "CtHello", "settings": {} }
 ```
 
-## What `mount` gets
+## What a component gets
 
-`ctx` holds:
-
-- `settings`: this widget's settings, `defaults` merged with what's saved.
+- `settings`: this widget's settings, `defaults` filled in with what's saved.
+  It's live state: assign to it (`settings.who = "you"`) and the change is
+  saved, and every open tab shows it. There's no save call.
 - `editing`: whether the pen button is on. Offer rearranging and editing then.
-- `save(next)`: store `next` as this widget's settings. Don't redraw after it:
-  the new tab re-mounts every widget when settings change, in every open tab,
-  so the redraw after a save is the same one another tab's change gets.
-- `ui`: the core's building blocks, so a plugin never imports the core.
-  - `ui.dialog({ title, tabs, aside, onSave })` opens the modal. Each tab is
-    `{ label, render() }`, returning an element. With `onSave`, it has Cancel
-    and Save, and stays open if `onSave` returns `false`.
-  - `ui.form(fields, values, update)` renders `fields` against `values` and
-    calls `update(patch)` as they change, after assigning the patch into
-    `values`. The field types are listed in `extension/ui.js`: `checkbox`,
-    `text`, `url`, `number`, `textarea`, `select`, `range`, `colour` (a scheme
-    colour), `image` (a URL or an upload), `glyph` (a Nerd Font glyph, with
-    suggestions for the words its `words()` returns) and `presets`.
-  - `ui.el(tag, props, ...children)` and `ui.icon(name)`.
+- The whole app state, `getContext<App>("ct")` (see
+  [The new tab](../architecture/newtab.md#state)), for opening a dialog:
+  `app.dialog = { component, props }`. The dialog gets an `onclose` prop.
 
-`mount` runs again on every settings change and every edit-mode toggle, so
-keep it cheap and return a cleanup for anything that outlives the element (a
-timer, a listener).
+## Fields
 
-## Colours
+`extension/src/fields.ts` lists the field types: `checkbox`, `text`, `url`,
+`number`, `textarea`, `select`, `range`, `colour` (a scheme colour or a fixed
+one), `image` (a URL or an upload), `glyph` (a Nerd Font glyph, with
+suggestions for the words its `words(values)` returns) and `presets` (buttons
+that set several keys at once). `CtForm` draws them, bound to an object, and
+works inside your own components too.
 
-Use the scheme's CSS variables, `var(--caelestia-primary)`,
-`var(--caelestia-surface-container)` and the rest. They change live, so a
-plugin that styles with them never needs to watch the scheme. `scheme.js`
+## Actions
+
+`widget.actions` puts buttons in the toolbar while the widget is shown:
+`{ icon, title, run(settings, app) }`. The bookmarks' + is one.
+
+## Colours and style
+
+The `Ct*` components use Tailwind utilities only, and the scheme is
+Tailwind's palette: `bg-primary`, `text-on-surface`, `border-outline-variant`,
+`bg-glass` for the frosted panels. They follow the scheme live. Outside
+Tailwind the same colours are `var(--caelestia-primary)` and so on. `scheme.ts`
 exports `COLOURS` (the colours offered in pickers), `cssColour(token)` and
 `onColour(token)` (the text colour for a background colour).
 
-## Style
+Give the root element a `ct-<name>` class, so custom CSS can find it, and
+square the corners that meet a window edge with
+`in-[.ct-edge-bottom]:rounded-b-none` and its siblings.
 
-Put a plugin's CSS in `newtab.css` under `.widget-<id>`, the class its
-section gets.
+## The `Ct` prefix is reserved
 
-## Plugins that need data from outside the browser
+Components whose names start with `Ct` are the project's. Name yours
+anything else.
+
+## Components that need data from outside the browser
 
 A web page can't read files or keep secrets, and the stores reject extensions
 that run downloaded code. So anything that reads the machine (files, D-Bus,
 passwords) belongs in the helper as a data plugin: implement the `Plugin`
 trait in `src/plugins/`, and list it in `plugins::all()`. Its value lands in
-`storage.local` under its topic, where the new tab can read it and watch for
+`storage.local` under its topic, where a component can read it and watch for
 changes. See [The helper](../architecture/helper.md).

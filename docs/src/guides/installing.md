@@ -51,8 +51,9 @@ It isn't on addons.mozilla.org yet. Until it is:
 
 - **To try it**, open `about:debugging`, choose *This Firefox* (or *This
   Floorp*, and so on), then *Load Temporary Add-on…*, and pick
-  `extension/manifest.json`. It stays until the browser restarts.
-- **To keep it**, build an `.xpi` with `web-ext build --source-dir extension`
+  `extension/dist/manifest.json`. It stays until the browser restarts. Build
+  it first: `npm ci --prefix extension && npm run --prefix extension build`.
+- **To keep it**, build an `.xpi` with `web-ext build --source-dir extension/dist`
   and install it from `about:addons` (the gear, then *Install Add-on From
   File…*). Release Firefox refuses unsigned add-ons. Developer Edition,
   Nightly, ESR and unbranded builds accept them once

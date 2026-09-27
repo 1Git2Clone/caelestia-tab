@@ -2,6 +2,8 @@
 // API: an extension registers itself with a `style`, and TST adds that CSS to
 // its sidebar. The sidebar is TST's own extension page, so the --caelestia-*
 // variables pages get never reach it; the colours go in as hex.
+import type { Scheme } from "./types.ts";
+
 const TST = "treestyletab@piro.sakura.ne.jp";
 
 // settings.treeStyleTab when nothing's been saved.
@@ -11,12 +13,12 @@ export const TREE_STYLE_TAB = { tint: true, strength: 14 };
 // and sets --browser-background inline from the browser theme whenever there
 // is one, so both are overridden. !important beats that inline value and the
 // :root rules TST sets under several selectors of its own.
-export function tstStyle(scheme, { strength }) {
-  const c = (name) => `#${scheme.colours[name]}`;
+export function tstStyle(scheme: Scheme, { strength }: { strength: number }) {
+  const c = (name: string) => `#${scheme.colours[name]}`;
   // Darker than the surface in both modes, so the sidebar sits below the page:
   // towards the scheme's shadow, less in light mode, where it greys quickly.
   const base = `color-mix(in srgb, ${c("surface")}, ${c("shadow")} ${scheme.mode === "light" ? 12 : 40}%)`;
-  const mix = (n) => `color-mix(in srgb, ${c("primary")} ${n}%, ${base})`;
+  const mix = (n: number) => `color-mix(in srgb, ${c("primary")} ${n}%, ${base})`;
   return `:root {
   --browser-background: ${mix(strength)} !important;
   --tabbar-bg: ${mix(strength)} !important;
@@ -31,7 +33,7 @@ export function tstStyle(scheme, { strength }) {
 // Registers, or clears, the tint. TST keeps a registered style until the
 // next register-self, so turning the tint off sends an empty one. Resolves
 // false when TST isn't there to answer (not installed, or not started yet).
-export async function syncTreeStyleTab(scheme, settings) {
+export async function syncTreeStyleTab(scheme: Scheme | null, settings: any): Promise<boolean> {
   const opts = { ...TREE_STYLE_TAB, ...settings?.treeStyleTab };
   const style = scheme && opts.tint ? tstStyle(scheme, opts) : "";
   return browser.runtime
@@ -42,4 +44,4 @@ export async function syncTreeStyleTab(scheme, settings) {
     );
 }
 
-export const isTreeStyleTab = (sender) => sender.id === TST;
+export const isTreeStyleTab = (sender: { id: string }) => sender.id === TST;

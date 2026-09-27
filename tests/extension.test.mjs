@@ -1,9 +1,9 @@
-// node --test tests/*.test.mjs: userstyles.js and glyphs.js.
+// node --test tests/*.test.mjs: userstyles.ts, glyphs.ts and layout.ts.
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import test from "node:test";
 
-import { cssFor, documents, libFor, matches } from "../extension/userstyles.js";
+import { cssFor, documents, libFor, matches } from "../extension/src/userstyles.ts";
 
 test("splits @-moz-document blocks and matches them like Stylus", () => {
   const css = `@import url("x.css");
@@ -32,7 +32,7 @@ test("splits @-moz-document blocks and matches them like Stylus", () => {
 });
 
 test("the vendored lib takes the scheme's colours and accent", () => {
-  const lib = fs.readFileSync(new URL("../extension/userstyles/lib.less", import.meta.url), "utf8");
+  const lib = fs.readFileSync(new URL("../extension/public/userstyles/lib.less", import.meta.url), "utf8");
   const colours = new Proxy({}, { get: (_, name) => (name === "primary" ? "abcdef" : "123456") });
   const out = libFor(lib, { colours });
   assert.match(out, /@catppuccin: \{ @latte: \{ @rosewater: #123456;/);
@@ -41,21 +41,17 @@ test("the vendored lib takes the scheme's colours and accent", () => {
 });
 
 test("glyph suggestions follow the bookmark's host and name", async () => {
-  const { words, suggest, parse } = await import("../extension/glyphs.js");
-  const index = JSON.parse(fs.readFileSync(new URL("../extension/vendor/nerd-fonts/glyphnames.json", import.meta.url), "utf8"));
+  const { words, suggest } = await import("../extension/src/glyphs.ts");
+  const index = JSON.parse(fs.readFileSync(new URL("../extension/public/vendor/nerd-fonts/glyphnames.json", import.meta.url), "utf8"));
   assert.deepEqual(words("https://gist.github.com/x", "Gists"), ["gist", "github", "gists"]);
   assert.deepEqual(words("music.hu-tao.dev", ""), ["music", "tao"]);
   const names = suggest(index, words("https://github.com", "GitHub")).map((g) => g.name);
   assert.ok(names.includes("fa-github") && names.includes("dev-github") && names.includes("md-github"));
   assert.ok(names.indexOf("fa-github") < names.indexOf("dev-githubactions"), "whole-word matches come first");
-  assert.equal(parse(index, "nf-fa-github"), "");
-  assert.equal(parse(index, "f09b"), "");
-  assert.equal(parse(index, ""), "");
-  assert.equal(parse(index, "not a glyph"), null);
 });
 
 test("even rows never leave one tile alone on a row", async () => {
-  const { evenColumns } = await import("../extension/plugins/bookmarks.js");
+  const { evenColumns } = await import("../extension/src/layout.ts");
   const five = [1, 1, 1, 1, 1];
   assert.equal(evenColumns(1000, 176, 20, five), 5, "all five fit");
   assert.equal(evenColumns(800, 176, 20, five), 3, "four fit: 3 and 2, not 4 and 1");

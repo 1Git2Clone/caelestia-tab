@@ -18,23 +18,32 @@ sh scripts/setup-hooks.sh   # once per clone: the pre-commit hook
 │   ├── install.rs          # where each browser looks for the manifest
 │   ├── zen.rs              # the Zen mod, and install-zen
 │   └── plugins/            # data plugins: scheme, wallpaper
-├── extension/              # the extension, plain ES modules with no build step
-│   ├── manifest.json
-│   ├── background.js       # helper connection, site theme injection
-│   ├── content.js          # per page: asks for its theme, keeps what it got
-│   ├── newtab.{html,css,js}  # the new tab's core
-│   ├── ui.js               # dialog and forms, handed to plugins
-│   ├── scheme.js           # the scheme as CSS variables, colour tokens
-│   ├── userstyles.js       # compile a style, split and match @-moz-document
-│   ├── treestyletab.js     # the Tree Style Tab tint
-│   ├── glyphs.js           # Nerd Font glyph suggestions and parsing
-│   ├── plugins/            # widgets: clock, bookmarks
-│   ├── userstyles/         # vendored catppuccin/userstyles + index.json
-│   └── vendor/             # vendored less.js and the Nerd Fonts symbols
+├── extension/              # the extension: Svelte 5 and TypeScript, built with Vite
+│   ├── newtab.html         # the new tab's page; Vite's entry
+│   ├── src/
+│   │   ├── newtab.ts       # mounts App with the state from store.svelte.ts
+│   │   ├── store.svelte.ts # settings, scheme and wallpaper; saving and syncing
+│   │   ├── app.css         # the only global CSS: scheme variables, font, Tailwind
+│   │   ├── components/     # Ct* components; widgets/ holds the widgets
+│   │   ├── fields.ts       # the settings API: field types, WidgetInfo
+│   │   ├── widgets.ts      # finds every widget component
+│   │   ├── layout.ts       # even rows, window-edge detection
+│   │   ├── background.ts   # helper connection, site theme injection
+│   │   ├── render.ts       # the new tab for svelte/server
+│   │   ├── scheme.ts       # the scheme as CSS variables, colour tokens
+│   │   ├── userstyles.ts   # compile a style, split and match @-moz-document
+│   │   ├── treestyletab.ts # the Tree Style Tab tint
+│   │   └── glyphs.ts       # Nerd Font glyph suggestions and search
+│   ├── public/             # copied into dist/ as they are
+│   │   ├── manifest.json
+│   │   ├── content.js      # per page: asks for its theme, keeps what it got
+│   │   ├── userstyles/     # vendored catppuccin/userstyles + index.json
+│   │   └── vendor/         # vendored less.js and the Nerd Fonts symbols
+│   └── dist/               # the built extension (not committed)
 ├── zen/                    # Zen's autoconfig: the pref file and the watcher script
-├── scripts/vendor-userstyles.mjs   # refreshes extension/userstyles and less.js
-├── scripts/vendor-nerd-fonts.sh    # refreshes extension/vendor/nerd-fonts
-├── tests/                  # node --test for userstyles.js and glyphs.js, and the Firefox e2e test
+├── scripts/vendor-userstyles.mjs   # refreshes extension/public/userstyles and less.js
+├── scripts/vendor-nerd-fonts.sh    # refreshes extension/public/vendor/nerd-fonts
+├── tests/                  # node --test for userstyles, glyphs and layout, and the Firefox tests
 └── docs/                   # this handbook
 ```
 
@@ -47,8 +56,13 @@ cargo fmt --check
 cargo clippy --all-targets -- -D warnings
 cargo test
 node --test tests/*.test.mjs
-web-ext lint --source-dir extension --self-hosted
+npm ci --prefix extension          # once, and when package-lock.json changes
+npm run --prefix extension check   # svelte-check: TypeScript and Svelte
+npm run --prefix extension build   # extension/dist
+web-ext lint --source-dir extension/dist --self-hosted
 ```
+
+`node --test` runs the TypeScript sources directly; Node strips the types.
 
 And, slower, the whole path in a real headless Firefox. The pre-push hook runs
 it; CI doesn't, because the runner has no home directory and nixpkgs' Firefox
@@ -79,19 +93,21 @@ It prints each site as themed or not and lists the ones to look at by hand;
 failure there isn't always a broken style.
 
 `web-ext lint` warns about `new Function` and `innerHTML` in
-`vendor/less.min.js`; those are less.js's JavaScript-evaluation and plugin
-features, which no bundled style uses. Warnings don't fail the build, errors
-do.
+`vendor/less.min.js`, which are less.js's JavaScript-evaluation and plugin
+features that no bundled style uses, and about `innerHTML` in `newtab.js` and
+`render.js`, which is how Svelte's runtime builds DOM from its compiled
+templates. Warnings don't fail the build, errors do.
 
 ## Running it in a browser
 
 ```sh
 cargo build && ./target/debug/caelestia-tab install   # or wherever your target dir is
-web-ext run --source-dir extension --firefox=floorp   # any Firefox-based binary
+npx --prefix extension vite build --watch &            # rebuilds dist/ on every save
+web-ext run --source-dir extension/dist --firefox=floorp   # any Firefox-based binary
 ```
 
 `web-ext run` starts a throwaway profile with the extension loaded, and
-reloads it when a file changes. `install` points the manifest at the debug
+reloads it when `dist/` changes. `install` points the manifest at the debug
 binary, so run it again after switching back to an installed build.
 
 The helper can be driven by hand as well. It writes length-prefixed JSON to
@@ -110,7 +126,7 @@ node scripts/vendor-userstyles.mjs
 
 It fetches catppuccin/userstyles at the commit pinned in the script (`REV`),
 compiles each style once to find its URL rules, and rewrites
-`extension/userstyles/` and `extension/vendor/`. Bump `REV` to update, run it,
+`extension/public/userstyles/` and `extension/public/vendor/`. Bump `REV` to update, run it,
 then run `node --test tests/*.test.mjs`. A style that stops compiling is
 skipped with a warning, not dropped silently.
 

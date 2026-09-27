@@ -25,8 +25,8 @@ fs.writeFileSync(path.join(tmp, "home/.mozilla/native-messaging-hosts/caelestia_
 
 // Every colour distinct and unlike any site's own, so a background that
 // matches one can only have come from the scheme.
-const { styles } = JSON.parse(fs.readFileSync(path.join(root, "extension/userstyles/index.json"), "utf8"));
-const lib = fs.readFileSync(path.join(root, "extension/userstyles/lib.less"), "utf8");
+const { styles } = JSON.parse(fs.readFileSync(path.join(root, "extension/public/userstyles/index.json"), "utf8"));
+const lib = fs.readFileSync(path.join(root, "extension/public/userstyles/lib.less"), "utf8");
 // caelestia's Material colours as well as the catppuccin names, for the
 // site overrides that use var(--caelestia-*) directly.
 const MATERIAL = "primary onPrimary primaryContainer onPrimaryContainer secondary onSecondary tertiary background onBackground surface onSurface surfaceVariant onSurfaceVariant surfaceDim surfaceBright surfaceContainerLowest surfaceContainerLow surfaceContainer surfaceContainerHigh surfaceContainerHighest outline outlineVariant shadow".split(" ");
@@ -97,7 +97,7 @@ try {
     capabilities: { alwaysMatch: { pageLoadStrategy: "eager", timeouts: { pageLoad: 20000 }, "moz:firefoxOptions": { args: ["-headless"], prefs: { "extensions.webextensions.restrictedDomains": "" } } } },
   }));
   const s = `/session/${id}`;
-  await call("POST", `${s}/moz/addon/install`, { path: path.join(root, "extension"), temporary: true });
+  await call("POST", `${s}/moz/addon/install`, { path: path.join(root, "extension/dist"), temporary: true });
   // Site themes need <all_urls>, which a temporary add-on is granted.
   await sleep(3000);
   for (const [style, url] of todo) {

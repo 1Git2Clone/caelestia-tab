@@ -58,7 +58,7 @@ its own; recipes live in the docs.
 
 ## The palette swap
 
-`userstyles.js` `libFor()` rewrites the vendored `lib.less` before compiling:
+`userstyles.ts` `libFor()` rewrites the vendored `lib.less` before compiling:
 
 - The `@catppuccin` map gets the scheme's colours under both `@latte` and
   `@mocha`. caelestia's scheme carries all 26 Catppuccin colour names.

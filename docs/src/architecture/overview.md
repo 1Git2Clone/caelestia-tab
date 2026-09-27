@@ -7,9 +7,9 @@ caelestia CLI ──writes──▶ ~/.local/state/caelestia/{scheme.json, wallp
                          caelestia-tab (helper)
                                    │ native messaging (stdio)
                                    ▼
-                         background.js ──writes──▶ storage.local
+                         background.ts ──writes──▶ storage.local
                                    ▲                  │ onChanged
-                     "theme?"      │                  ├──▶ newtab.js (every open new tab)
+                     "theme?"      │                  ├──▶ the new tab (every open one)
                      insertCSS     │                  └──▶ content.js (every page)
                                    └───────────────────────┘
 ```

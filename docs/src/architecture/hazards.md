@@ -4,7 +4,7 @@ Things that look wrong, or look safe, and aren't. Dated where they were learned
 the hard way.
 
 - **The native host name can't contain a hyphen.** It's `caelestia_tab`, while
-  the binary is `caelestia-tab`. Both `install.rs` and `background.js` spell it;
+  the binary is `caelestia-tab`. Both `install.rs` and `background.ts` spell it;
   change both or neither.
 - **`allowed_extensions` must match `gecko.id` exactly.** A mismatch looks
   like a missing helper: "No such native application".
@@ -24,7 +24,7 @@ the hard way.
   pinterest's `[a-z]{2}`. Parse the rules one by one; don't cut the prelude at
   the first brace (2026-09-27).
 - **A regexp rule's value is a CSS string.** `"\\."` in the style is `\.` to
-  the regex, and a bare `\.` is just `.`. `userstyles.js` unescapes it the CSS
+  the regex, and a bare `\.` is just `.`. `userstyles.ts` unescapes it the CSS
   way before building the `RegExp`.
 - **WebDriver won't navigate to `moz-extension://` URLs.** To reach the new
   tab in a test, start geckodriver with `--allow-system-access` and call
@@ -52,11 +52,11 @@ the hard way.
   the start URL may open behind other tabs (2026-09-27).
 - **TST paints its sidebar with `--browser-background` first.** It's set
   inline from the browser theme, so overriding only `--tabbar-bg` changes
-  nothing whenever a theme is active; `treestyletab.js` overrides both, with
+  nothing whenever a theme is active; `treestyletab.ts` overrides both, with
   `!important` (2026-09-27).
 - **A starting TST sidebar drops registrations.** It replaces its list of
   extensions with a snapshot it asked TST's background for, so a
-  `register-self` that lands in between is lost. `background.js` re-sends once,
+  `register-self` that lands in between is lost. `background.ts` re-sends once,
   5 seconds after the first registration, and on every `sidebar-show`
   (2026-09-27).
 - **TST sends `ready` only to extensions it already knows.** The first
@@ -101,3 +101,17 @@ the hard way.
 - **A style's domain list is not everywhere its site kind lives.** mdBook's
   lists a handful of Rust books, so an mdBook anywhere else is unthemed. That's
   what an override's *Also on pages matching* selector is for (2026-09-27).
+- **Svelte 5 throws when a template changes state.** Creating a settings entry
+  on the fly while rendering a list (a `??=` inside `{#each}`) stops the whole
+  render with `state_unsafe_mutation`, and the panel silently keeps showing
+  the previous tab. Create state in an event handler instead (the Websites
+  list does it on `ontoggle`) (2026-09-27).
+- **Unlayered CSS beats every Tailwind class.** Tailwind's utilities live in
+  `@layer utilities`; a plain `button { font: inherit }` outside any layer wins
+  over `font-glyph` on a button, which showed every glyph as a box. `app.css`
+  keeps its rules in `@layer base`, declared before `utilities`
+  (2026-09-27).
+- **`vite build --ssr` pulls in `node:async_hooks`** through svelte/server's
+  async rendering. It's only loaded for async renders and a failed load is
+  caught, so the SSR build marks it external rather than polyfilling it
+  (2026-09-27).

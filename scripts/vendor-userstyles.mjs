@@ -16,7 +16,7 @@ import os from "node:os";
 import path from "node:path";
 import { createRequire } from "node:module";
 
-import { compile, documents } from "../extension/userstyles.js";
+import { compile, documents } from "../extension/src/userstyles.ts";
 
 const REV = "5307c4e5e98a0ea623114ec31102f575104a368e";
 // What catppuccin itself lints with (its deno.json), so a style that compiles
@@ -24,7 +24,7 @@ const REV = "5307c4e5e98a0ea623114ec31102f575104a368e";
 const LESS = "4.2.2";
 const USERCSS_META = "0.12.0";
 
-const out = path.resolve("extension/userstyles");
+const out = path.resolve("extension/public/userstyles");
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "caelestia-tab-"));
 const run = (cmd, args, cwd = tmp) => execFileSync(cmd, args, { cwd, stdio: ["ignore", "ignore", "inherit"] });
 
@@ -65,7 +65,7 @@ for (const id of fs.readdirSync(path.join(cup, "styles")).sort()) {
 }
 fs.writeFileSync(path.join(out, "index.json"), JSON.stringify({ rev: REV, styles: index }, null, 1) + "\n");
 
-const vendor = path.resolve("extension/vendor");
+const vendor = path.resolve("extension/public/vendor");
 fs.mkdirSync(vendor, { recursive: true });
 fs.copyFileSync(path.join(tmp, "node_modules/less/dist/less.min.js"), path.join(vendor, "less.min.js"));
 // The npm package ships without its licence file.

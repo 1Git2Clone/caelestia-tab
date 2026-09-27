@@ -60,7 +60,7 @@ usually bigger. A message over 512 KiB is sent as parts instead:
 { "part": 0, "parts": 4, "data": "{\"topic\":\"wallpaper\",\"val" }
 ```
 
-The parts arrive in order; `background.js` concatenates their `data` and
+The parts arrive in order; `background.ts` concatenates their `data` and
 parses the result as one message. `host::tests` checks that parts rejoin
 exactly, including a multi-byte character straddling a boundary.
 

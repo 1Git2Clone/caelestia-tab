@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Vendors the Nerd Fonts symbols into extension/vendor/nerd-fonts/: the
+# Vendors the Nerd Fonts symbols into extension/public/vendor/nerd-fonts/: the
 # symbols-only font as WOFF2, and a compact name -> codepoint index of every
 # glyph, which the bookmark editor searches and suggests from. Run from the
 # repo root, in the dev shell:
@@ -8,7 +8,7 @@
 set -euo pipefail
 
 VERSION=v3.5.1
-out=extension/vendor/nerd-fonts
+out=extension/public/vendor/nerd-fonts
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 

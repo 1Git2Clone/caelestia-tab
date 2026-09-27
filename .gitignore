@@ -2,3 +2,5 @@
 /docs/book
 /web-ext-artifacts
 /result
+/extension/node_modules
+/extension/dist

@@ -31,7 +31,8 @@ and Firefox-based browsers (Floorp, Zen, LibreWolf, Waterfox).
   optional.
 - **Zen's window** in the scheme too, live: Zen ignores the theme API, so
   it's done with a Zen mod and a small autoconfig script.
-- **Everything is a plugin**, the built-in widgets included.
+- **Everything is a component**: the widgets are Svelte components whose
+  settings forms are drawn from what they declare, the built-in ones included.
 
 The browser's window frame is [CaelestiaFox](https://addons.mozilla.org/en-US/firefox/addon/caelestiafox)'s
 job; the two work side by side.
@@ -43,7 +44,8 @@ nix profile install git+https://git.hu-tao.dev/hutao/caelestia-tab   # or: cargo
 caelestia-tab install          # register the helper with your browsers
 ```
 
-Then load `extension/manifest.json` from `about:debugging` (*This Firefox*,
+Then build the extension (`npm ci --prefix extension && npm run --prefix extension build`)
+and load `extension/dist/manifest.json` from `about:debugging` (*This Firefox*,
 *Load Temporary Add-on…*), and open a new tab. The handbook's
 [Installing](https://pages.hu-tao.dev/hutao/caelestia-tab/docs/guides/installing.html)
 chapter covers permanent installs, Home Manager, and the site-theme
@@ -59,7 +61,7 @@ The [handbook](https://pages.hu-tao.dev/hutao/caelestia-tab/docs/) (source in
 | [Installing](docs/src/guides/installing.md) | The helper, the extension, Nix and Home Manager |
 | [Browsers](docs/src/guides/browsers.md) | Where each browser looks for the helper, per-browser quirks |
 | [Zen's window](docs/src/guides/zen.md) | The Zen mod, and the script that reloads it live |
-| [Writing a plugin](docs/src/guides/plugins.md) | The widget API, and data plugins in the helper |
+| [Writing a component](docs/src/guides/plugins.md) | Widget components and their settings, and data plugins in the helper |
 | [Theming your own sites](docs/src/guides/own-styles.md) | The `--caelestia-*` variables in Stylus and userscripts |
 | [Development](docs/src/guides/development.md) | The dev shell, checks, running it, refreshing the vendored styles |
 | [How the pieces talk](docs/src/architecture/overview.md) | Helper, storage, new tab, content scripts |
@@ -83,8 +85,8 @@ Contributors and agents: read [AGENTS.md](AGENTS.md) first.
 ## Licence
 
 MIT, see [LICENSE](LICENSE). The vendored
-[catppuccin/userstyles](extension/userstyles/LICENSE) are MIT,
-[less.js](extension/vendor/less.LICENSE) is Apache-2.0, and the
-[Nerd Fonts symbols](extension/vendor/nerd-fonts/LICENSE) are MIT, with each
+[catppuccin/userstyles](extension/public/userstyles/LICENSE) are MIT,
+[less.js](extension/public/vendor/less.LICENSE) is Apache-2.0, and the
+[Nerd Fonts symbols](extension/public/vendor/nerd-fonts/LICENSE) are MIT, with each
 glyph set under its own licence
 ([Nerd Fonts' licence audit](https://github.com/ryanoasis/nerd-fonts/blob/master/license-audit.md)).

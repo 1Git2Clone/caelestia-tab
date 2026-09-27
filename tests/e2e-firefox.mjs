@@ -70,7 +70,7 @@ try {
     });
   const primary = () => js(`return getComputedStyle(document.documentElement).getPropertyValue("--caelestia-primary")`);
 
-  await call("POST", `${s}/moz/addon/install`, { path: path.join(root, "extension"), temporary: true });
+  await call("POST", `${s}/moz/addon/install`, { path: path.join(root, "extension/dist"), temporary: true });
   await call("POST", `${s}/moz/context`, { context: "chrome" });
   await call("POST", `${s}/execute/sync`, { script: "BrowserCommands.openTab();", args: [] });
   await call("POST", `${s}/moz/context`, { context: "content" });

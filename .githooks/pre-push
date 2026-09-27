@@ -9,8 +9,9 @@ if ! command -v web-ext >/dev/null 2>&1 && command -v nix >/dev/null 2>&1 && [ -
   exec nix develop --quiet -c "$0" "$@"
 fi
 
-echo "pre-push • cargo build"
+echo "pre-push • cargo build, extension build"
 cargo build --quiet
+npm run --prefix extension --silent build >/dev/null
 
 echo "pre-push • tests/e2e-firefox.mjs (headless Firefox)"
 nix shell nixpkgs#firefox nixpkgs#geckodriver -c node tests/e2e-firefox.mjs

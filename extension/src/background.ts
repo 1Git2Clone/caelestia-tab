@@ -3,20 +3,22 @@
 // The helper's messages go straight into storage.local, which the new tab and
 // the content scripts watch, so none of them depend on this page staying
 // awake. The only other state here is a cache of compiled styles.
-import "./vendor/less.min.js";
-import { cssVars } from "./scheme.js";
-import { isTreeStyleTab, syncTreeStyleTab } from "./treestyletab.js";
-import { SITES, compile, cssFor, libFor, matches } from "./userstyles.js";
+import { cssVars } from "./scheme.ts";
+import { isTreeStyleTab, syncTreeStyleTab } from "./treestyletab.ts";
+import { SITES, compile, cssFor, libFor, matches } from "./userstyles.ts";
 
 const store = browser.storage.local;
 
-let helper = null;
+// less.js is loaded as a classic script before this one (manifest.json).
+declare const less: any;
+
+let helper: any = null;
 
 function connectHelper() {
   if (helper) return;
   helper = browser.runtime.connectNative("caelestia_tab");
-  let parts = [];
-  helper.onMessage.addListener((msg) => {
+  let parts: string[] = [];
+  helper.onMessage.addListener((msg: any) => {
     // Messages over the browser's 1 MiB cap arrive in order, as parts.
     if ("part" in msg) {
       parts.push(msg.data);
@@ -26,7 +28,7 @@ function connectHelper() {
     }
     store.set({ [msg.topic]: msg.value, helperError: null });
   });
-  helper.onDisconnect.addListener((port) => {
+  helper.onDisconnect.addListener((port: any) => {
     // Set when the helper isn't registered or died; the new tab shows it.
     if (port.error) store.set({ helperError: port.error.message });
     helper = null;
@@ -40,7 +42,7 @@ browser.runtime.onConnect.addListener(connectHelper);
 
 // Tree Style Tab: re-send the tint on every scheme or settings change, and
 // when TST (re)starts or opens a sidebar.
-let tstSent = null;
+let tstSent: string | null = null;
 async function syncTst(force = false) {
   const { scheme, settings } = await store.get(["scheme", "settings"]);
   // Settings change on every keystroke in the new tab's forms; only a change
@@ -61,7 +63,7 @@ async function syncTst(force = false) {
 // ponytail: one fixed 5s re-send; a sidebar slower than that to start stays
 // untinted until the next scheme or settings change.
 (async () => {
-  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
   for (let i = 0; i < 20 && tstSent === null; i++) {
     await syncTst();
     if (tstSent === null) await sleep(3000);
@@ -71,21 +73,21 @@ async function syncTst(force = false) {
     await syncTst(true);
   }
 })();
-store.onChanged.addListener((changes) => {
+store.onChanged.addListener((changes: any) => {
   if (changes.scheme || changes.settings) syncTst();
 });
 // Re-send when a sidebar opens, too: a new window's sidebar starts with the
 // same race.
-browser.runtime.onMessageExternal.addListener((msg, sender) => {
+browser.runtime.onMessageExternal.addListener((msg: any, sender: any) => {
   if (isTreeStyleTab(sender) && (msg?.type === "ready" || msg?.type === "sidebar-show")) syncTst(true);
 });
 
-const index = fetch("userstyles/index.json").then((r) => r.json());
-const lib = fetch("userstyles/lib.less").then((r) => r.text());
+const index = fetch("/userstyles/index.json").then((r) => r.json());
+const lib = fetch("/userstyles/lib.less").then((r) => r.text());
 // id -> { key, css: Promise<string> }, recompiled when the scheme changes.
-const compiled = new Map();
+const compiled = new Map<string, { key: string; css: Promise<string> }>();
 
-async function themeFor(url, detected) {
+async function themeFor(url: string, detected: string[] | undefined) {
   const { scheme, settings } = await store.get(["scheme", "settings"]);
   if (!scheme) return "";
   const sites = { ...SITES, ...settings?.sites };
@@ -95,12 +97,12 @@ async function themeFor(url, detected) {
   for (const style of (await index).styles) {
     // The user's override: more domains, pages matching a selector, their CSS.
     const own = sites.overrides?.[style.id] ?? {};
-    const domains = (own.domains ?? "").split(/\s+/).filter(Boolean).map((value) => ({ type: "domain", value }));
+    const domains = (own.domains ?? "").split(/\s+/).filter(Boolean).map((value: string) => ({ type: "domain", value }));
     const anywhere = (own.when && detected?.includes(style.id)) || matches(domains, url);
     if (sites.off.includes(style.id) || !(anywhere || matches(style.matches, url))) continue;
     let hit = compiled.get(style.id);
     if (hit?.key !== key) {
-      const source = fetch(`userstyles/${style.id}.less`).then((r) => r.text());
+      const source = fetch(`/userstyles/${style.id}.less`).then((r) => r.text());
       hit = {
         key,
         css: source.then(async (s) => compile(less, libFor(await lib, scheme, sites.accent), s, style.vars, scheme.mode)),
@@ -110,14 +112,14 @@ async function themeFor(url, detected) {
     try {
       css += `\n${cssFor(await hit.css, url, anywhere)}`;
     } catch (e) {
-      console.warn(`caelestia-tab: ${style.id}:`, e.message ?? e);
+      console.warn(`caelestia-tab: ${style.id}:`, (e as Error).message ?? e);
     }
     if (own.css) css += `\n${own.css}`;
   }
   return css;
 }
 
-browser.runtime.onMessage.addListener((msg, sender) => {
+browser.runtime.onMessage.addListener((msg: any, sender: any) => {
   if (msg.type !== "theme") return;
   return (async () => {
     const css = await themeFor(msg.url, msg.detected);

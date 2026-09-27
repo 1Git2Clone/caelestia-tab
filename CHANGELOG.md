@@ -10,8 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `caelestia-tab`, the native messaging helper. It streams caelestia's scheme and wallpaper to the extension and resends them when they change. `caelestia-tab install` registers it with Firefox, Floorp, Zen, LibreWolf and Waterfox.
-- The extension: a new tab whose colours and wallpaper follow the scheme live. It has a clock and date widget, and a bookmarks widget laid out on a user-defined CSS grid with Tiles and List presets. An edit mode lets you reorder (drag, or the arrows), edit and remove tiles.
-- Nerd Font glyphs as a bookmark's mark. The symbols font is bundled, and the editor suggests glyphs from the bookmark's address and name, searches all of them by name, or takes a glyph, a name (`nf-fa-github`) or a codepoint.
+- The extension: a new tab whose colours and wallpaper follow the scheme live, built with Svelte 5, TypeScript and Tailwind. It has a clock and date widget, and a bookmarks widget laid out on a user-defined CSS grid with Tiles and List presets, or in even rows (5, or 3 and 2, never 4 and 1). An edit mode lets you reorder (drag, or the arrows), edit and remove tiles; the controls sit under each tile's name and mark.
+- Settings open as a panel beside the page, so changes show as you make them. Widgets are components that declare their settings, and the panel draws each one's form from that.
+- The clock's time and date each take their own separator and size, with a weight, a leading-zero option, four date styles, and the glass behind it optional.
+- A tile's colour can be a fixed one from the browser's colour picker as well as a scheme colour, and the scheme colours are named under their swatches. Uploaded tile images are scaled to what a tile shows.
+- A widget flush with a window edge squares its corners on that side.
+- Nerd Font glyphs as a bookmark's mark. The symbols font is bundled, and the editor shows every glyph with a search by name, and suggests glyphs from the bookmark's address and name.
 - Zen's window follows the scheme live. The helper writes a Zen mod into every Zen profile, and `zen/caelestia-tab.cfg` (installed with `caelestia-tab install-zen`, or `lib.wrapZen` on Nix) reloads it on each change.
 - The clock sits on the same glass as the bookmarks, so it stays legible over any wallpaper, dark text in light mode included.
 - Tree Style Tab's sidebar is tinted towards the scheme's primary and follows switches live. It can be turned off, and its strength set, in *Settings*, *Browser*.

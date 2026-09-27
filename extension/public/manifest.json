@@ -20,7 +20,7 @@
   "permissions": ["nativeMessaging", "storage", "unlimitedStorage", "scripting"],
   "host_permissions": ["<all_urls>"],
   "background": {
-    "scripts": ["background.js"],
+    "scripts": ["vendor/less.min.js", "background.js"],
     "type": "module"
   },
   "chrome_url_overrides": {

@@ -1,5 +1,5 @@
 // Material Design icon paths (Apache-2.0, google/material-design-icons).
-const PATHS = {
+export const PATHS = {
   add: "M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z",
   edit: "M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z",
   settings:
@@ -12,6 +12,6 @@ const PATHS = {
   drag: "M11 18a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm-2-8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm0-6a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm6 4a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm0 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm0 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4z",
 };
 
-export function icon(name) {
+export function icon(name: keyof typeof PATHS) {
   return `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${PATHS[name]}"/></svg>`;
 }

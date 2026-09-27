@@ -43,8 +43,14 @@ jobs:
       - uses: actions/checkout@v7.0.1
       - name: node --test
         run: nix develop -c node --test tests/*.test.mjs
+      - name: npm ci
+        run: nix develop -c npm ci --prefix extension
+      - name: svelte-check
+        run: nix develop -c npm run --prefix extension check
+      - name: build
+        run: nix develop -c npm run --prefix extension build
       - name: web-ext lint
-        run: nix develop -c web-ext lint --source-dir extension --self-hosted
+        run: nix develop -c web-ext lint --source-dir extension/dist --self-hosted
 
   nix:
     runs-on: nix-node

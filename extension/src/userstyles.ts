@@ -1,6 +1,12 @@
 // Compiles the vendored catppuccin userstyles against the live caelestia
 // scheme, and picks out the parts of a compiled style that apply to a URL.
-// Shared by background.js and scripts/vendor-userstyles.mjs.
+// Shared by background.ts and scripts/vendor-userstyles.mjs.
+import type { Scheme } from "./types.ts";
+
+export interface Rule {
+  type: string;
+  value: string;
+}
 
 // The catppuccin palette. caelestia's scheme carries every one of these names.
 const NAMES = [
@@ -12,8 +18,12 @@ const NAMES = [
 
 // settings.sites when nothing's been saved: every style on, accented with the
 // scheme's primary.
-export const SITES = { enabled: true, off: [], accent: "primary" };
-
+export interface Override {
+  domains?: string;
+  when?: string;
+  css?: string;
+}
+export const SITES = { enabled: true, off: [] as string[], accent: "primary", overrides: {} as Record<string, Override> };
 
 const IMPORT = /@import\s+["']https:\/\/userstyles\.catppuccin\.com\/lib\/std\/v1\.less["'];/;
 
@@ -24,7 +34,7 @@ const IMPORT = /@import\s+["']https:\/\/userstyles\.catppuccin\.com\/lib\/std\/v
 // chain per colour, precomputed upstream), so the few icons styles tint with a
 // filter come out in catppuccin's shade, not the scheme's. Computing filter
 // chains for arbitrary colours needs a solver; add one if that shows.
-export function libFor(lib, scheme, accent = "primary") {
+export function libFor(lib: string, scheme: Scheme, accent = "primary") {
   const c = scheme.colours;
   const colours = NAMES.map((n) => `@${n}: #${c[n]};`).join(" ");
   return lib
@@ -35,7 +45,7 @@ export function libFor(lib, scheme, accent = "primary") {
 // Both flavour variables are set to the scheme's mode, so a site's own light
 // or dark toggle doesn't pick a branch the colours weren't made for. The
 // flavour now only decides `if(@flavor = latte, ...)` branches.
-export async function compile(less, lib, source, vars, mode) {
+export async function compile(less: any, lib: string, source: string, vars: Record<string, string>, mode: string): Promise<string> {
   const flavour = mode === "light" ? "latte" : "mocha";
   const { css } = await less.render(source.replace(IMPORT, lib), {
     globalVars: { ...vars, lightFlavor: flavour, darkFlavor: flavour },
@@ -46,8 +56,8 @@ export async function compile(less, lib, source, vars, mode) {
 // Splits compiled CSS into its @-moz-document blocks and whatever sits outside
 // them. Web pages ignore @-moz-document, so the extension injects the bodies
 // of the matching blocks instead of the whole sheet.
-export function documents(css) {
-  const blocks = [];
+export function documents(css: string) {
+  const blocks: { rules: Rule[]; body: string }[] = [];
   let global = "";
   let i = 0;
   const RULE = /\s*,?\s*(?:\/\*[\s\S]*?\*\/\s*)*(domain|url-prefix|url|regexp)\(\s*(["'])((?:\\.|(?!\2)[^\\])*)\2\s*\)/y;
@@ -59,8 +69,8 @@ export function documents(css) {
     }
     global += css.slice(i, at);
     let j = at + "@-moz-document".length;
-    const rules = [];
-    for (let m; ((RULE.lastIndex = j), (m = RULE.exec(css))); j = RULE.lastIndex) {
+    const rules: Rule[] = [];
+    for (let m: RegExpExecArray | null; ((RULE.lastIndex = j), (m = RULE.exec(css))); j = RULE.lastIndex) {
       // CSS string escapes: `\\.` is a backslash and a dot.
       rules.push({ type: m[1], value: m[3].replace(/\\(.)/g, "$1") });
     }
@@ -73,7 +83,7 @@ export function documents(css) {
 }
 
 // The brace that closes the one at `open`, skipping strings and comments.
-function closing(css, open) {
+function closing(css: string, open: number) {
   let depth = 0;
   for (let i = open; i < css.length; i++) {
     const ch = css[i];
@@ -91,7 +101,7 @@ function closing(css, open) {
 }
 
 // Stylus's semantics: a regexp must match the whole URL.
-export function matches(rules, url) {
+export function matches(rules: Rule[], url: string) {
   let host = "";
   try {
     host = new URL(url).hostname;
@@ -113,7 +123,7 @@ export function matches(rules, url) {
 // The CSS one compiled style contributes to a page, or "" when none of its
 // blocks match the URL. `all` takes every block, for a page the user's
 // override matched by its content or an extra domain.
-export function cssFor(compiled, url, all = false) {
+export function cssFor(compiled: string, url: string, all = false) {
   const { global, blocks } = documents(compiled);
   const bodies = blocks.filter((b) => all || matches(b.rules, url)).map((b) => b.body);
   return bodies.length ? global + bodies.join("\n") : "";
