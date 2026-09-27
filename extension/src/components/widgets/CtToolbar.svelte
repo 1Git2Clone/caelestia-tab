@@ -14,7 +14,9 @@
 </script>
 
 <!-- The pill of buttons: each shown widget's actions, the pen for edit mode
-     and the settings. A widget like any other, placed where the user wants. -->
+     and the settings. A widget like any other, placed where the user wants,
+     and drawn above the others (z-2): a widget laid over its area, like a
+     menu, can't hide the way out of edit mode. -->
 <script lang="ts">
   import { getContext } from "svelte";
   import type { App } from "../../store.svelte.ts";
@@ -28,7 +30,7 @@
   const on = `${base} bg-primary text-on-primary`;
 </script>
 
-<nav class="ct-toolbar flex gap-0.5 rounded-full bg-glass p-1 backdrop-blur-md">
+<nav class="ct-toolbar relative z-2 flex gap-0.5 rounded-full bg-glass p-1 backdrop-blur-md">
   {#if settings.actions}
     {#each app.settings.widgets as w (w.id)}
       {#if !w.hidden}

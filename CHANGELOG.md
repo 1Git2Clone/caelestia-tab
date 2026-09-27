@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The clock's time and date each take their own separator and size, with a weight, a leading-zero option, four date styles, and the glass behind it optional.
 - A tile's colour can be a fixed one from the browser's colour picker as well as a scheme colour, and the scheme colours are named under their swatches. Uploaded tile images are scaled to what a tile shows.
 - A widget flush with a window edge squares its corners on that side.
+- The toolbar stays above other widgets, and edit mode's pens above everything, so widgets can be laid over each other's areas.
 - The page is a CSS grid you define, and every widget, the toolbar included, sits where you place it. Widgets are added from *Settings*, *General*, and edited from the page: edit mode gives each one an overlay that opens its properties and placement in the side panel. Every editor, a bookmark's included, opens there and applies as you type; there are no pop-ups.
 - A page font (*Settings*, *General*), and fonts for the clock's time and date. Font fields autocomplete from the installed fonts, listed by the helper, each shown in its own face. Font sizes are in pt.
 - Tree Style Tab's sidebar takes the background's choices and fields: a colour dimmed towards the surface, the wallpaper dimmed and blurred, or TST's own look.

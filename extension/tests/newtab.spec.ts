@@ -130,3 +130,16 @@ test("a widget whose component isn't built stays removable from edit mode", asyn
   await panel(page).getByRole("button", { name: "Remove this widget" }).click();
   await expect(page.getByText("No component called NotBuilt")).toHaveCount(0);
 });
+
+test("a widget laid over the toolbar leaves its buttons clickable", async ({ page }) => {
+  await page.evaluate(async () => {
+    const { settings } = await (window as any).browser.storage.local.get("settings");
+    const s = settings ?? {};
+    s.widgets = [...(s.widgets ?? []), { id: "over", component: "Hello", place: { area: "toolbar", justify: "stretch", align: "stretch" }, settings: {} }];
+    await (window as any).browser.storage.local.set({ settings: s });
+  });
+  await page.reload();
+  await expect(page.locator(".hello")).toBeVisible();
+  await page.getByTitle("Settings", { exact: true }).click({ timeout: 2000 });
+  await expect(panel(page)).toBeVisible();
+});

@@ -1,6 +1,7 @@
 <!-- Edit mode's default overlay on a widget: its name, and a button that
      opens its properties and placement in the side panel. A widget can bring its own instead
-     (WidgetInfo.overlay). -->
+     (WidgetInfo.overlay). Above every widget (z-3), so one laid over another
+     doesn't hide its pen. -->
 <script lang="ts">
   import { edit, type App, type Widget } from "../store.svelte.ts";
   import { widgets } from "../widgets.ts";
@@ -11,7 +12,7 @@
   const label = $derived(widgets.find((c) => c.name === widget.component)?.widget.label ?? widget.component);
 </script>
 
-<div class="pointer-events-none absolute inset-0 rounded-2xl outline-2 outline-offset-2 outline-primary outline-dashed">
+<div class="pointer-events-none absolute inset-0 z-3 rounded-2xl outline-2 outline-offset-2 outline-primary outline-dashed">
   <button
     type="button"
     class="pointer-events-auto absolute -top-3.5 left-3 flex cursor-pointer items-center gap-1.5 rounded-full border-0 bg-primary px-3 py-1 text-sm text-on-primary shadow-md"

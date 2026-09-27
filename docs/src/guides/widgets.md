@@ -10,7 +10,10 @@ its properties, its placement, whether it shows, or to remove it.
 
 The pen, the settings button and each shown widget's own buttons (the
 bookmarks' +). Each group can be turned off. Without a toolbar on the page,
-Ctrl+, still opens settings.
+Ctrl+, still opens settings. It's drawn above the other widgets, and edit
+mode's outlines and pens above everything, so a widget placed over its area
+(a menu across the top, say) never hides them. Such a widget can find it at
+`.ct-toolbar` to keep its own buttons clear of it.
 
 ## Clock and date
 
