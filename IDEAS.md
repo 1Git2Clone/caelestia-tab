@@ -74,6 +74,12 @@ Once, at install:
 
 ## First milestone: prove colours and background
 
+Built in the first prototype (2026-09-27): the helper and its data plugins,
+the live colours and wallpaper, the clock and bookmark plugins with the grid
+editor, device-local settings, and the Catppuccin site themes compiled against
+the live scheme. See the handbook. Chrome support and Tree Style Tab come
+next.
+
 - The core and plugin loading.
 - The new tab's colours and background follow the scheme and change live on a
   switch.
@@ -151,8 +157,8 @@ Once, at install:
 
 - Check whether Firefox and the forks load an unsigned extension or need AMO
   unlisted signing, before building anything.
-- Helper language: Rust or Python.
-- A native-messaging helper (no open port) or a localhost service.
+- Helper language: settled, Rust.
+- Settled: a native-messaging helper, no open port.
 - Music servers: WebDAV only serves files; the API most music servers share is
   Subsonic's (Navidrome, Gonic, Airsonic). Decide which to build on.
 - Media controls:
