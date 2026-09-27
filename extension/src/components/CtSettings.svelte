@@ -4,33 +4,38 @@
      pen, a bookmark. There are no pop-ups. -->
 <script lang="ts">
   import { getContext } from "svelte";
-  import { LAYOUT, PLACE, type Field } from "../fields.ts";
+  import { LAYOUT, type Field } from "../fields.ts";
   import { COLOURS } from "../scheme.ts";
-  import { complete, DEFAULTS, type App } from "../store.svelte.ts";
+  import { complete, DEFAULTS, edit, type App, type Widget } from "../store.svelte.ts";
   import { button, hint, iconButton, input, primary } from "../ui.ts";
   import { widgets } from "../widgets.ts";
   import CtForm from "./CtForm.svelte";
   import CtIcon from "./CtIcon.svelte";
   import CtTabs from "./CtTabs.svelte";
+  import CtWidgetEditor from "./CtWidgetEditor.svelte";
 
   const app = getContext<App>("ct");
   let tab = $state(0);
 
-  const BACKGROUND: Field[] = [
+  // The new tab's background and Tree Style Tab's sidebar take the same
+  // choices; `none` is what "no background of ours" means for each.
+  const backdrop = (label: string, none: string): Field[] => [
     {
       key: "source",
-      label: "Background",
+      label,
       type: "select",
       options: [
         ["wallpaper", "The caelestia wallpaper"],
         ["colour", "A colour"],
-        ["none", "The scheme's background colour"],
+        ["none", none],
       ],
     },
-    { key: "colour", label: "Colour, when it's a colour", type: "colour" },
-    { key: "dim", label: "Dim", type: "range", min: 0, max: 90, unit: "%" },
-    { key: "blur", label: "Blur", type: "range", min: 0, max: 40, unit: "px" },
+    { key: "colour", label: "Colour", type: "colour", when: (v) => v.source === "colour" },
+    { key: "dim", label: "Dim", type: "range", min: 0, max: 90, unit: "%", when: (v) => v.source !== "none" },
+    { key: "blur", label: "Blur", type: "range", min: 0, max: 40, unit: "px", when: (v) => v.source === "wallpaper" },
   ];
+  const BACKGROUND = backdrop("Background", "The scheme's background colour");
+  const TST = backdrop("Sidebar", "Tree Style Tab's own");
   const SITES_FIELDS: Field[] = [
     { key: "enabled", label: "Theme websites", type: "checkbox" },
     {
@@ -45,37 +50,20 @@
     { key: "when", label: "Also on pages matching", type: "text", hint: "A CSS selector, checked once the page has loaded: the style applies wherever it matches." },
     { key: "css", label: "Your CSS", type: "textarea", rows: 6, hint: "Applied after the style, on the same pages. The scheme is in var(--caelestia-*)." },
   ];
-  const TST: Field[] = [
-    {
-      key: "source",
-      label: "Sidebar",
-      type: "select",
-      options: [
-        ["tint", "A colour, tinted over the surface"],
-        ["wallpaper", "The caelestia wallpaper"],
-        ["none", "Tree Style Tab's own"],
-      ],
-    },
-    { key: "colour", label: "Colour", type: "colour", hint: "The tint, and the tabs' tint over the wallpaper." },
-    { key: "strength", label: "Strength", type: "range", min: 0, max: 60, unit: "%" },
-    { key: "dim", label: "Dim, over the wallpaper", type: "range", min: 0, max: 90, unit: "%" },
-    { key: "blur", label: "Blur, over the wallpaper", type: "range", min: 0, max: 40, unit: "px" },
-  ];
-  const box = "m-0 rounded-2xl border border-solid border-outline-variant px-5 pt-3 pb-5";
-
+  // A new widget goes on the page and straight into its editor, with the pen
+  // on, so it can be placed where it should be.
   let adding = $state("CtBookmarks");
   function add() {
     const c = widgets.find((c) => c.name === adding)!;
-    app.settings.widgets.push({
+    const widget: Widget = {
       id: crypto.randomUUID(),
       component: c.name,
       place: { area: "auto", justify: "stretch", align: "start", ...c.widget.place },
       settings: structuredClone(c.widget.defaults),
-    });
-  }
-  function remove(i: number) {
-    const w = app.settings.widgets[i];
-    if (confirm(`Remove this ${widgets.find((c) => c.name === w.component)?.widget.label ?? w.component} and its settings?`)) app.settings.widgets.splice(i, 1);
+    };
+    app.settings.widgets.push(widget);
+    app.editing = true;
+    edit(app, c.widget.label, CtWidgetEditor, { widget: app.settings.widgets.at(-1) });
   }
 
   // Websites: the vendored styles, filterable, each with its override.
@@ -127,44 +115,16 @@
     {@const Focus = app.focus.component}
     <Focus {...app.focus.props} onclose={() => (app.focus = null)} />
   {:else}
-  <CtTabs tabs={["Widgets", "Background", "Websites", "Browser", "Advanced"]} bind:current={tab} />
+  <CtTabs tabs={["Page", "Background", "Websites", "Browser", "Advanced"]} bind:current={tab} />
 
   {#if tab === 0}
     <div class="grid gap-4">
-      <fieldset class={box}>
-        <legend class="px-2 font-medium">Page</legend>
-        <div class="grid gap-4">
-          <CtForm fields={[{ key: "font", label: "Font", type: "font", hint: "Every widget's, unless it sets its own." }]} values={app.settings} />
-          <details>
-            <summary class="cursor-pointer">Layout</summary>
-            <p class={hint}>The page is a CSS grid: widgets sit in its areas (each widget's placement, below or from the pen).</p>
-            <CtForm fields={LAYOUT} values={app.settings.layout} />
-          </details>
-        </div>
-      </fieldset>
-      {#each app.settings.widgets as w, i (w.id)}
-        {@const c = widgets.find((c) => c.name === w.component)}
-        <fieldset class={box}>
-          <legend class="flex items-center gap-2 px-2">
-            <span class="font-medium">{c?.widget.label ?? w.component}</span>
-            <label class="flex cursor-pointer items-center gap-1.5">
-              <input type="checkbox" class="m-0 size-4.5 accent-primary" checked={!w.hidden} onchange={(e) => (w.hidden = !e.currentTarget.checked)} /> Show
-            </label>
-            <button type="button" class={iconButton} title="Remove this widget" onclick={() => remove(i)}><CtIcon name="close" /></button>
-          </legend>
-          <div class="grid gap-4">
-            {#if c}
-              <CtForm fields={c.widget.fields} values={w.settings} />
-            {:else}
-              <p class={hint}>No component called {w.component} in this build.</p>
-            {/if}
-            <details>
-              <summary class="cursor-pointer">Placement</summary>
-              <div class="pt-3"><CtForm fields={PLACE} values={w.place} /></div>
-            </details>
-          </div>
-        </fieldset>
-      {/each}
+      <p class="m-0 {hint}">Each widget is edited from the page: turn on the pen and pick one.</p>
+      <CtForm fields={[{ key: "font", label: "Font", type: "font", hint: "Every widget's, unless it sets its own." }]} values={app.settings} />
+      <h3 class="m-0 text-lg font-medium">Layout</h3>
+      <p class="m-0 {hint}">The page is a CSS grid, and each widget sits in one of its areas (its placement, from the pen).</p>
+      <CtForm fields={LAYOUT} values={app.settings.layout} />
+      <h3 class="m-0 text-lg font-medium">Add a widget</h3>
       <div class="flex gap-2">
         <select class={input} bind:value={adding} aria-label="Widget to add">
           {#each widgets as c (c.name)}<option value={c.name}>{c.widget.label}</option>{/each}

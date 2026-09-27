@@ -31,7 +31,8 @@ is a complete example.
 ```
 
 Put it in `extension/src/components/widgets/`, build, and add it from
-*Settings*, *Widgets*, *Add*. Place it with its *Placement*, or the pen.
+*Settings*, *Page*, *Add a widget*. It's then edited from the page, with the
+pen.
 
 ## What a component gets
 
@@ -53,8 +54,10 @@ Put it in `extension/src/components/widgets/`, build, and add it from
 one), `font` (a font-family, with the installed fonts offered), `image` (a URL
 or an upload), `glyph` (a Nerd Font glyph, with
 suggestions for the words its `words(values)` returns) and `presets` (buttons
-that set several keys at once). `CtForm` draws them, bound to an object, and
-works inside your own components too.
+that set several keys at once). Any field can take `when: (values) => boolean`
+to show only when it applies, like a colour only when the source is a colour.
+`CtForm` draws them, bound to an object, and works inside your own components
+too.
 
 ## Edit mode
 

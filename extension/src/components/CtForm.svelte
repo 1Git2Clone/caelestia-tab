@@ -9,6 +9,6 @@
 
 <div class="ct-form grid gap-4">
   {#each fields as field, i (i)}
-    <CtField {field} {values} />
+    {#if !field.when || field.when(values)}<CtField {field} {values} />{/if}
   {/each}
 </div>

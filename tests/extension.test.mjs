@@ -64,7 +64,7 @@ test("the Tree Style Tab sidebar follows the background's choices", async () => 
   const { tstStyle, tstOptions } = await import("../extension/src/treestyletab.ts");
   const colours = new Proxy({}, { get: (_, n) => ({ primary: "aa0000", tertiary: "00aa00" })[n] ?? "111111" });
   const scheme = { mode: "dark", colours };
-  const tint = tstStyle(scheme, tstOptions({ colour: "tertiary", strength: 20 }), null);
+  const tint = tstStyle(scheme, tstOptions({ source: "colour", colour: "tertiary", dim: 80 }), null);
   assert.match(tint, /--tabbar-bg: color-mix\(in srgb, #00aa00 20%/);
   const wall = tstStyle(scheme, tstOptions({ source: "wallpaper", dim: 30, blur: 4 }), "data:image/jpeg;base64,x");
   assert.match(wall, /--tabbar-bg: transparent !important/);
@@ -72,4 +72,5 @@ test("the Tree Style Tab sidebar follows the background's choices", async () => 
   assert.match(wall, /blur\(4px\)/);
   assert.match(wall, /opacity: 0.3/);
   assert.equal(tstOptions({ tint: false }).source, "none", "the old off switch still means off");
+  assert.deepEqual(tstOptions({ source: "tint", strength: 20, dim: 45 }), { source: "colour", colour: "primary", dim: 80, blur: 0 }, "an old tint's strength becomes its dim");
 });

@@ -38,14 +38,19 @@ With [Tree Style Tab](https://addons.mozilla.org/en-US/firefox/addon/tree-style-
 installed, its sidebar follows the scheme live, with the same choices as the
 new tab's background (*Settings*, *Browser*):
 
-- **A colour, tinted over the surface** (the default): the surface mixed
-  towards black (40% in dark mode, 12% in light, where surfaces grey quickly),
-  then tinted towards the colour you pick, primary by default, so it sits a
-  step darker than the page in both modes. *Strength* sets the tint.
-- **The caelestia wallpaper**, dimmed and blurred as you set, with the tabs on
-  a translucent tint of the colour. The sidebar gets a copy scaled to 900 px,
-  since TST keeps the style in every sidebar.
+- **A colour** (the default: primary, dimmed 86%): the colour dimmed towards
+  the surface mixed towards black (40% in dark mode, 12% in light, where
+  surfaces grey quickly), so it sits a step darker than the page in both
+  modes and a high dim is a light tint.
+- **The caelestia wallpaper**, dimmed towards the scheme's background and
+  blurred as you set, with the tabs on a translucent tint of primary. The
+  sidebar gets a copy scaled to 900 px, since TST keeps the style in every
+  sidebar.
 - **Tree Style Tab's own** look.
+
+The fields are the background's: the colour shows when the source is a
+colour, and the blur when it's the wallpaper. A tint set up before this, with
+its *Strength*, carries over as the same colour dimmed by 100 minus it.
 
 It goes through TST's own API: caelestia-tab registers with TST and hands it
 a stylesheet, so it needs no permission, and nothing happens without TST.

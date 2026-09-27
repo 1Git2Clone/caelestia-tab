@@ -27,10 +27,11 @@
 >
   {#each app.settings.widgets as w (w.id)}
     {@const c = widgets.find((c) => c.name === w.component)}
-    {#if c && !w.hidden}
+    <!-- A hidden widget stays in edit mode, faded, so the pen can bring it back. -->
+    {#if c && (!w.hidden || app.editing)}
       {@const Overlay = c.widget.overlay === false ? null : (c.widget.overlay ?? CtEditOverlay)}
       <section
-        class="ct-widget ct-widget-{w.id} relative min-w-0 [grid-area:var(--area)] {JUSTIFY[w.place.justify]} {ALIGN[w.place.align]}"
+        class="ct-widget ct-widget-{w.id} relative min-w-0 [grid-area:var(--area)] {JUSTIFY[w.place.justify]} {ALIGN[w.place.align]} {w.hidden ? 'opacity-40' : ''}"
         style:--area={w.place.area}
         use:edges
       >

@@ -52,7 +52,7 @@ up, copy to another machine, or edit by hand.
 ## The page
 
 The page is a CSS grid the user defines: `layout`'s columns, rows, named areas,
-gap and padding, typed as CSS in *Settings*, *Widgets*, *Page*. Each widget
+gap and padding, typed as CSS in *Settings*, *Page*. Each widget
 sits on it by its `place`: an `area` (one of the layout's names, or any
 `grid-area` value) and its alignment in that cell. The default layout is one
 column of three areas, `toolbar`, `clock` and `bookmarks`. Nothing about the
@@ -69,7 +69,9 @@ is in `rem`, apart from grid tracks (`fr`) and the like.
 
 The pen turns on edit mode, and every widget gets an overlay: by default
 `CtEditOverlay`, an outline and a chip with the widget's name that opens its
-properties and placement (`CtWidgetEditor`). A widget can bring its own
+properties and placement (`CtWidgetEditor`), whether it shows, and removing
+it. A hidden widget stays on the page in edit mode, faded, so the pen can
+bring it back. A widget can bring its own
 overlay (`WidgetInfo.overlay`), or none, and can do more in edit mode itself
 through its `editing` prop, as the bookmarks' per-tile controls do.
 
@@ -105,9 +107,10 @@ it's filled in.
 
 A widget's form is drawn from its component's `fields` (see
 [Writing a component](../guides/plugins.md)): the settings panel knows nothing
-about clocks or bookmarks. Widgets are added and removed there too, and the
-panel itself is a component named in settings (`panel`), so it can be
-replaced.
+about clocks or bookmarks. Settings itself has no per-widget section: its
+*Page* tab holds the page's font and grid and adds widgets, and everything
+about one widget is edited from the page with the pen. The panel is a
+component named in settings (`panel`), so it can be replaced.
 
 ## Styling
 

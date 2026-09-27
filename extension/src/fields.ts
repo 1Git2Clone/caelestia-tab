@@ -16,7 +16,12 @@
 import type { Component } from "svelte";
 import type { App, Place } from "./store.svelte.ts";
 
-export type Field =
+// Every field can take `when`: shown only while it returns true for the
+// values, like a colour that only matters when the source is a colour.
+type When = { when?: (values: any) => boolean };
+
+export type Field = When &
+  (
   | { key: string; label: string; hint?: string; type: "checkbox" | "text" | "url" | "textarea"; placeholder?: string; rows?: number }
   | { key: string; label: string; hint?: string; type: "number"; min?: number; max?: number; step?: number }
   | { key: string; label: string; hint?: string; type: "range"; min: number; max: number; step?: number; unit?: string }
@@ -30,7 +35,8 @@ export type Field =
   // A Nerd Font glyph; `words` are what to suggest glyphs for.
   | { key: string; label: string; hint?: string; type: "glyph"; words?: (values: any) => string[] }
   // Buttons that set several keys at once.
-  | { type: "presets"; label: string; hint?: string; presets: { label: string; values: Record<string, any> }[] };
+  | { type: "presets"; label: string; hint?: string; presets: { label: string; values: Record<string, any> }[] }
+  );
 
 export interface WidgetInfo {
   label: string;

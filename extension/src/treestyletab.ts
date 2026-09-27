@@ -6,19 +6,30 @@ import type { Scheme } from "./types.ts";
 
 const TST = "treestyletab@piro.sakura.ne.jp";
 
-// settings.treeStyleTab when nothing's been saved. The same choices as the
-// new tab's background: a colour tinted over a darkened surface, the
-// wallpaper, or TST left alone.
+// settings.treeStyleTab when nothing's been saved: the same choices as the
+// new tab's background. A colour is dimmed towards the darkened surface, so
+// dim 86 is a light tint; the wallpaper is dimmed towards the scheme's
+// background and can be blurred; none leaves TST alone.
 export const TREE_STYLE_TAB = {
-  source: "tint" as "tint" | "wallpaper" | "none",
+  source: "colour" as "colour" | "wallpaper" | "none",
   colour: "primary",
-  strength: 14,
-  dim: 45,
+  dim: 86,
   blur: 0,
 };
 
-// Settings from before `source`: { tint: false } meant off.
-export const tstOptions = (saved: any) => ({ ...TREE_STYLE_TAB, ...(saved?.tint === false && !saved.source ? { source: "none" } : {}), ...saved });
+// Earlier settings: { tint: false } meant off, and a "tint" source had a
+// `strength`, the colour's share, which is 100 minus the dim.
+export function tstOptions(saved: any): typeof TREE_STYLE_TAB {
+  if (!saved) return { ...TREE_STYLE_TAB };
+  const { tint, strength, ...rest } = saved;
+  const old = saved.source === "tint" || (!saved.source && strength != null);
+  return {
+    ...TREE_STYLE_TAB,
+    ...rest,
+    ...(tint === false && !saved.source ? { source: "none" } : {}),
+    ...(old ? { source: "colour", dim: 100 - (strength ?? 14) } : {}),
+  };
+}
 
 const hex = (scheme: Scheme, token: string) => (token.startsWith("#") ? token : `#${scheme.colours[token]}`);
 
@@ -33,19 +44,21 @@ export function tstStyle(scheme: Scheme, opts: typeof TREE_STYLE_TAB, wallpaper:
   const base = `color-mix(in srgb, ${c("surface")}, ${c("shadow")} ${scheme.mode === "light" ? 12 : 40}%)`;
   const tint = hex(scheme, opts.colour);
   const mix = (n: number) => `color-mix(in srgb, ${tint} ${n}%, ${base})`;
+  // The colour's share: what the dim leaves of it.
+  const share = 100 - opts.dim;
   const text = `
   --tab-text-regular: ${c("onSurface")} !important;
   --tab-text-active: ${c("onSurface")} !important;
   --tab-border: ${c("outlineVariant")} !important;`;
   if (opts.source === "wallpaper" && wallpaper) {
     // The tab bar goes see-through over the wallpaper, dimmed towards the
-    // scheme's background, and the tabs keep a tinted, translucent surface.
+    // scheme's background, and the tabs keep a translucent tint of the colour.
     const over = (n: number) => `color-mix(in srgb, ${tint} ${n}%, color-mix(in srgb, ${c("background")} 55%, transparent))`;
     return `:root {
   --browser-background: transparent !important;
   --tabbar-bg: transparent !important;
-  --tab-like-surface: ${over(opts.strength)} !important;
-  --tab-surface-active: ${over(Math.min(opts.strength * 3, 60))} !important;${text}
+  --tab-like-surface: ${over(14)} !important;
+  --tab-surface-active: ${over(42)} !important;${text}
 }
 body {
   isolation: isolate;
@@ -70,10 +83,10 @@ body::after {
 }`;
   }
   return `:root {
-  --browser-background: ${mix(opts.strength)} !important;
-  --tabbar-bg: ${mix(opts.strength)} !important;
-  --tab-like-surface: ${mix(opts.strength + 6)} !important;
-  --tab-surface-active: ${mix(Math.min(opts.strength * 3, 60))} !important;${text}
+  --browser-background: ${mix(share)} !important;
+  --tabbar-bg: ${mix(share)} !important;
+  --tab-like-surface: ${mix(Math.min(share + 6, 100))} !important;
+  --tab-surface-active: ${mix(Math.min(share * 3, 60))} !important;${text}
 }`;
 }
 
