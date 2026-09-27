@@ -56,6 +56,11 @@ its own; recipes live in the docs.
   parsed.
 - `css` goes after the style's CSS, so it wins at equal specificity.
 
+Sites of the user's own are `settings.sites.custom` (`{ id, name }`, ids
+`custom-…`), with an override under the same id. They have no style, so
+their `domains` and `when` are the only ways they match, and their `css` is
+all they add, after every bundled style's.
+
 ## The palette swap
 
 `userstyles.ts` `libFor()` rewrites the vendored `lib.less` before compiling:
