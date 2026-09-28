@@ -18,24 +18,39 @@ concurrency:
 # rustup, as serenity-discord-bot's do, and all three failed within 6-32s on
 # this repo's first run (2026-09-27; cause unconfirmed, the logs weren't read),
 # while the nix-node jobs passed.
+#
+# A job's nix store starts empty, so each job downloads its shell again: .#ci,
+# the dev shell less the UI tests' 2.2 GiB of browsers, for all but those
+# tests. And the runner takes two jobs at a time, so fmt, clippy and test are
+# one job, paying for the toolchain once.
 jobs:
-  fmt:
+  rust:
     runs-on: nix-node
+    env:
+      # No debug info: nobody debugs a CI build, and it's most of target/'s
+      # size, which the cache uploads and downloads.
+      CARGO_PROFILE_DEV_DEBUG: 0
+      CARGO_PROFILE_TEST_DEBUG: 0
     steps:
       - uses: actions/checkout@v7.0.1
-      - run: nix develop -c cargo fmt --check
-
-  clippy:
-    runs-on: nix-node
-    steps:
-      - uses: actions/checkout@v7.0.1
-      - run: nix develop -c cargo clippy --all-targets -- -D warnings
-
-  test:
-    runs-on: nix-node
-    steps:
-      - uses: actions/checkout@v7.0.1
-      - run: nix develop -c cargo test --verbose
+      # What serenity-discord-bot's Swatinem/rust-cache keeps, by hand: that
+      # action asks cargo and rustc for its key, and they're only on PATH
+      # inside nix develop. flake.lock is in the key for the toolchain.
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            ~/.cargo/git/db
+            target
+          key: rust-${{ hashFiles('Cargo.lock', 'flake.lock') }}
+          restore-keys: rust-
+      - name: fmt
+        run: nix develop .#ci -c cargo fmt --check
+      - name: clippy
+        run: nix develop .#ci -c cargo clippy --all-targets -- -D warnings
+      - name: test
+        run: nix develop .#ci -c cargo test --verbose
 
   extension:
     runs-on: nix-node

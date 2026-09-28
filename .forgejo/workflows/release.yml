@@ -1,28 +1,42 @@
 # On a v<version> tag: builds the AMO zips with scripts/release-zip.sh and
 # publishes them as that tag's release, with its CHANGELOG.md section as the
 # notes. A tag that already has a release fails at the create step.
+#
+# Run by hand with a tag to publish one whose own run failed, without moving
+# the tag: it builds from the tag, with this file's steps.
+#
+# The job's own token is enough: Forgejo gives a job write on its repo, and
+# the vps's Caddy lets the runner reach the release routes (vps
+# modules/containers/caddy.nix, runnerApiPaths). `permissions:` isn't read.
 name: Release
 
 on:
   push:
     tags: ["v*"]
-
-permissions:
-  contents: write
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "The tag to publish, like v0.1.1"
+        required: true
 
 jobs:
   release:
     runs-on: nix-node
+    env:
+      TAG: ${{ inputs.tag || github.ref_name }}
     steps:
       - uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ inputs.tag || github.ref }}
 
+      # The default shell, not .#ci: a tag from before .#ci existed has none.
       - name: Build
-        run: nix develop -c scripts/release-zip.sh "${GITHUB_REF_NAME#v}"
+        run: nix develop -c scripts/release-zip.sh "${TAG#v}"
 
       - name: Notes
         # The version's section, less its heading and the link lines at the end.
         run: >-
-          nix develop -c awk -v h="## [${GITHUB_REF_NAME#v}]"
+          nix develop -c awk -v h="## [${TAG#v}]"
           '/^## \[/ { on = index($0, h) == 1; next } /^\[[^]]*\]: / { next } on'
           CHANGELOG.md > notes.md
 
@@ -31,7 +45,7 @@ jobs:
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           api=$GITHUB_SERVER_URL/api/v1/repos/$GITHUB_REPOSITORY
-          id=$(nix develop -c jq -n --arg tag "$GITHUB_REF_NAME" --rawfile body notes.md \
+          id=$(nix develop -c jq -n --arg tag "$TAG" --rawfile body notes.md \
                 '{tag_name: $tag, name: $tag, body: $body}' |
             curl -fsS -H "Authorization: token $TOKEN" -H 'Content-Type: application/json' \
               -d @- "$api/releases" |
