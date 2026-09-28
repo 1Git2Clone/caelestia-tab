@@ -8,6 +8,11 @@ nix develop
 sh scripts/setup-hooks.sh   # once per clone: the pre-commit hook
 ```
 
+`nix develop .#ci` is the same shell without rust-analyzer and the UI tests'
+browsers, half the download. CI uses it for every job but the UI tests, since
+each job starts with an empty store; the Rust job also keeps cargo's registry
+and `target/` in the Actions cache.
+
 ## The layout
 
 ```text
