@@ -183,6 +183,34 @@ the hard way.
   `{#if}` shows it.** Svelte 5 transitions are local by default: they play
   only for their own block. The settings panel, shown by App's `{#if}`,
   needs `transition:fly|global` (2026-09-27).
+- **GitHub's events are the last 30 of every repository, private ones
+  first when you're busy there.** Filtering them for `public` in the tab left
+  nothing: all 30 were one private repository's. Public-only is GitHub's
+  own list, `users/{login}/events/public`, fetched and cached beside the other
+  (2026-09-28).
+- **GitHub's push events no longer carry `size` or `commits`,** only `head`
+  and `before`. Code reading `size` fell back to a bare *Pushed to main*; the
+  tab shows `head`'s short SHA and links to that commit (2026-09-28).
+- **The private toggle swaps every search for another query.** Dropping a
+  search's results as soon as nothing asks for it meant each flip searched
+  again, against GitHub's 30 a minute. The helper keeps a search an hour
+  after it was last asked for, and sends all it keeps (2026-09-28).
+- **The helper only sends what changed, so a command can get no answer.**
+  A refresh while rate-limited fetches nothing and sends nothing. The tab's
+  refresh spinner stops on the next value *or* after 15 seconds; anything
+  else that waits on an answer needs the same way out (2026-09-28).
+- **A Playwright test passes on data you made up.** The private toggle's
+  first test seeded events with a `public` flag and passed, while the real
+  tab, on the real list, showed nothing. For helper data, check what the
+  helper really sends (drive the binary over native messaging, or the e2e
+  harness with `GH_TOKEN` set) before writing the fixture (2026-09-28).
+- **`/rate_limit`'s `core.used` stayed at 0 for `gh`'s token** through
+  requests that should count, so it can't show whether the helper fetched.
+  The helper's `at` moves on every fetch: watch that instead (2026-09-28).
+- **The e2e harness's `js()` returns `"ERR …"` rather than throwing.** A
+  script that throws (an element not found) reads as a result, and a step
+  that didn't happen looks like it did. Compare what it returns
+  (2026-09-28).
 - **The browser runs the helper it started with.** After a rebuild, an open
   browser keeps the old helper, and a new tab that expects newer data waits
   for what never comes. The GitHub tab checks for the keys it needs and asks

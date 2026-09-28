@@ -31,8 +31,18 @@ Open or closed, and the tab it's on, stay as you left them, in every new tab.
 Tabs of your own come after these (see [Writing a menu tab](plugins.md)).
 
 - **GitHub**: each of your searches (one per line, `Label: query`) as a
-  column of compact cards, a column of your recent activity (pushes, pull
-  requests, reviews, comments …), and, beside the refresh button, when the
+  column of compact cards, and your recent activity (pushes, pull requests,
+  reviews, comments …) where a line's query is `@activity`, as in
+  `Recent activity: @activity`. A repeated query is one column, and a line
+  with a label but no query yet is skipped. A push reads *Pushed 16bdf70 to
+  main* and links to that commit. With *Private activity* off, every column is
+  public repositories only: each search is sent with `is:public`, and the
+  activity column is GitHub's own list of your public events (so it's your last
+  public ones, not your last 30 filtered down to nothing). The helper keeps
+  both twins of every search for an hour and both lists of events, so flipping
+  it back and forth shows the other at once and doesn't ask GitHub again. The
+  refresh button spins until the helper answers, and gives up after
+  15 seconds if nothing changed (while rate-limited, say). Beside it, when the
   helper last fetched them, as
   *Updated at 22:31*, *Updated at yesterday, 22:31* or
   *Updated at 26-09-2026 22:31*: the words and the three formats are settings.
@@ -63,8 +73,11 @@ with `tell({ topic, command, … })`. A tab of your own can too:
   asks, and once a track: lyrics found are kept in
   `~/.cache/caelestia-tab/lyrics/`. Some players send lyrics themselves (`lyrics` on the player).
 - **`github`**: GitHub searches, and your recent events when asked, after a
-  tab sends `{ command: "queries", widget: id, queries, activity }` (its own
-  list, replacing its last one). The helper fetches them every five minutes,
+  tab sends `{ command: "queries", widget: id, queries, activity, private }`
+  (its own list, replacing its last one). The tab adds `is:public` to its
+  queries itself; `private: false` asks for `publicActivity` rather than
+  `activity`. `results` holds every search kept, asked for now or in the last
+  hour, each with its ETag. The helper fetches them every five minutes,
   on `{ command: "refresh" }` and when a search is new, side by side, and
   otherwise answers from what it last fetched, so opening a tab doesn't
   search again: GitHub allows 30 searches a minute. An unchanged result comes

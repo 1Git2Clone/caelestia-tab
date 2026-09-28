@@ -19,10 +19,26 @@ use crate::secrets;
 /// last fetched rather than searching again.
 /// ponytail: fixed; a setting when someone wants it fresher or rarer.
 const EVERY: Duration = Duration::from_secs(5 * 60);
+/// How long a search nothing asks for is kept: the private toggle swaps
+/// every search for its `is:public` twin, and flipping it back and forth
+/// shouldn't search again (GitHub allows 30 a minute).
+/// ponytail: fixed; longer if someone flips it less often than hourly.
+const KEEP: Duration = Duration::from_secs(60 * 60);
+
+/// Whether something fetched then is due again.
+fn old(t: &Instant) -> bool {
+    t.elapsed() >= EVERY - Duration::from_secs(5)
+}
+
+/// Your events, private repositories' included (for your own token), and
+/// public ones only: GitHub's two lists of them, each fetched and cached on
+/// its own, so a tab flipping between them doesn't ask again.
+const ALL: &str = "events";
+const PUBLIC: &str = "events/public";
 
 /// GitHub for the new tab's GitHub tab: your searches, and your recent
 /// activity. The tab sends what it shows (`{ topic: "github", command:
-/// "queries", widget, queries, activity }`, replacing that widget's last
+/// "queries", widget, queries, activity, private }`, replacing that widget's last
 /// list); this fetches it every five minutes, on `{ command: "refresh" }`,
 /// and when a search is new, and otherwise answers from what it has. Each
 /// search keeps its ETag, so an unchanged one is a 304. Rate-limited, it
@@ -41,14 +57,15 @@ pub struct GitHub {
 
 #[derive(Default)]
 struct State {
-    // widget id -> its queries, and whether it shows your activity.
+    // widget id -> its queries, and which of your events it shows, if any.
     queries: HashMap<String, Vec<String>>,
-    activity: HashMap<String, bool>,
-    // query -> (ETag, the last result).
-    cache: HashMap<String, (String, Value)>,
-    // Your login, and your events with their ETag.
+    activity: HashMap<String, Option<&'static str>>,
+    // query -> (ETag, the last result, when it was last fetched).
+    cache: HashMap<String, (String, Value, Instant)>,
+    // Your login, and each list of your events with its ETag and when it
+    // was last fetched.
     login: Option<String>,
-    events: Option<(String, Value)>,
+    events: HashMap<&'static str, (String, Value, Instant)>,
     token: Option<(String, &'static str)>,
     // When everything was last fetched, and when (ms) for the value.
     fetched: Option<Instant>,
@@ -118,8 +135,13 @@ impl Plugin for GitHub {
                     })
                     .collect();
                 state.queries.insert(widget.clone(), queries);
-                let activity = message["activity"].as_bool().unwrap_or(false);
-                state.activity.insert(widget, activity);
+                // A tab from before `private` sends none: it gets them all.
+                let private = message["private"].as_bool().unwrap_or(true);
+                let events = message["activity"]
+                    .as_bool()
+                    .unwrap_or(false)
+                    .then_some(if private { ALL } else { PUBLIC });
+                state.activity.insert(widget, events);
             }
             // Drop the cached token too: the user may have just logged in.
             Some("refresh") => {
@@ -133,21 +155,21 @@ impl Plugin for GitHub {
 
     async fn read(&self) -> io::Result<Value> {
         // What to fetch, taken out so the lock isn't held across requests.
-        let (queries, due, fetch_events, cached, events, login, known) = {
+        let (due, kinds, cached, events, login, known) = {
             let mut state = self.state.lock().unwrap();
             let queries: BTreeSet<String> = state.queries.values().flatten().cloned().collect();
-            // Results for searches nothing asks for any more are dropped.
-            state.cache.retain(|q, _| queries.contains(q));
-            let activity = state.activity.values().any(|a| *a);
+            // Results for searches nothing asks for any more are dropped,
+            // after a while.
+            state
+                .cache
+                .retain(|q, (_, _, t)| queries.contains(q) || t.elapsed() < KEEP);
             let limited = state
                 .limited
                 .as_ref()
                 .is_some_and(|(until, _)| now_ms() < *until);
-            let stale = state.forced
-                || state
-                    .fetched
-                    .is_none_or(|t| t.elapsed() >= EVERY - Duration::from_secs(5));
-            // Everything when it's time; else only what was never fetched.
+            let stale = state.forced || state.fetched.as_ref().is_none_or(old);
+            // Everything when it's time; else only what has no result, or
+            // an old one (a search kept from before the toggle flipped).
             let due: Vec<String> = if limited {
                 Vec::new()
             } else if stale {
@@ -155,42 +177,49 @@ impl Plugin for GitHub {
             } else {
                 queries
                     .iter()
-                    .filter(|q| !state.cache.contains_key(*q))
+                    .filter(|q| state.cache.get(*q).is_none_or(|(_, _, t)| old(t)))
                     .cloned()
                     .collect()
             };
-            let fetch_events = activity && !limited && (stale || state.events.is_none());
+            // Each list of events asked for, when it's time for it.
+            let wanted: BTreeSet<&'static str> =
+                state.activity.values().flatten().copied().collect();
+            let kinds: Vec<&'static str> = wanted
+                .into_iter()
+                .filter(|k| {
+                    !limited && (stale || state.events.get(k).is_none_or(|(_, _, t)| old(t)))
+                })
+                .collect();
             if stale && !limited {
                 state.forced = false;
             }
             (
-                queries,
                 due,
-                fetch_events,
+                kinds,
                 state.cache.clone(),
                 state.events.clone(),
                 state.login.clone(),
                 state.token.clone(),
             )
         };
-        if !due.is_empty() || fetch_events {
+        if !due.is_empty() || !kinds.is_empty() {
             let token = match known {
                 Some(t) => Some(t),
                 None => token().await,
             };
             let Some((token, from)) = token else {
                 self.state.lock().unwrap().error = Some("No GitHub token. Log in with `gh auth login`, set GH_TOKEN, or add a `github` secret (see the handbook's GitHub chapter).".into());
-                return Ok(self.value(&queries));
+                return Ok(self.value());
             };
             let searches = join_all(due.iter().map(|q| {
-                let etag = cached.get(q).map(|(etag, _)| etag.as_str());
+                let etag = cached.get(q).map(|(etag, _, _)| etag.as_str());
                 search(&self.http, &token, q, etag)
             }));
             let mine = async {
-                if !fetch_events {
+                if kinds.is_empty() {
                     return None;
                 }
-                Some(activity_of(&self.http, &token, login.as_deref(), events_etag(&events)).await)
+                Some(activity_of(&self.http, &token, login.as_deref(), &kinds, &events).await)
             };
             let (answers, mine) = futures_util::join!(searches, mine);
 
@@ -201,18 +230,34 @@ impl Plugin for GitHub {
             for (q, answer) in due.into_iter().zip(answers) {
                 match answer {
                     Ok(Some((etag, value))) => {
-                        state.cache.insert(q, (etag, value));
+                        state.cache.insert(q, (etag, value, Instant::now()));
                     }
-                    Ok(None) => {}
+                    // A 304: the same result, fetched now.
+                    Ok(None) => {
+                        if let Some(c) = state.cache.get_mut(&q) {
+                            c.2 = Instant::now();
+                        }
+                    }
                     Err(f) => failed = Some(f),
                 }
             }
             match mine {
-                Some(Ok((login, Some(fresh)))) => {
+                Some(Ok((login, lists))) => {
                     state.login = Some(login);
-                    state.events = Some(fresh);
+                    for (kind, fresh) in lists {
+                        match fresh {
+                            Some((etag, value)) => {
+                                state.events.insert(kind, (etag, value, Instant::now()));
+                            }
+                            // A 304: the same list, fetched now.
+                            None => {
+                                if let Some(e) = state.events.get_mut(kind) {
+                                    e.2 = Instant::now();
+                                }
+                            }
+                        }
+                    }
                 }
-                Some(Ok((login, None))) => state.login = Some(login),
                 Some(Err(f)) => failed = Some(f),
                 None => {}
             }
@@ -233,18 +278,21 @@ impl Plugin for GitHub {
                 }
             }
         }
-        Ok(self.value(&queries))
+        Ok(self.value())
     }
 }
 
 impl GitHub {
-    /// What the tab gets: the last results of each search it shows, your
-    /// activity, when they were fetched, and what went wrong, if anything.
-    fn value(&self, queries: &BTreeSet<String>) -> Value {
+    /// What the tab gets: the last results of each search kept (the ones
+    /// it shows, and their twins from before the toggle flipped, so flipping
+    /// back shows them at once), your activity, when they were fetched, and
+    /// what went wrong, if anything.
+    fn value(&self) -> Value {
         let state = self.state.lock().unwrap();
-        let results: serde_json::Map<String, Value> = queries
+        let results: serde_json::Map<String, Value> = state
+            .cache
             .iter()
-            .filter_map(|q| state.cache.get(q).map(|(_, v)| (q.clone(), v.clone())))
+            .map(|(q, (_, v, _))| (q.clone(), v.clone()))
             .collect();
         let limited = state
             .limited
@@ -252,17 +300,14 @@ impl GitHub {
             .filter(|(until, _)| now_ms() < *until);
         json!({
             "results": results,
-            "activity": state.events.as_ref().map(|(_, v)| v.clone()),
+            "activity": state.events.get(ALL).map(|(_, v, _)| v.clone()),
+            "publicActivity": state.events.get(PUBLIC).map(|(_, v, _)| v.clone()),
             "at": state.at,
             "auth": state.token.as_ref().map(|(_, from)| *from),
             "error": limited.map(|(_, m)| m.clone()).or_else(|| state.error.clone()),
             "limitedUntil": limited.map(|(until, _)| *until),
         })
     }
-}
-
-fn events_etag(events: &Option<(String, Value)>) -> Option<&str> {
-    events.as_ref().map(|(etag, _)| etag.as_str())
 }
 
 /// The HTTP client the network plugins share the settings of: a timeout, so
@@ -360,15 +405,17 @@ async fn search(
     Ok(answer.map(|(etag, body)| (etag, items(&body))))
 }
 
-/// Your login (asked once) and your recent events, or None when they haven't
-/// changed since `etag`. These are GitHub's core API, not search, whose
-/// limit is its own (5000 an hour).
+/// Your login (asked once) and each list of your recent events asked for,
+/// None for one that hasn't changed since its ETag. These are GitHub's core
+/// API, not search, whose limit is its own (5000 an hour); a 304 isn't
+/// counted against it.
 async fn activity_of(
     http: &reqwest::Client,
     token: &str,
     login: Option<&str>,
-    etag: Option<&str>,
-) -> Result<(String, Option<(String, Value)>), Failure> {
+    kinds: &[&'static str],
+    cached: &HashMap<&'static str, (String, Value, Instant)>,
+) -> Result<(String, Vec<(&'static str, Option<(String, Value)>)>), Failure> {
     let login = match login {
         Some(l) => l.to_owned(),
         None => get(http, token, "https://api.github.com/user", &[], None)
@@ -376,9 +423,17 @@ async fn activity_of(
             .and_then(|(_, me)| me["login"].as_str().map(str::to_owned))
             .unwrap_or_default(),
     };
-    let url = format!("https://api.github.com/users/{login}/events");
-    let answer = get(http, token, &url, &[("per_page", "30")], etag).await?;
-    Ok((login, answer.map(|(etag, body)| (etag, events(&body)))))
+    let answers = join_all(kinds.iter().map(|kind| {
+        let url = format!("https://api.github.com/users/{login}/{kind}");
+        let etag = cached.get(kind).map(|(etag, _, _)| etag.as_str());
+        async move { get(http, token, &url, &[("per_page", "30")], etag).await }
+    }))
+    .await;
+    let mut lists = Vec::new();
+    for (kind, answer) in kinds.iter().zip(answers) {
+        lists.push((*kind, answer?.map(|(etag, body)| (etag, events(&body)))));
+    }
+    Ok((login, lists))
 }
 
 /// Your events as the tab shows them: what happened, where, when, and a link.
@@ -406,13 +461,15 @@ fn events(body: &Value) -> Value {
             let action = capitalised(p["action"].as_str().unwrap_or(""));
             let branch = p["ref"].as_str().unwrap_or_default().trim_start_matches("refs/heads/");
             let (text, url) = match e["type"].as_str().unwrap_or_default() {
-                "PushEvent" => (
-                    match p["size"].as_u64() {
-                        Some(n) => format!("Pushed {n} commit{} to {branch}", if n == 1 { "" } else { "s" }),
-                        None => format!("Pushed to {branch}"),
-                    },
-                    format!("https://github.com/{repo}/commits/{branch}"),
-                ),
+                // GitHub's push events carry `head` (and `before`), no longer
+                // `size` or `commits`: the commit pushed is what's known.
+                "PushEvent" => match p["head"].as_str() {
+                    Some(head) => (
+                        format!("Pushed {} to {branch}", &head[..head.len().min(7)]),
+                        format!("https://github.com/{repo}/commit/{head}"),
+                    ),
+                    None => (format!("Pushed to {branch}"), format!("https://github.com/{repo}/commits/{branch}")),
+                },
                 "PullRequestEvent" => (about(&format!("{action} pull request")), link(&p["pull_request"]["html_url"], repo)),
                 "IssuesEvent" => (about(&format!("{action} issue")), link(&p["issue"]["html_url"], repo)),
                 "IssueCommentEvent" => (about("Commented on"), link(&p["comment"]["html_url"], repo)),
@@ -564,15 +621,18 @@ mod tests {
     fn events_say_what_happened_and_link_to_it() {
         let body = json!([
             { "type": "PushEvent", "repo": { "name": "a/b" }, "created_at": "t",
-              "payload": { "ref": "refs/heads/main", "size": 2 } },
+              "payload": { "ref": "refs/heads/main", "head": "16bdf70a055fcb73fb5a120822ce9c66029b11e7", "before": "63abe44" } },
             { "type": "PullRequestEvent", "repo": { "name": "a/b" }, "created_at": "t",
               "payload": { "action": "opened", "number": 3,
                 "pull_request": { "number": 3, "title": "Fix it", "html_url": "https://github.com/a/b/pull/3" } } },
             { "type": "GollumEvent", "repo": { "name": "a/b" }, "created_at": "t", "payload": {} },
         ]);
         let out = events(&body);
-        assert_eq!(out[0]["text"], "Pushed 2 commits to main");
-        assert_eq!(out[0]["url"], "https://github.com/a/b/commits/main");
+        assert_eq!(out[0]["text"], "Pushed 16bdf70 to main");
+        assert_eq!(
+            out[0]["url"],
+            "https://github.com/a/b/commit/16bdf70a055fcb73fb5a120822ce9c66029b11e7"
+        );
         assert_eq!(out[1]["text"], "Opened pull request #3: Fix it");
         assert_eq!(out[1]["url"], "https://github.com/a/b/pull/3");
         assert_eq!(out[2]["text"], "Gollum");

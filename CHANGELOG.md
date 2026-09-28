@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- GitHub's recent activity is a line among your searches (`Label: @activity`), placed and labelled like one, in place of a checkbox that added a second column. A repeated search is one column, and a half-typed `Label:` is no longer searched for as text.
+- A push in your activity reads as its short SHA and links to that commit.
+- The refresh button spins until the new results are in.
+
+### Added
+
+- *Private activity*: off, every GitHub column is public repositories only (searches get `is:public`, activity is your public events). Both sides are kept, so flipping it doesn't ask GitHub again.
+
 ## [0.1.0] - 2026-09-28
 
 ### Added
