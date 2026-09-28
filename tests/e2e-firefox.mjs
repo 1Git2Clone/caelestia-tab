@@ -101,6 +101,13 @@ try {
   await sleep(1500);
   assert.equal(await js(`return (await browser.storage.local.get("settings")).settings.font`), "Hand Edited", "a hand edit of the file reaches the extension");
 
+  // A site of the user's own, on the same page: its CSS applies there too.
+  // (Storage holds only what's been changed so far, so no sites yet.)
+  const set = await js(`const { settings } = await browser.storage.local.get("settings");
+    const sites = { ...settings.sites, custom: [{ id: "custom-e2e", name: "Local" }], overrides: { ...settings.sites?.overrides, "custom-e2e": { domains: "127.0.0.1", when: "", css: "h1 { color: rgb(1, 2, 3) !important; }" } } };
+    await browser.storage.local.set({ settings: { ...settings, sites } });`);
+  assert.equal(set, null, "the site of your own is saved");
+  await sleep(500);
   await call("POST", `${s}/url`, { url: "http://127.0.0.1:9090/" });
   await sleep(2500);
   assert.equal(await primary(), "#ff3355", "the page got the variables");
@@ -113,6 +120,7 @@ try {
     "rgba(255, 51, 85, 0.3)",
     "the style's accent is the scheme's primary",
   );
+  assert.equal(await js(`return getComputedStyle(document.querySelector("h1")).color`), "rgb(1, 2, 3)", "a site of your own gets its CSS");
   console.log("e2e: ok");
 } finally {
   if (id) await call("DELETE", `/session/${id}`).catch(() => {});

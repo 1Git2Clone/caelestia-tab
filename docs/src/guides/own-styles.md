@@ -45,6 +45,16 @@ apply();
 document.addEventListener("caelestia-scheme", apply);
 ```
 
+## A site of your own
+
+For a site no bundled style covers: *Settings*, *Websites*, type its name in
+the filter, and press Enter (or pick *Add "…", a site of your own* under the
+list). It opens with three fields: the domains it's on, one per line; *Also on
+pages matching*, a CSS selector for pages it's on wherever they're hosted;
+and your CSS, which gets the scheme as `var(--caelestia-*)` like any page. It
+can be turned off with its checkbox, like the bundled ones, and removed from
+its own section.
+
 ## Overriding a bundled site style
 
 The bundled styles are Catppuccin's, applied as upstream wrote them. To go

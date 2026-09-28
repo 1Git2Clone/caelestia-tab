@@ -189,3 +189,33 @@ mdbook build docs    # what the pages workflow does
 
 The pages workflow publishes `main` to
 <https://pages.hu-tao.dev/hutao/caelestia-tab/docs/>.
+
+## Releasing
+
+Date the `[Unreleased]` section of `CHANGELOG.md`, bump `version` in
+`extension/public/manifest.json` and `Cargo.toml`, commit, and tag it
+`v<version>`. Then, with the tag checked out:
+
+```sh
+nix shell nixpkgs#zip -c scripts/release-zip.sh <version>
+```
+
+It builds the extension without anyone's own components (a normal build
+takes in `~/.config/caelestia-tab/components`), leaves out `render.js`, which
+nothing loads yet, and writes `release/caelestia-tab-<version>.zip`, the
+source zip and `SHA256SUMS`. The zips are byte for byte the same on every run
+and every machine with the same lockfile: every file takes the tagged
+commit's time, and they're zipped sorted, since `web-ext build` stamps entries
+with the time it zips and adds them in any order. For 0.1.0:
+
+```
+ad84678028036c27ec41c98405a5950a8f892dce8670e53fd0ba19f53662b781  caelestia-tab-0.1.0.zip
+2a114cd8d37bc8c0dc590029ee5373a4cca42c3516143368ec02acd484b588f3  caelestia-tab-0.1.0-source.zip
+```
+
+AMO asks for the source of bundled, minified code: the second zip, built as
+with the script (Node 24, npm 11). Its linter warns about `vendor/less.min.js`
+(less.js, unmodified, from `scripts/vendor-userstyles.mjs`), the
+`innerHTML` in Svelte's runtime and the page's `<style>`s, and
+`data_collection_permissions` being newer than the minimum Firefox; none is
+an error.

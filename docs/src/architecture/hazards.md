@@ -136,7 +136,10 @@ the hard way.
   wrappers link the helper's manifest into `~/.mozilla/native-messaging-hosts`
   when the browser starts, so a browser started before the rebuild still
   starts the old helper, and a plugin added since answers "a command for no
-  plugin" or never sends. Restart the browser (2026-09-27).
+  plugin" or never sends. Restart the browser (2026-09-27). And check where
+  the link points: one made by hand (`ln -s` to fix a stale one) stays as
+  it is, and the wrapper leaves it alone, so a restart kept the old helper
+  running; `readlink -f` it against the system's store path.
 - **Reading a watched file raises an event about it.** inotify reports opens
   and closes too, which notify passes on as `EventKind::Access`. Reading the
   scheme again on those read it again, forever: 94,000 reads in 8 seconds,
@@ -212,3 +215,9 @@ the hard way.
   browser keeps the old helper, and a new tab that expects newer data waits
   for what never comes. The GitHub tab checks for the keys it needs and asks
   for a newer helper instead (2026-09-27).
+- **The e2e test's `js()` returns an error instead of throwing.** A script
+  that fails comes back as the string `"ERR …"`, so a setup step whose result
+  isn't checked fails silently and the assertion after it looks like the
+  feature's fault. Assert on a setup step's result (`null` when it returned
+  nothing). Storage there holds only what's been changed, too: no `sites`
+  until something set them (2026-09-27).

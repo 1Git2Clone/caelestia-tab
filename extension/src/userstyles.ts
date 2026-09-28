@@ -23,7 +23,9 @@ export interface Override {
   when?: string;
   css?: string;
 }
-export const SITES = { enabled: true, off: [] as string[], accent: "primary", overrides: {} as Record<string, Override> };
+// `custom`: sites of the user's own, with no vendored style: each is its
+// name, and its domains, selector and CSS are an override like any other's.
+export const SITES = { enabled: true, off: [] as string[], accent: "primary", overrides: {} as Record<string, Override>, custom: [] as { id: string; name: string }[] };
 
 const IMPORT = /@import\s+["']https:\/\/userstyles\.catppuccin\.com\/lib\/std\/v1\.less["'];/;
 

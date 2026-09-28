@@ -73,7 +73,7 @@ const RENAMED: Record<string, string> = { clock: "CtClock", bookmarks: "CtBookma
 // settings, and the menu widget's, and drop the placement.
 export function complete(saved: any): Settings {
   const s: Settings = { ...structuredClone(DEFAULTS), ...saved };
-  s.sites = { ...SITES, ...s.sites };
+  s.sites = { ...structuredClone(SITES), ...s.sites };
   s.treeStyleTab = tstOptions(s.treeStyleTab);
   s.background = { ...DEFAULTS.background, ...s.background };
   s.menu = { ...structuredClone(DEFAULTS.menu), ...s.menu };

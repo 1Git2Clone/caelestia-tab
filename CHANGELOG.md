@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-09-28
+
 ### Added
 
 - `caelestia-tab`, the native messaging helper. It streams caelestia's scheme and wallpaper to the extension and resends them when they change. `caelestia-tab install` registers it with Firefox, Floorp, Zen, LibreWolf and Waterfox.
@@ -18,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A fixed page: a bar with the menu and the toolbar (which can sit on either side or in the middle), the clock, and the bookmarks. The pen edits each part from the page, opening its settings in the side panel; every editor, a bookmark's included, opens there and applies as you type, and there are no pop-ups.
 - A menu over the clock, growing out of its button and sliding between tabs, that stays open or closed, on the tab you left, across new tabs. GitHub shows your searches as columns of cards, and your recent activity as a line among them (`Label: @activity`), a toggle that limits every column to public repositories (searches get `is:public`, activity is your public events; both kept, so flipping it doesn't ask GitHub again), pushes as the short SHA linking to the commit, a refresh button that spins until the answer is in, with when they were last fetched beside the refresh button, in formats you set, fetched every five minutes (not each time a tab opens) and kept through a rate limit; Media has a tab per player, the cover, controls and lyrics side by side when there's room, lyrics that follow the song until you scroll them, and a click on a line to play from there. Tabs of your own come from `~/.config/caelestia-tab/components`.
 - The line under a bookmark takes the colour that goes with the tile's, one of your own, or none.
+- Sites of your own: type a name in *Settings*, *Websites* and press Enter, then give it its domains, a selector and your CSS.
 - A page font (*Settings*, *General*), and fonts for the clock's time and date. Font fields autocomplete from the installed fonts, listed by the helper, each shown in its own face. Font sizes are in pt.
 - Tree Style Tab's sidebar takes the background's choices and fields: a colour dimmed towards the surface, the wallpaper dimmed and blurred, or TST's own look.
 - Settings only show a field when it applies: a colour when the source is a colour, a blur when it's the wallpaper.
@@ -33,3 +36,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tree Style Tab's sidebar is tinted towards the scheme's primary and follows switches live. It can be turned off, and its strength set, in *Settings*, *Browser*.
 - Site themes: the 134 catppuccin/userstyles, compiled against the live scheme and injected per site. Every page also gets the scheme as `--caelestia-*` CSS variables and a `caelestia-scheme` event, for your own Stylus styles and userscripts.
 - Per-site overrides in *Settings*, *Websites*: more domains for a style, a CSS selector that applies it to matching pages wherever they're hosted, and your own CSS on top. The docs carry recipes for mdBook on any domain and for claude.ai's current design.
+
+[Unreleased]: https://git.hu-tao.dev/hutao/caelestia-tab/compare/v0.1.0...main
+[0.1.0]: https://git.hu-tao.dev/hutao/caelestia-tab/releases/tag/v0.1.0

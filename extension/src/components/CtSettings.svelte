@@ -51,6 +51,13 @@
       options: [...COLOURS.slice(0, 3), ["mauve", "Mauve"], ["pink", "Pink"], ["red", "Red"], ["peach", "Peach"], ["green", "Green"], ["blue", "Blue"], ["lavender", "Lavender"]],
     },
   ];
+  // A site of your own has no style of ours, so its domains are its only
+  // addresses and its CSS is all it gets.
+  const OWN: Field[] = [
+    { key: "domains", label: "On", type: "textarea", rows: 3, hint: "Its domains, one per line: music.example.com …" },
+    { key: "when", label: "Also on pages matching", type: "text", hint: "A CSS selector, checked once the page has loaded: the CSS applies wherever it matches." },
+    { key: "css", label: "Your CSS", type: "textarea", rows: 8, hint: "The scheme is in var(--caelestia-*): background: var(--caelestia-surface) …" },
+  ];
   const OVERRIDE: Field[] = [
     { key: "domains", label: "Also on", type: "textarea", rows: 3, hint: "More domains for this style, one per line." },
     { key: "when", label: "Also on pages matching", type: "text", hint: "A CSS selector, checked once the page has loaded: the style applies wherever it matches." },
@@ -62,7 +69,26 @@
   fetch("/userstyles/index.json")
     .then((r) => r.json())
     .then((index) => (styles = index.styles));
-  const shown = $derived(styles.filter((s) => s.name.toLowerCase().includes(filter.trim().toLowerCase())));
+  const typed = $derived(filter.trim());
+  const shown = $derived([...styles, ...app.settings.sites.custom].filter((s) => s.name.toLowerCase().includes(typed.toLowerCase())));
+  const mine = (id: string) => app.settings.sites.custom.some((s) => s.id === id);
+  // The one open, to open a site just added.
+  let expanded = $state("");
+  // A site of your own, named as typed: added and opened.
+  function addSite() {
+    if (!typed) return;
+    const id = `custom-${crypto.randomUUID()}`;
+    app.settings.sites.custom.push({ id, name: typed });
+    app.settings.sites.overrides[id] = { domains: "", when: "", css: "" };
+    expanded = id;
+  }
+  function removeSite(id: string) {
+    const s = app.settings.sites;
+    if (!confirm(`Remove ${s.custom.find((c) => c.id === id)?.name ?? "this site"} and its CSS?`)) return;
+    s.custom = s.custom.filter((c) => c.id !== id);
+    delete s.overrides[id];
+    s.off = s.off.filter((x) => x !== id);
+  }
   // Created when a site is first opened, not while rendering the list.
   const open = (id: string) => (app.settings.sites.overrides[id] ??= { domains: "", when: "", css: "" });
   function toggle(id: string, on: boolean) {
@@ -130,10 +156,24 @@
         </p>
       {/if}
       <CtForm fields={SITES_FIELDS} values={app.settings.sites} />
-      <input type="search" class={input} placeholder="Filter sites" bind:value={filter} />
+      <input
+        type="search"
+        class={input}
+        placeholder="Filter sites, or name one of your own"
+        aria-label="Filter sites"
+        bind:value={filter}
+        onkeydown={(e) => e.key === "Enter" && (e.preventDefault(), addSite())}
+      />
       <div class="grid gap-1">
         {#each shown as s (s.id)}
-          <details class="rounded-xl open:bg-surface-container-high open:p-3" ontoggle={(e) => e.currentTarget.open && open(s.id)}>
+          <details
+            class="rounded-xl open:bg-surface-container-high open:p-3"
+            open={expanded === s.id}
+            ontoggle={(e) => {
+              if (e.currentTarget.open) open(s.id);
+              else if (expanded === s.id) expanded = "";
+            }}
+          >
             <summary class="flex cursor-pointer items-center gap-2 py-1">
               <input
                 type="checkbox"
@@ -145,10 +185,19 @@
               {s.name}
             </summary>
             {#if app.settings.sites.overrides[s.id]}
-              <div class="pt-3"><CtForm fields={OVERRIDE} values={app.settings.sites.overrides[s.id]} /></div>
+              <div class="pt-3"><CtForm fields={mine(s.id) ? OWN : OVERRIDE} values={app.settings.sites.overrides[s.id]} /></div>
+            {/if}
+            {#if mine(s.id)}
+              <button type="button" class="{button} mt-3" onclick={() => removeSite(s.id)}>Remove this site</button>
             {/if}
           </details>
         {/each}
+        {#if typed}
+          <!-- Enter in the filter does the same. -->
+          <button type="button" class="{button} flex items-center gap-2 text-left" onclick={addSite}>
+            <CtIcon name="add" />Add “{typed}”, a site of your own
+          </button>
+        {/if}
       </div>
     </div>
   {:else if tab === 3}

@@ -163,6 +163,13 @@ async function themeFor(url: string, detected: string[] | undefined) {
     }
     if (own.css) css += `\n${own.css}`;
   }
+  // The user's own sites: only their CSS, on their domains or pages.
+  for (const site of sites.custom ?? []) {
+    const own = sites.overrides?.[site.id] ?? {};
+    const domains = (own.domains ?? "").split(/\s+/).filter(Boolean).map((value: string) => ({ type: "domain", value }));
+    if (sites.off.includes(site.id) || !own.css || !((own.when && detected?.includes(site.id)) || matches(domains, url))) continue;
+    css += `\n${own.css}`;
+  }
   return css;
 }
 

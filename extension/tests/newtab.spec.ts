@@ -70,6 +70,27 @@ test("a field only shows when it applies", async ({ page }) => {
   await expect(panel(page).getByRole("slider", { name: /^Blur/ })).toHaveCount(0);
 });
 
+test("a site of your own is added from the filter, by Enter or its + row", async ({ page }) => {
+  await page.getByTitle("Settings", { exact: true }).click();
+  await panel(page).getByRole("tab", { name: "Websites" }).click();
+  const filter = panel(page).getByRole("searchbox", { name: "Filter sites" });
+  await filter.fill("Navidrome");
+  await expect(panel(page).getByRole("button", { name: /Add “Navidrome”/ })).toBeVisible();
+  await filter.press("Enter");
+  // Added, and open for its domains and CSS.
+  const on = panel(page).getByRole("textbox", { name: "On", exact: true });
+  await expect(on).toBeVisible();
+  await on.fill("music.example.com");
+  await panel(page).getByRole("textbox", { name: "Your CSS" }).fill("body { background: var(--caelestia-surface); }");
+  await filter.fill("Jellyfin");
+  await panel(page).getByRole("button", { name: /Add “Jellyfin”/ }).click();
+  const { sites } = (await page.evaluate(() => (window as any).browser.storage.local.get("settings"))).settings;
+  expect(sites.custom.map((c: any) => c.name)).toEqual(["Navidrome", "Jellyfin"]);
+  expect(sites.overrides[sites.custom[0].id].domains).toBe("music.example.com");
+  await panel(page).getByRole("button", { name: "Remove this site" }).click();
+  await expect.poll(async () => (await page.evaluate(() => (window as any).browser.storage.local.get("settings"))).settings.sites.custom.length).toBe(1);
+});
+
 test("Escape steps out of an editor, then closes the panel", async ({ page }) => {
   await page.getByTitle("Edit", { exact: true }).click();
   await page.locator(".ct-controls").first().getByTitle("Edit").click();
