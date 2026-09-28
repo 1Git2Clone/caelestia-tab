@@ -41,7 +41,12 @@
     { key: "blur", label: "Blur", type: "range", min: 0, max: 40, unit: "px", when: (v) => v.source === "wallpaper" },
   ];
   const BACKGROUND = backdrop("Background", "The scheme's background colour");
-  const TST = backdrop("Sidebar", "Tree Style Tab's own");
+  const TST: Field[] = [
+    ...backdrop("Sidebar", "Tree Style Tab's own"),
+    // 0 is centred; the sidebar is narrow, so most of a wallpaper is off it.
+    { key: "x", label: "X offset", type: "range", min: -100, max: 100, unit: "%", when: (v) => v.source === "wallpaper" },
+    { key: "y", label: "Y offset", type: "range", min: -100, max: 100, unit: "%", when: (v) => v.source === "wallpaper" },
+  ];
   const SITES_FIELDS: Field[] = [
     { key: "enabled", label: "Theme websites", type: "checkbox" },
     {

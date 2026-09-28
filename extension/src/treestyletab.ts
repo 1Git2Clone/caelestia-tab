@@ -9,12 +9,15 @@ const TST = "treestyletab@piro.sakura.ne.jp";
 // settings.treeStyleTab when nothing's been saved: the same choices as the
 // new tab's background. A colour is dimmed towards the darkened surface, so
 // dim 86 is a light tint; the wallpaper is dimmed towards the scheme's
-// background and can be blurred; none leaves TST alone.
+// background, blurred and moved off centre (x and y, -100 to 100); none
+// leaves TST alone.
 export const TREE_STYLE_TAB = {
   source: "colour" as "colour" | "wallpaper" | "none",
   colour: "primary",
   dim: 86,
   blur: 0,
+  x: 0,
+  y: 0,
 };
 
 // Earlier settings: { tint: false } meant off, and a "tint" source had a
@@ -73,7 +76,9 @@ body::after {
   pointer-events: none;
 }
 body::before {
-  background: url("${wallpaper}") center / cover no-repeat;
+  /* An offset of -100 lines the wallpaper's left or top edge up with the
+     sidebar's and 100 its right or bottom: covering, it never leaves a gap. */
+  background: url("${wallpaper}") ${50 + opts.x / 2}% ${50 + opts.y / 2}% / cover no-repeat;
   filter: blur(${opts.blur}px);
   transform: scale(1.05);
 }
