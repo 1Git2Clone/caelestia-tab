@@ -86,11 +86,12 @@ the hard way.
 - **The Forgejo runner has no home directory.** Building nixpkgs' Firefox
   there fails with "home directory /homeless-shelter exists", so the
   end-to-end test runs from the pre-push hook instead of CI (2026-09-27).
-- **The runner's job image has no awk, and no jq.** It carries bash,
-  coreutils, grep, sed, curl and git (the vps repo's `ci-image.nix`), so a
-  `run:` step that works in your shell fails with exit 127 there. Run other
-  tools through `nix develop -c`. The release workflow's first run died this
-  way (2026-09-28).
+- **The runner's job image is not a stdenv.** It carries nix, node, bash,
+  coreutils, findutils, grep, sed, tar, gzip, xz, curl, git and which (the vps
+  repo's `modules/runner/ci-image.nix`), and no awk, diff, make, patch,
+  bzip2, unzip or jq. A `run:` step that works in your shell fails with exit
+  127 there; run anything off that list through `nix develop -c`. The release
+  workflow's first run died on awk this way (2026-09-28).
 - **The Chrome DevTools MCP can't find Chrome on NixOS**; it looks in
   `/opt/google/chrome`. To look at the new tab outside a browser, serve
   `extension/` with a stub `browser` object and screenshot it with
