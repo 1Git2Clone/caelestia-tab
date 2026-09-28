@@ -215,7 +215,7 @@ test("activity is a line of the searches, once, and the private toggle swaps eve
   await expect(tab.getByRole("link", { name: /Pushed 16bdf70 to main/ })).toHaveAttribute("href", /me\/open\/commit\//);
   await expect(tab.getByRole("link", { name: /me\/secret/ })).toHaveCount(0);
   // And the helper is told, so it fetches the public twins.
-  await expect.poll(() => page.evaluate(() => (window as any).__sent.findLast((m: any) => m.message?.command === "queries")?.message)).toMatchObject({ queries: [`${q} is:public`], activity: true, private: false });
+  await expect.poll(() => page.evaluate(() => (window as any).__sent?.findLast((m: any) => m.message?.command === "queries")?.message)).toMatchObject({ queries: [`${q} is:public`], activity: true, private: false });
   await toggle.check();
   // On: the private repository in the search and in the activity.
   await expect(tab.getByRole("link", { name: /me\/secret/ })).toHaveCount(2);

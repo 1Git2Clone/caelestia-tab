@@ -193,24 +193,28 @@ The pages workflow publishes `main` to
 ## Releasing
 
 Date the `[Unreleased]` section of `CHANGELOG.md`, bump `version` in
-`extension/public/manifest.json` and `Cargo.toml`, commit, and tag it
-`v<version>`. Then, with the tag checked out:
+`extension/public/manifest.json` and `Cargo.toml` (and `Cargo.lock` with it),
+commit, and tag it `v<version>`. Pushing the tag runs
+`.forgejo/workflows/release.yml`, which builds the zips below and publishes
+them as the tag's release on Forgejo, with the version's `CHANGELOG.md`
+section as its notes. To build them yourself, with the tag checked out:
 
 ```sh
-nix shell nixpkgs#zip -c scripts/release-zip.sh <version>
+nix develop -c scripts/release-zip.sh <version>
 ```
 
 It builds the extension without anyone's own components (a normal build
 takes in `~/.config/caelestia-tab/components`), leaves out `render.js`, which
-nothing loads yet, and writes `release/caelestia-tab-<version>.zip`, the
+nothing loads yet, and writes `release/caelestia-tab-v<version>.zip`, the
 source zip and `SHA256SUMS`. The zips are byte for byte the same on every run
 and every machine with the same lockfile: every file takes the tagged
 commit's time, and they're zipped sorted, since `web-ext build` stamps entries
-with the time it zips and adds them in any order. For 0.1.0:
+with the time it zips and adds them in any order. For 0.1.0 (built before
+the `v` in the names; its release carries them renamed):
 
 ```
-ad84678028036c27ec41c98405a5950a8f892dce8670e53fd0ba19f53662b781  caelestia-tab-0.1.0.zip
-2a114cd8d37bc8c0dc590029ee5373a4cca42c3516143368ec02acd484b588f3  caelestia-tab-0.1.0-source.zip
+ad84678028036c27ec41c98405a5950a8f892dce8670e53fd0ba19f53662b781  caelestia-tab-v0.1.0.zip
+2a114cd8d37bc8c0dc590029ee5373a4cca42c3516143368ec02acd484b588f3  caelestia-tab-v0.1.0-source.zip
 ```
 
 AMO asks for the source of bundled, minified code: the second zip, built as
