@@ -90,8 +90,9 @@
               web-ext
               nodejs
 
-              # scripts/release-zip.sh
+              # scripts/release-zip.sh and release.yml
               zip
+              gawk # the job image has none
 
               # scripts/vendor-nerd-fonts.sh
               woff2
