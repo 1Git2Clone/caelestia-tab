@@ -30,7 +30,7 @@
         hint: `One per line, as Label: query, in GitHub's search syntax (is:pr, involves:@me, repo:owner/name …). Each is a column. ${ACTIVITY} as the query is what you did last on GitHub: pushes, pull requests, reviews, comments …`,
       },
       { key: "limit", label: "Shown per search", type: "number", min: 1, max: 30 },
-      { key: "private", label: "Private activity", type: "checkbox", hint: `Off, every column is public repositories only: each search gets is:public, and ${ACTIVITY} is your public events.` },
+      { key: "private", label: "Private activity", type: "checkbox", hint: `Ticked, every column includes your private repositories. Unticked, only public ones: each search gets is:public, and ${ACTIVITY} is your public events.` },
       { key: "updated", label: "Before the time of the last search", type: "text", placeholder: "Updated at" },
       {
         key: "today",
