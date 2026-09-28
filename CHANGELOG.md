@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- *X offset* and *Y offset* for Tree Style Tab's wallpaper, in *Settings*, *Browser*: -100% to 100%, centred at 0, to move the part of the wallpaper the narrow sidebar shows.
+
 ## [0.1.1] - 2026-09-28
 
 ### Changed

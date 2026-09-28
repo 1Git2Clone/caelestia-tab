@@ -43,13 +43,15 @@ new tab's background (*Settings*, *Browser*):
   surfaces grey quickly), so it sits a step darker than the page in both
   modes and a high dim is a light tint.
 - **The caelestia wallpaper**, dimmed towards the scheme's background and
-  blurred as you set, with the tabs on a translucent tint of primary. The
+  blurred as you set, with the tabs on a translucent tint of primary. *X
+  offset* and *Y offset* (-100% to 100%, 0 centred) move it: -100 lines up
+  its left or top edge with the sidebar's, 100 its right or bottom. The
   sidebar gets a copy scaled to 900 px, since TST keeps the style in every
   sidebar.
 - **Tree Style Tab's own** look.
 
 The fields are the background's: the colour shows when the source is a
-colour, and the blur when it's the wallpaper. A tint set up before this, with
+colour, and the blur and offsets when it's the wallpaper. A tint set up before this, with
 its *Strength*, carries over as the same colour dimmed by 100 minus it.
 
 It goes through TST's own API: caelestia-tab registers with TST and hands it

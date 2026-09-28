@@ -71,6 +71,9 @@ test("the Tree Style Tab sidebar follows the background's choices", async () => 
   assert.match(wall, /url\("data:image\/jpeg;base64,x"\)/);
   assert.match(wall, /blur\(4px\)/);
   assert.match(wall, /opacity: 0.3/);
+  assert.match(wall, /\) 50% 50% \/ cover/, "centred unless moved");
+  const moved = tstStyle(scheme, tstOptions({ source: "wallpaper", x: -100, y: 40 }), "data:image/jpeg;base64,x");
+  assert.match(moved, /\) 0% 70% \/ cover/);
   assert.equal(tstOptions({ tint: false }).source, "none", "the old off switch still means off");
-  assert.deepEqual(tstOptions({ source: "tint", strength: 20, dim: 45 }), { source: "colour", colour: "primary", dim: 80, blur: 0 }, "an old tint's strength becomes its dim");
+  assert.deepEqual(tstOptions({ source: "tint", strength: 20, dim: 45 }), { source: "colour", colour: "primary", dim: 80, blur: 0, x: 0, y: 0 }, "an old tint's strength becomes its dim");
 });
