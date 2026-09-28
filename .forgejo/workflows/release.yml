@@ -17,12 +17,12 @@ jobs:
       - uses: actions/checkout@v7.0.1
 
       - name: Build
-        run: nix develop -c scripts/release-zip.sh "${GITHUB_REF_NAME#v}"
+        run: nix develop .#ci -c scripts/release-zip.sh "${GITHUB_REF_NAME#v}"
 
       - name: Notes
         # The version's section, less its heading and the link lines at the end.
         run: >-
-          nix develop -c awk -v h="## [${GITHUB_REF_NAME#v}]"
+          nix develop .#ci -c awk -v h="## [${GITHUB_REF_NAME#v}]"
           '/^## \[/ { on = index($0, h) == 1; next } /^\[[^]]*\]: / { next } on'
           CHANGELOG.md > notes.md
 
@@ -31,11 +31,11 @@ jobs:
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           api=$GITHUB_SERVER_URL/api/v1/repos/$GITHUB_REPOSITORY
-          id=$(nix develop -c jq -n --arg tag "$GITHUB_REF_NAME" --rawfile body notes.md \
+          id=$(nix develop .#ci -c jq -n --arg tag "$GITHUB_REF_NAME" --rawfile body notes.md \
                 '{tag_name: $tag, name: $tag, body: $body}' |
             curl -fsS -H "Authorization: token $TOKEN" -H 'Content-Type: application/json' \
               -d @- "$api/releases" |
-            nix develop -c jq -e .id)
+            nix develop .#ci -c jq -e .id)
           for f in release/*; do
             curl -fsS -H "Authorization: token $TOKEN" -F "attachment=@$f" \
               "$api/releases/$id/assets?name=${f#release/}" > /dev/null

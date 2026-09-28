@@ -72,15 +72,14 @@
         system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
-        in
-        {
-          default = pkgs.mkShell {
+          # Every CI job but the UI tests'. A job's store starts empty, and the
+          # browsers are 2.2 GiB of the default shell's 4.4.
+          ci = pkgs.mkShell {
             packages = with pkgs; [
               rustc
               cargo
               clippy
               rustfmt
-              rust-analyzer
 
               # The handbook in docs/.
               mdbook
@@ -98,6 +97,13 @@
               woff2
               jq
             ];
+          };
+        in
+        {
+          inherit ci;
+          default = pkgs.mkShell {
+            inputsFrom = [ ci ];
+            packages = [ pkgs.rust-analyzer ];
 
             RUST_SRC_PATH = "${pkgs.rustPlatform.rustLibSrc}";
             # The UI tests' browsers, from nixpkgs rather than Playwright's own
