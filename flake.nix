@@ -90,6 +90,9 @@
               web-ext
               nodejs
 
+              # scripts/release-zip.sh
+              zip
+
               # scripts/vendor-nerd-fonts.sh
               woff2
               jq

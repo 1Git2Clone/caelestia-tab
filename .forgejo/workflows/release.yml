@@ -1,0 +1,42 @@
+# On a v<version> tag: builds the AMO zips with scripts/release-zip.sh and
+# publishes them as that tag's release, with its CHANGELOG.md section as the
+# notes. A tag that already has a release fails at the create step.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: nix-node
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Build
+        run: nix develop -c scripts/release-zip.sh "${GITHUB_REF_NAME#v}"
+
+      - name: Notes
+        # The version's section, less its heading and the link lines at the end.
+        run: >-
+          awk -v h="## [${GITHUB_REF_NAME#v}]"
+          '/^## \[/ { on = index($0, h) == 1; next } /^\[[^]]*\]: / { next } on'
+          CHANGELOG.md > notes.md
+
+      - name: Publish
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          api=$GITHUB_SERVER_URL/api/v1/repos/$GITHUB_REPOSITORY
+          id=$(nix develop -c jq -n --arg tag "$GITHUB_REF_NAME" --rawfile body notes.md \
+                '{tag_name: $tag, name: $tag, body: $body}' |
+            curl -fsS -H "Authorization: token $TOKEN" -H 'Content-Type: application/json' \
+              -d @- "$api/releases" |
+            nix develop -c jq -e .id)
+          for f in release/*; do
+            curl -fsS -H "Authorization: token $TOKEN" -F "attachment=@$f" \
+              "$api/releases/$id/assets?name=${f#release/}" > /dev/null
+          done

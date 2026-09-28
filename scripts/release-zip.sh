@@ -6,9 +6,9 @@
 # finishes; so every file takes the tagged commit's time, and zip takes them
 # sorted, without extra attributes.
 #
-#   scripts/release-zip.sh 0.1.0      (in the dev shell, with zip on PATH)
+#   scripts/release-zip.sh 0.1.0      (in the dev shell)
 #
-# Writes release/caelestia-tab-<version>.zip, -source.zip and SHA256SUMS.
+# Writes release/caelestia-tab-v<version>.zip, -source.zip and SHA256SUMS.
 set -eu
 version=$1
 tag=v$version
@@ -24,10 +24,10 @@ CAELESTIA_TAB_COMPONENTS=$empty npm run --prefix extension --silent build >/dev/
 rmdir "$empty"
 
 mkdir -p release
-out=$root/release/caelestia-tab-$version.zip
+out=$root/release/caelestia-tab-$tag.zip
 rm -f "$out"
 # render.js is the unused SSR build: nothing in the extension loads it.
 (cd extension/dist && find . -exec touch -h -d "@$time" {} + &&
   find . -type f ! -name render.js | LC_ALL=C sort | TZ=UTC zip -q -X -D -9 -@ "$out")
-git archive --format=zip --mtime="@$time" -o "release/caelestia-tab-$version-source.zip" "$tag"
-(cd release && sha256sum "caelestia-tab-$version.zip" "caelestia-tab-$version-source.zip" > SHA256SUMS && cat SHA256SUMS)
+git archive --format=zip --mtime="@$time" -o "release/caelestia-tab-$tag-source.zip" "$tag"
+(cd release && sha256sum "caelestia-tab-$tag.zip" "caelestia-tab-$tag-source.zip" > SHA256SUMS && cat SHA256SUMS)
