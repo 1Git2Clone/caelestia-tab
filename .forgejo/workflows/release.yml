@@ -22,7 +22,7 @@ jobs:
       - name: Notes
         # The version's section, less its heading and the link lines at the end.
         run: >-
-          awk -v h="## [${GITHUB_REF_NAME#v}]"
+          nix develop -c awk -v h="## [${GITHUB_REF_NAME#v}]"
           '/^## \[/ { on = index($0, h) == 1; next } /^\[[^]]*\]: / { next } on'
           CHANGELOG.md > notes.md
 
