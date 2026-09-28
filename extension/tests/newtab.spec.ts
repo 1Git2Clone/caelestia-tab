@@ -168,6 +168,49 @@ test("GitHub shows your activity, and a rate limit keeps the last results", asyn
   expect(refresh.x - (stamp.x + stamp.width)).toBeLessThan(40);
 });
 
+test("activity is a line of the searches, once, and the private toggle swaps every column for its public twin", async ({ page }) => {
+  // Shaped like the helper's: both twins of a search are kept, and both lists of events.
+  const push = (repo: string) => ({ kind: "PushEvent", repo, text: "Pushed 16bdf70 to main", url: `https://github.com/${repo}/commit/16bdf70a055fcb73fb5a120822ce9c66029b11e7`, at: new Date().toISOString() });
+  const pr = (repo: string) => ({ url: `https://github.com/${repo}/pull/1`, repo, number: 1, title: `PR in ${repo}`, pr: true, draft: false, updated: new Date().toISOString() });
+  const q = "is:pr author:@me";
+  await seed(page, {
+    github: {
+      at: Date.now(),
+      results: { [q]: { total: 2, items: [pr("me/secret"), pr("me/open")] }, [`${q} is:public`]: { total: 1, items: [pr("me/open")] } },
+      activity: [push("me/secret")],
+      publicActivity: [push("me/open")],
+    },
+    settings: { menu: { open: true, tab: "CtGitHub", tabs: { CtGitHub: { searches: `PRs: ${q}\nMine: @activity\nAgain: @activity\nHalf typed:` } } } },
+  });
+  const tab = page.locator(".ct-github");
+  await expect(tab.getByRole("heading", { level: 3 })).toHaveText([/^PRs\s*2$/, "Mine"]);
+  // On: the private repository in the search and in the activity.
+  await expect(tab.getByRole("link", { name: /me\/secret/ })).toHaveCount(2);
+  await page.getByTitle("Edit", { exact: true }).click();
+  await page.getByTitle("Edit GitHub").click();
+  const toggle = panel(page).getByRole("checkbox", { name: "Private activity" });
+  await toggle.uncheck();
+  await expect(tab.getByRole("link", { name: /PR in me\/open/ })).toBeVisible();
+  await expect(tab.getByRole("link", { name: /Pushed 16bdf70 to main/ })).toHaveAttribute("href", /me\/open\/commit\//);
+  await expect(tab.getByRole("link", { name: /me\/secret/ })).toHaveCount(0);
+  // And the helper is told, so it fetches the public twins.
+  await expect.poll(() => page.evaluate(() => (window as any).__sent.findLast((m: any) => m.message?.command === "queries")?.message)).toMatchObject({ queries: [`${q} is:public`], activity: true, private: false });
+  await toggle.check();
+  // On: the private repository in the search and in the activity.
+  await expect(tab.getByRole("link", { name: /me\/secret/ })).toHaveCount(2);
+});
+
+test("the refresh icon spins until the helper answers", async ({ page }) => {
+  await seed(page, { github: { at: 1, results: {} }, settings: { menu: { open: true, tab: "CtGitHub", tabs: {} } } });
+  await page.getByTitle("Fetch again now").click();
+  const busy = page.getByTitle("Fetching…");
+  await expect(busy).toBeDisabled();
+  await expect(busy.locator(".animate-spin")).toBeVisible();
+  await page.evaluate(() => (window as any).browser.storage.local.set({ github: { at: Date.now(), results: {} } }));
+  await expect(page.getByTitle("Fetch again now")).toBeEnabled();
+  await expect(page.locator(".ct-github .animate-spin")).toHaveCount(0);
+});
+
 test("a helper too old for the time and activity says so, rather than wait", async ({ page }) => {
   await seed(page, { github: { results: {} }, settings: { menu: { open: true, tab: "CtGitHub", tabs: {} } } });
   const tab = page.locator(".ct-github");

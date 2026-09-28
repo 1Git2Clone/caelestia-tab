@@ -117,6 +117,10 @@ Match CI locally before pushing:
   expected from less.js and Svelte's runtime; errors aren't)
 - `mdbook build docs` when the docs changed
 
+For anything that reads a remote API (GitHub, LRCLIB), run the built helper
+against the real API and check what it sends before writing a test's
+fixture: a test on made-up data passes whatever the API really does.
+
 For anything that touches the helper, storage or injection, run
 `tests/e2e-firefox.mjs` (see the Development chapter); for anything a user
 does on the new tab, the Playwright tests (`npm run --prefix extension test`),

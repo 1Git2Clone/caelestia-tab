@@ -1,6 +1,9 @@
 <script module lang="ts">
   import type { TabInfo } from "../../fields.ts";
 
+  // Not a search: the query that makes a column of your recent events.
+  export const ACTIVITY = "@activity";
+
   export const tab: TabInfo = {
     label: "GitHub",
     glyph: "", // nf-fa-github
@@ -9,9 +12,10 @@
         "Your pull requests: is:open is:pr author:@me archived:false",
         "Review requests: is:open is:pr review-requested:@me archived:false",
         "Your issues: is:open is:issue assignee:@me archived:false",
+        `Recent activity: ${ACTIVITY}`,
       ].join("\n"),
       limit: 6,
-      activity: true,
+      private: true,
       updated: "Updated at",
       today: "HH:mm",
       yesterday: "[yesterday], HH:mm",
@@ -23,10 +27,10 @@
         label: "Searches",
         type: "textarea",
         rows: 4,
-        hint: "One per line, as Label: query, in GitHub's search syntax (is:pr, involves:@me, repo:owner/name …). Each is a column.",
+        hint: `One per line, as Label: query, in GitHub's search syntax (is:pr, involves:@me, repo:owner/name …). Each is a column. ${ACTIVITY} as the query is what you did last on GitHub: pushes, pull requests, reviews, comments …`,
       },
       { key: "limit", label: "Shown per search", type: "number", min: 1, max: 30 },
-      { key: "activity", label: "Your recent activity", type: "checkbox", hint: "A column of what you did last on GitHub: pushes, pull requests, reviews, comments …" },
+      { key: "private", label: "Private activity", type: "checkbox", hint: `Off, every column is public repositories only: each search gets is:public, and ${ACTIVITY} is your public events.` },
       { key: "updated", label: "Before the time of the last search", type: "text", placeholder: "Updated at" },
       {
         key: "today",
@@ -39,15 +43,16 @@
     ],
   };
 
+  // The columns, in order. A label with no query yet (`Label:` mid-typing)
+  // is skipped rather than searched for as text, and a repeated query is
+  // one column: the helper keeps one result per query anyway.
   export function searches(text: string) {
+    const seen = new Set<string>();
     return text
       .split("\n")
-      .map((l) => l.trim())
-      .filter(Boolean)
-      .map((l) => {
-        const at = l.indexOf(": ");
-        return at > 0 ? { label: l.slice(0, at), query: l.slice(at + 2).trim() } : { label: l, query: l };
-      });
+      .map((l) => l.trim().match(/^(?:(.+?):(?:\s+|$))?(.*)$/)!)
+      .map(([l, label, query]) => ({ label: label ?? l, query: query.trim() }))
+      .filter((s) => s.query && !seen.has(s.query) && seen.add(s.query));
   }
 
   function ago(iso: string, now = Date.now()) {
@@ -89,16 +94,36 @@
   const app = getContext<App>("ct");
 
   const list = $derived(searches(settings.searches));
+  // A search as it's sent, and as its results come back keyed.
+  const sent = (query: string) => (settings.private ? query : `${query} is:public`);
   const github = $derived(app.data.github);
   // Tell the helper what to search, once typing stops.
   $effect(() => {
-    const queries = list.map((s) => s.query);
-    const activity = settings.activity;
+    const queries = list.map((s) => s.query).filter((q) => q !== ACTIVITY).map(sent);
+    const activity = list.some((s) => s.query === ACTIVITY);
+    const priv = settings.private;
     // The helper answers from what it last fetched, unless a search is new:
     // opening the tab doesn't search again.
-    const timer = setTimeout(() => tell({ topic: "github", command: "queries", widget: "CtGitHub", queries, activity }), 800);
+    const timer = setTimeout(() => tell({ topic: "github", command: "queries", widget: "CtGitHub", queries, activity, private: priv }), 800);
     return () => clearTimeout(timer);
   });
+  // The refresh icon spins until the helper's answer lands. A refresh that
+  // changes nothing (rate-limited) gets no answer: the helper only sends
+  // what differs, so the spin gives up on its own.
+  let refreshing = $state(false);
+  $effect(() => {
+    github;
+    refreshing = false;
+  });
+  $effect(() => {
+    if (!refreshing) return;
+    const timer = setTimeout(() => (refreshing = false), 15000);
+    return () => clearTimeout(timer);
+  });
+  function refresh() {
+    refreshing = true;
+    tell({ topic: "github", command: "refresh" });
+  }
   const PR = ""; // nf-oct-git_pull_request
   const ISSUE = ""; // nf-oct-issue_opened
   // An event's glyph, by its kind.
@@ -126,7 +151,9 @@
            rather than wait for them. -->
       {#if github?.at}{settings.updated} {stamp(github.at, settings)}{:else if github && !("activity" in github)}Update the helper to see when it last fetched{:else if github}Not fetched yet{/if}
     </span>
-    <button type="button" class={control} title="Fetch again now" onclick={() => tell({ topic: "github", command: "refresh" })}><CtIcon name="refresh" /></button>
+    <button type="button" class="{control} disabled:cursor-wait" title={refreshing ? "Fetching…" : "Fetch again now"} disabled={refreshing} onclick={refresh}>
+      <span class={refreshing ? "animate-spin" : ""}><CtIcon name="refresh" /></span>
+    </button>
   </header>
   {#if github?.error}
     <!-- What's shown stays; this says why it may be old. -->
@@ -135,38 +162,47 @@
     </p>
   {/if}
   {#each list as s (s.query)}
-    {@const r = github?.results?.[s.query]}
-    <section class="grid min-w-0 content-start gap-2">
-      <h3 class="m-0 flex items-baseline gap-2 px-1 text-sm font-medium text-primary">
-        {s.label}
-        {#if r?.total != null}<span class="text-xs text-on-surface-variant">{r.total}</span>{/if}
-      </h3>
-      {#if !r}
-        <p class="m-0 px-1 text-sm text-on-surface-variant">{github ? "Searching…" : "Waiting for the helper."}</p>
-      {:else if !r.items.length}
-        <p class="m-0 px-1 text-sm text-on-surface-variant">Nothing.</p>
-      {:else}
-        {#each r.items.slice(0, settings.limit) as it (it.url)}
-          {@render card(it.url, it.pr ? PR : ISSUE, `${it.repo}#${it.number}`, it.updated, it.title, it.pr ? (it.draft ? "Draft pull request" : "Pull request") : "Issue", !it.draft)}
-        {/each}
-      {/if}
-    </section>
+    {@const r = github?.results?.[sent(s.query)]}
+    {#if s.query === ACTIVITY}
+      {@render activity(s.label)}
+    {:else}
+      <section class="grid min-w-0 content-start gap-2">
+        <h3 class="m-0 flex items-baseline gap-2 px-1 text-sm font-medium text-primary">
+          {s.label}
+          {#if r?.total != null}<span class="text-xs text-on-surface-variant">{r.total}</span>{/if}
+        </h3>
+        {#if !r}
+          <p class="m-0 px-1 text-sm text-on-surface-variant">{github ? "Searching…" : "Waiting for the helper."}</p>
+        {:else if !r.items.length}
+          <p class="m-0 px-1 text-sm text-on-surface-variant">Nothing.</p>
+        {:else}
+          {#each r.items.slice(0, settings.limit) as it (it.url)}
+            {@render card(it.url, it.pr ? PR : ISSUE, `${it.repo}#${it.number}`, it.updated, it.title, it.pr ? (it.draft ? "Draft pull request" : "Pull request") : "Issue", !it.draft)}
+          {/each}
+        {/if}
+      </section>
+    {/if}
   {/each}
-  {#if settings.activity}
-    <section class="grid min-w-0 content-start gap-2">
-      <h3 class="m-0 px-1 text-sm font-medium text-primary">Recent activity</h3>
-      {#if !github?.activity}
-        <p class="m-0 px-1 text-sm text-on-surface-variant">{!github ? "Waiting for the helper." : !("activity" in github) ? "Needs a newer helper." : "Fetching…"}</p>
-      {:else if !github.activity.length}
-        <p class="m-0 px-1 text-sm text-on-surface-variant">Nothing lately.</p>
-      {:else}
-        {#each github.activity.slice(0, settings.limit) as e, i (i)}
-          {@render card(e.url, EVENT[e.kind] ?? "\uf469", e.repo, e.at, e.text, e.kind.replace(/Event$/, ""), true)}
-        {/each}
-      {/if}
-    </section>
-  {/if}
 </div>
+
+{#snippet activity(label: string)}
+  <!-- The helper keeps both lists: flipping `private` shows the other at
+       once, and it fetches that one only if it has none or it's old. -->
+  {@const key = settings.private ? "activity" : "publicActivity"}
+  {@const events = github?.[key]}
+  <section class="grid min-w-0 content-start gap-2">
+    <h3 class="m-0 px-1 text-sm font-medium text-primary">{label}</h3>
+    {#if !events}
+      <p class="m-0 px-1 text-sm text-on-surface-variant">{!github ? "Waiting for the helper." : !(key in github) ? "Needs a newer helper." : "Fetching…"}</p>
+    {:else if !events.length}
+      <p class="m-0 px-1 text-sm text-on-surface-variant">Nothing lately.</p>
+    {:else}
+      {#each events.slice(0, settings.limit) as e, i (i)}
+        {@render card(e.url, EVENT[e.kind] ?? "\uf469", e.repo, e.at, e.text, e.kind.replace(/Event$/, ""), true)}
+      {/each}
+    {/if}
+  </section>
+{/snippet}
 
 {#snippet card(url: string, glyph: string, where: string, when: string, text: string, kind: string, accent: boolean)}
   <a href={url} class="block min-w-0 rounded-xl bg-surface-container-high/70 px-3 py-2 text-on-surface no-underline hover:bg-[color-mix(in_srgb,var(--caelestia-primary)_18%,var(--caelestia-surface-container-high))]">
