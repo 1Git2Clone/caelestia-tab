@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- GitHub's recent activity is a line among your searches (`Label: @activity`), placed and labelled like one, in place of a checkbox that added a second column. A repeated search is one column, and a half-typed `Label:` is no longer searched for as text.
+- A push in your activity reads as its short SHA and links to that commit.
+- The refresh button spins until the new results are in.
+
+### Added
+
+- *Private activity*: off, every GitHub column is public repositories only (searches get `is:public`, activity is your public events). Both sides are kept, so flipping it doesn't ask GitHub again.
+
 ## [0.1.0] - 2026-09-28
 
 ### Added
@@ -18,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A tile's colour can be a fixed one from the browser's colour picker as well as a scheme colour, and the scheme colours are named under their swatches. Uploaded tile images are scaled to what a tile shows.
 - The bookmarks square their corners on a window edge they touch.
 - A fixed page: a bar with the menu and the toolbar (which can sit on either side or in the middle), the clock, and the bookmarks. The pen edits each part from the page, opening its settings in the side panel; every editor, a bookmark's included, opens there and applies as you type, and there are no pop-ups.
-- A menu over the clock, growing out of its button and sliding between tabs, that stays open or closed, on the tab you left, across new tabs. GitHub shows your searches as columns of cards, and your recent activity as a line among them (`Label: @activity`), a toggle that limits every column to public repositories (searches get `is:public`, activity is your public events; both kept, so flipping it doesn't ask GitHub again), pushes as the short SHA linking to the commit, a refresh button that spins until the answer is in, with when they were last fetched beside the refresh button, in formats you set, fetched every five minutes (not each time a tab opens) and kept through a rate limit; Media has a tab per player, the cover, controls and lyrics side by side when there's room, lyrics that follow the song until you scroll them, and a click on a line to play from there. Tabs of your own come from `~/.config/caelestia-tab/components`.
+- A menu over the clock, growing out of its button and sliding between tabs, that stays open or closed, on the tab you left, across new tabs. GitHub shows your searches as columns of cards and a column of your recent activity, with when they were last fetched beside the refresh button, in formats you set, fetched every five minutes (not each time a tab opens) and kept through a rate limit; Media has a tab per player, the cover, controls and lyrics side by side when there's room, lyrics that follow the song until you scroll them, and a click on a line to play from there. Tabs of your own come from `~/.config/caelestia-tab/components`.
 - The line under a bookmark takes the colour that goes with the tile's, one of your own, or none.
 - Sites of your own: type a name in *Settings*, *Websites* and press Enter, then give it its domains, a selector and your CSS.
 - A page font (*Settings*, *General*), and fonts for the clock's time and date. Font fields autocomplete from the installed fonts, listed by the helper, each shown in its own face. Font sizes are in pt.
