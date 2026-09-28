@@ -9,8 +9,9 @@ sh scripts/setup-hooks.sh   # once per clone: the pre-commit hook
 ```
 
 `nix develop .#ci` is the same shell without rust-analyzer and the UI tests'
-browsers, half the download. CI uses it for every job but the UI tests, since
-each job starts with an empty store; the Rust job also keeps cargo's registry
+browsers, half the download. CI uses it for every job but the UI tests and
+the release (which builds old tags, from before it), since each job starts
+with an empty store; the Rust job also keeps cargo's registry
 and `target/` in the Actions cache.
 
 ## The layout
@@ -202,7 +203,10 @@ Date the `[Unreleased]` section of `CHANGELOG.md`, bump `version` in
 commit, and tag it `v<version>`. Pushing the tag runs
 `.forgejo/workflows/release.yml`, which builds the zips below and publishes
 them as the tag's release on Forgejo, with the version's `CHANGELOG.md`
-section as its notes. To build them yourself, with the tag checked out:
+section as its notes. If that run fails, fix the workflow on `main` and run
+it by hand (*Actions*, *Release*, or `fj actions dispatch`) with the tag: it
+builds from the tag, so the tag stays where it is. To build them yourself,
+with the tag checked out:
 
 ```sh
 nix develop -c scripts/release-zip.sh <version>
