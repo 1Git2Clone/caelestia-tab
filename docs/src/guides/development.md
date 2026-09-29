@@ -203,7 +203,9 @@ Date the `[Unreleased]` section of `CHANGELOG.md`, bump `version` in
 commit, and tag it `v<version>`. Pushing the tag runs
 `.forgejo/workflows/release.yml`, which builds the zips below and publishes
 them as the tag's release on Forgejo, with the version's `CHANGELOG.md`
-section as its notes. If that run fails, fix the workflow on `main` and run
+section as its notes. The run's log is public and prints the checksums, the
+notes and each file it uploads, so a reviewer can match the release to the
+run that built it. If that run fails, fix the workflow on `main` and run
 it by hand (*Actions*, *Release*, or `fj actions dispatch`) with the tag: it
 builds from the tag, so the tag stays where it is. To build them yourself,
 with the tag checked out:

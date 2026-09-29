@@ -38,7 +38,7 @@ jobs:
         run: >-
           nix develop -c awk -v h="## [${TAG#v}]"
           '/^## \[/ { on = index($0, h) == 1; next } /^\[[^]]*\]: / { next } on'
-          CHANGELOG.md > notes.md
+          CHANGELOG.md | tee notes.md
 
       - name: Publish
         env:
@@ -50,7 +50,9 @@ jobs:
             curl -fsS -H "Authorization: token $TOKEN" -H 'Content-Type: application/json' \
               -d @- "$api/releases" |
             nix develop -c jq -e .id)
+          echo "release $id: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/$TAG"
           for f in release/*; do
             curl -fsS -H "Authorization: token $TOKEN" -F "attachment=@$f" \
-              "$api/releases/$id/assets?name=${f#release/}" > /dev/null
+              "$api/releases/$id/assets?name=${f#release/}" |
+              nix develop -c jq -r '"uploaded \(.name) (\(.size) bytes): \(.browser_download_url)"'
           done

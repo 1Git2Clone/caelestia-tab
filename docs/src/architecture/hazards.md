@@ -227,3 +227,9 @@ the hard way.
   feature's fault. Assert on a setup step's result (`null` when it returned
   nothing). Storage there holds only what's been changed, too: no `sites`
   until something set them (2026-09-27).
+- **The release zips only build on Linux.** The flake has no macOS shell, and
+  outside it `scripts/release-zip.sh` stops at BSD `touch`, which doesn't take
+  `-d @<epoch>`. On a Mac, build in a `nixos/nix` container, and `docker cp`
+  the checkout in: Docker Desktop doesn't share `/private/tmp`, so a mount of
+  it comes up empty ("could not find a flake.nix"). An aarch64 container
+  gives the same checksums as the x86_64 runner (2026-09-29).
