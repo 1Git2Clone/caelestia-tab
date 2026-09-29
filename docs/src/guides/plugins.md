@@ -60,8 +60,10 @@ The tab fills the panel under the bar and scrolls when it's taller; a
 `number`, `textarea`, `select`, `range`, `colour` (a scheme colour or a fixed
 one), `font` (a font-family, with the installed fonts offered), `image` (a URL
 or an upload), `glyph` (a Nerd Font glyph, with
-suggestions for the words its `words(values)` returns) and `presets` (buttons
-that set several keys at once). Any field can take `when: (values) => boolean`
+suggestions for the words its `words(values)` returns), `presets` (buttons
+that set several keys at once) and `screen` (a full-width row that opens
+another component in the side panel, over this one, with `back` here).
+Any field can take `when: (values) => boolean`
 to show only when it applies, like a colour only when the source is a colour.
 `CtForm` draws them, bound to an object, and works inside your own components
 too.

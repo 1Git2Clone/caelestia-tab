@@ -495,6 +495,86 @@ test("the bookmarks' top line is optional, and its colour a setting", async ({ p
   await expect(bookmarks).toHaveAttribute("style", /--line: var\(--caelestia-secondary\)/);
 });
 
+// From Settings › Components (not the page's pen, so app.editing stays off)
+// to the bookmarks' own Bookmarks screen.
+async function openBookmarkList(page: Page) {
+  await page.getByTitle("Settings", { exact: true }).click();
+  await panel(page).getByRole("tab", { name: "Components" }).click();
+  await panel(page).getByRole("button", { name: "Bookmarks", exact: true }).click();
+  await panel(page).getByRole("button", { name: "Bookmarks", exact: true }).click();
+}
+
+test("the bookmarks' list reorders by Alt+arrow or a drag, and reorders the page", async ({ page }) => {
+  await openBookmarkList(page);
+  const rows = panel(page).getByRole("listitem");
+  await expect(rows).toHaveCount(4);
+  await expect(rows.nth(0)).toContainText("GitHub");
+  await expect(rows.nth(1)).toContainText("YouTube");
+
+  // Alt+ArrowDown on the first row moves it second (the row's name button,
+  // not its drag handle, which is also a "button" named after it).
+  await rows.nth(0).getByRole("button", { name: /GitHub/ }).last().focus();
+  await page.keyboard.press("Alt+ArrowDown");
+  await expect(rows.nth(0)).toContainText("YouTube");
+  await expect(rows.nth(1)).toContainText("GitHub");
+  await expect(page.locator(".ct-tile").first()).toContainText("YouTube");
+
+  // Dragging GitHub's handle (now the second row) onto the fourth row moves it there.
+  const handles = panel(page).getByTitle("Drag to move");
+  await handles.nth(1).dragTo(handles.nth(3));
+  await expect(rows.nth(3)).toContainText("GitHub");
+  await expect(page.locator(".ct-tile").nth(3)).toContainText("GitHub");
+});
+
+test("switching a bookmark off hides its tile; dimHidden shows it dimmed only while editing", async ({ page }) => {
+  await openBookmarkList(page);
+  await panel(page).getByRole("switch", { name: "Show Wikipedia" }).uncheck();
+  await expect(page.locator(".ct-tile", { hasText: "Wikipedia" })).toHaveCount(0);
+
+  // Still off the page in edit mode too, until dimHidden is on.
+  await page.getByTitle("Back to settings").click();
+  await page.getByTitle("Edit", { exact: true }).click();
+  await expect(page.locator(".ct-tile", { hasText: "Wikipedia" })).toHaveCount(0);
+  await panel(page).getByRole("checkbox", { name: "Show hidden bookmarks while editing" }).check();
+  const dimmed = page.locator(".ct-slot", { hasText: "Wikipedia" });
+  await expect(dimmed).toBeVisible();
+  await expect(dimmed).toHaveCSS("opacity", "0.4");
+  await page.getByTitle("Done editing").click();
+  await expect(page.locator(".ct-tile", { hasText: "Wikipedia" })).toHaveCount(0);
+});
+
+test("back from a bookmark opened from the list returns to it, then Bookmarks, then Settings", async ({ page }) => {
+  await openBookmarkList(page);
+  await expect(panel(page).getByRole("listitem")).toHaveCount(4);
+  await panel(page).getByRole("listitem").first().getByRole("button", { name: /GitHub/ }).last().click();
+  await expect(title(page)).toHaveText("GitHub");
+
+  await page.getByTitle("Back to settings").click();
+  await expect(title(page)).toHaveText("Bookmarks");
+  await expect(panel(page).getByRole("listitem")).toHaveCount(4); // back at the list
+
+  await page.getByTitle("Back to settings").click();
+  await expect(title(page)).toHaveText("Bookmarks");
+  await expect(panel(page).getByRole("listitem")).toHaveCount(0); // the widget's own form now
+
+  await page.getByTitle("Back to settings").click();
+  await expect(title(page)).toHaveText("Settings");
+  await expect(panel(page).getByRole("tablist")).toBeVisible();
+});
+
+test("with every bookmark switched off from its list, the menu fills the page", async ({ page }) => {
+  await openBookmarkList(page);
+  for (const name of ["GitHub", "YouTube", "Wikipedia", "MDN"]) {
+    await panel(page).getByRole("switch", { name: `Show ${name}` }).uncheck();
+  }
+  await expect(page.locator(".ct-bookmarks")).toHaveCount(0);
+  await page.keyboard.press("Escape");
+  await page.keyboard.press("Escape");
+  await page.keyboard.press("Escape");
+  const menuBottom = () => page.locator(".ct-menu").evaluate((el) => innerHeight - el.getBoundingClientRect().bottom);
+  await expect.poll(menuBottom).toBeCloseTo(20, 0);
+});
+
 test("with no bookmarks the menu fills the page, but edit mode keeps their pen box", async ({ page }) => {
   await page.evaluate(async () => {
     const store = (window as any).browser.storage.local;

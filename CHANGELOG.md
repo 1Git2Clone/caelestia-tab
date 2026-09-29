@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - *Hide* on every part and tab, last in its own pen: the toolbar's warns that Ctrl+, still opens Settings without it, and a hidden open tab gives way to the first one still shown.
 - *Components* in Settings: every part as one tree, the menu's tabs indented under it, with a switch to show or hide each and a row that opens its settings, hidden ones included; a user's own carries a *yours* label, and a tab's switch greys and disables while its menu is hidden (its own setting untouched).
 - Bookmarks: *Placement*, floating (rounded like the menu, with the page's own padding under it) or docked (flush with the window's bottom edge). *Top line* and *Line colour*, for the border along its top edge.
+- Bookmarks: a *Bookmarks* screen in its own settings lists every one, reordered by dragging its handle or Alt+Up/Down, each with a switch to show or hide it (off leaves no tile on the page); *Show hidden bookmarks while editing* dims them into edit mode instead, their own edit bar still working.
 
 ### Changed
 

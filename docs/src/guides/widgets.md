@@ -62,6 +62,14 @@ no bookmarks, the menu takes the whole page; in edit mode an empty list stays
 on the page so its pen box can add one. See
 [The new tab](../architecture/newtab.md#bookmarks).
 
+Its own *Bookmarks* screen lists every one, in order: its glyph or letters,
+its name, and a switch to show or hide it, off leaving no tile on the page
+(none shown at all gives the menu the whole page too). Reorder by dragging a
+row's handle, or Alt+Up/Down with the row's own controls focused. A row opens
+the same editor its tile's own Edit does. *Show hidden bookmarks while
+editing* keeps hidden ones on the page while editing, dimmed, their edit bar
+still working, off by default.
+
 ## The menu's tabs
 
 Open or closed, and the tab it's on, stay as you left them, in every new tab.

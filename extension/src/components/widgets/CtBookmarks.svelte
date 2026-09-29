@@ -1,19 +1,22 @@
 <script module lang="ts">
   import type { WidgetInfo } from "../../fields.ts";
   import CtBookmarkEditor from "../CtBookmarkEditor.svelte";
+  import CtBookmarkList from "../CtBookmarkList.svelte";
   import { edit, type App as State } from "../../store.svelte.ts";
 
   // Opens a bookmark in the side panel; a new one is added first, so the
   // page shows it while it's being filled in. The editor finds it by its id
-  // in app.settings each time (see App.focus).
-  function editItem(app: State, settings: any, index: number) {
+  // in app.settings each time (see App.focus). `back` is unset from the
+  // tile's own pen (back to the main settings) and the list's own focus from
+  // CtBookmarkList (back to the list).
+  export function editItem(app: State, settings: any, index: number, back?: State["focus"]) {
     if (index < 0) {
       settings.items.push(item({ name: "New bookmark", url: "" }));
       index = settings.items.length - 1;
     }
     const id = settings.items[index].id;
     const find = () => app.settings.bookmarks.items.findIndex((it: any) => it.id === id);
-    edit(app, () => app.settings.bookmarks.items[find()]?.name || "Bookmark", CtBookmarkEditor, () => ({ settings: app.settings.bookmarks, index: find() }));
+    edit(app, () => app.settings.bookmarks.items[find()]?.name || "Bookmark", CtBookmarkEditor, () => ({ settings: app.settings.bookmarks, index: find() }), back);
   }
 
   const PRESETS = [
@@ -38,6 +41,9 @@
     height: 1,
     column: "",
     row: "",
+    // Off the page entirely, unless the bookmarks' own dimHidden is on and
+    // the page is in edit mode.
+    hidden: false,
     ...props,
   });
 
@@ -49,6 +55,7 @@
       placement: "floating",
       topLine: true,
       topLineColour: "primary",
+      dimHidden: false,
       items: [
         // nf-fa-github, nf-fa-youtube, nf-fa-wikipedia_w, nf-dev-mozilla
         item({ name: "GitHub", url: "https://github.com", colour: "primary", glyph: "" }),
@@ -59,6 +66,7 @@
     },
     fields: [
       { type: "presets", label: "Start from", presets: PRESETS },
+      { type: "screen", label: "Bookmarks", hint: "Reorder them, or switch one off.", component: CtBookmarkList, props: (app) => ({ settings: app.settings.bookmarks }) },
       { key: "flow", label: "Flow", type: "switch", options: [["row", "Rows"], ["column", "Columns"]], hint: "Which way the tiles fill, gaps filled as they go." },
       { key: "count", label: "Columns", type: "number", min: 1, max: 12, when: (v) => v.flow !== "column" },
       { key: "count", label: "Rows", type: "number", min: 1, max: 12, when: (v) => v.flow === "column" },
@@ -67,6 +75,7 @@
       { key: "placement", label: "Placement", type: "switch", options: [["floating", "Floating"], ["docked", "Docked"]], hint: "Floating, rounded like the menu with the page's padding under it; docked, flush with the window's bottom." },
       { key: "topLine", label: "Top line", type: "checkbox" },
       { key: "topLineColour", label: "Line colour", type: "colour", when: (v) => v.topLine },
+      { key: "dimHidden", label: "Show hidden bookmarks while editing", type: "checkbox" },
     ],
     actions: [{ icon: "add", title: "Add a bookmark", run: (settings, app) => editItem(app, settings, -1) }],
   };
@@ -111,10 +120,12 @@
     style:--gap="{settings.gap}rem"
   >
     {#each settings.items as it, i (it.id)}
-      {#if editing}
+      {#if editing ? it.hidden && !settings.dimHidden : it.hidden}
+        <!-- Off the page: not drawn at all. -->
+      {:else if editing}
         <div
           role="listitem"
-          class="ct-slot col-(--col) row-(--row) flex min-h-0 min-w-0 cursor-grab flex-col {dragging === i ? 'opacity-40' : ''} {over === i ? 'outline-3 outline-offset-3 outline-primary outline-dashed rounded-xl' : ''}"
+          class="ct-slot col-(--col) row-(--row) flex min-h-0 min-w-0 cursor-grab flex-col {dragging === i || it.hidden ? 'opacity-40' : ''} {over === i ? 'outline-3 outline-offset-3 outline-primary outline-dashed rounded-xl' : ''}"
           style:--col={place(it)["--col"]}
           style:--row={place(it)["--row"]}
           draggable="true"

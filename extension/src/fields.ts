@@ -16,6 +16,7 @@
 //       ],
 //     };
 //   </script>
+import type { Component } from "svelte";
 import type { App } from "./store.svelte.ts";
 
 // Every field can take `when`: shown only while it returns true for the
@@ -40,6 +41,9 @@ export type Field = When &
   | { key: string; label: string; hint?: string; type: "glyph"; words?: (values: any) => string[] }
   // Buttons that set several keys at once.
   | { type: "presets"; label: string; hint?: string; presets: { label: string; values: Record<string, any> }[] }
+  // A full-width row that opens another screen in the side panel, over this
+  // one (a list of the part's own items, say), `back` to here.
+  | { type: "screen"; label: string; hint?: string; component: Component<any>; props: (app: App) => Record<string, any> }
   );
 
 // A part of the page or a menu tab: its name, its settings' defaults and

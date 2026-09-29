@@ -16,7 +16,7 @@
   const marks = $derived(app.settings.bookmarks);
   // No bookmarks to show, and the menu takes the page; edit mode keeps an
   // empty list on it, so its pen box can add one.
-  const shown = $derived(!marks.hidden && (marks.items.length > 0 || app.editing));
+  const shown = $derived(!marks.hidden && (marks.items.some((it: any) => !it.hidden) || app.editing));
 </script>
 
 <main
