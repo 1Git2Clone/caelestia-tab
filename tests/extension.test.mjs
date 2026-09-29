@@ -1,4 +1,4 @@
-// node --test tests/*.test.mjs: userstyles.ts, glyphs.ts and layout.ts.
+// node --test tests/*.test.mjs: userstyles.ts, glyphs.ts, bookmarks.ts and layout.ts.
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import test from "node:test";
@@ -50,14 +50,18 @@ test("glyph suggestions follow the bookmark's host and name", async () => {
   assert.ok(names.indexOf("fa-github") < names.indexOf("dev-githubactions"), "whole-word matches come first");
 });
 
-test("even rows never leave one tile alone on a row", async () => {
-  const { evenColumns } = await import("../extension/src/layout.ts");
-  const five = [1, 1, 1, 1, 1];
-  assert.equal(evenColumns(1000, 176, 20, five), 5, "all five fit");
-  assert.equal(evenColumns(800, 176, 20, five), 3, "four fit: 3 and 2, not 4 and 1");
-  assert.equal(evenColumns(150, 176, 20, five), 1, "narrower than one tile: one column");
-  assert.equal(evenColumns(1000, 176, 20, [1, 2, 1, 1]), 5, "a wide tile counts its span");
-  assert.equal(evenColumns(1000, 176, 20, [1, 1]), 2, "few tiles: only as many columns as tiles");
+test("bookmarks saved as CSS strings load as numbers, and junk as the defaults", async () => {
+  const { bookmarkOptions } = await import("../extension/src/bookmarks.ts");
+  assert.deepEqual(bookmarkOptions({ even: true, tileWidth: "11rem", columns: "repeat(5, minmax(0, 1fr))", rows: "8.75rem", gap: "1.25rem", flow: "row dense", items: [] }), {
+    count: 5,
+    rowHeight: 8.75,
+    gap: 1.25,
+    flow: "row",
+    items: [],
+  });
+  assert.deepEqual(bookmarkOptions({ columns: "200px 1fr 2fr", rows: "minmax(3.25rem, auto)", gap: "0.75rem 1.5rem", flow: "column dense" }), { flow: "column" }, "unparseable: left for the defaults");
+  const now = { flow: "column", count: 3, rowHeight: 4, gap: 0.5, placement: "docked", hidden: true };
+  assert.deepEqual(bookmarkOptions(now), now, "today's shape passes through");
 });
 
 test("the Tree Style Tab sidebar follows the background's choices", async () => {

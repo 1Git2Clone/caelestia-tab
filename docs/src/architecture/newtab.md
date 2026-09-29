@@ -140,24 +140,33 @@ The `Ct*` components use Tailwind classes only. A value only known at run time
 Each component also carries a stable `ct-*` class (`ct-tile`, `ct-clock`,
 `ct-bookmarks` …) for your custom CSS to target.
 
-The bookmarks' wrapper gets `ct-edge-top`, `-bottom`, `-left` and `-right`
-while it touches that edge of the window (`edges` in `layout.ts`, rechecked on
-resize and zoom), and squares its corners there with
-`in-[.ct-edge-bottom]:rounded-b-none`.
+The page's parts get `ct-edge-top`, `-bottom`, `-left` and `-right` while they
+touch that edge of the window (`edges` in `layout.ts`, rechecked on resize and
+zoom); the clock squares its corners there with `in-[.ct-edge-bottom]:rounded-b-none`
+and its siblings. The bookmarks square their bottom corners from their own
+*Placement* setting instead (docked), not the window edge.
 
 ## Bookmarks
 
-`CtBookmarks` lays tiles out on a CSS grid whose `grid-template-columns`,
-`grid-auto-rows`, `gap` and `grid-auto-flow` are settings, typed as CSS. The
-Tiles and List presets only fill those fields in. A tile takes `span <width>`
-and `span <height>`, or any `grid-column` and `grid-row` value, which override
-the spans. A value the browser can't parse is dropped, so a half-typed
-setting leaves the grid as it was.
+`CtBookmarks` lays tiles out on a CSS grid: *Flow* (a switch) picks rows or
+columns, *Columns*/*Rows* (named for the flow) how many of the other axis,
+and *Row height* and *Gap* are both in rem. Rows fills a fixed number of
+columns and adds rows as needed; columns, the other way round, with the
+columns sharing the width. Either way gaps are filled as tiles are added
+(`grid-auto-flow: … dense`). The Tiles and List presets only fill *Columns*,
+*Row height* and *Gap* in. A tile takes `span <width>` and `span <height>`, or
+any `grid-column` and `grid-row` value, which override the spans.
 
-With *Even rows* on (the Tiles default), the columns come from the narrowest
-tile width instead: as many as fit, then as few as still need that many rows,
-so five tiles that don't fit on one row go 3 and 2, never 4 and 1
-(`evenColumns` in `layout.ts`, tested in `tests/extension.test.mjs`).
+Older settings (a `grid-template-columns` string, "even rows", a narrowest
+tile width) are read once, migrated by `bookmarkOptions` in `bookmarks.ts`
+(tested in `tests/extension.test.mjs`), and saved as the numbers above.
+
+*Placement* is floating (the default: rounded like the menu, with the page's
+own bottom padding under it) or docked (flush with the window's bottom edge,
+which also drops that padding — see `--pb` in `CtLayout.svelte`). The top
+corners stay rounded either way. *Top line* turns the top border on or off,
+and *Line colour* (shown while it's on) is a scheme colour or a fixed one,
+resolved with `cssColour` like a tile's.
 
 A tile shows its image, or its colour when it has none: a scheme colour, which
 follows the scheme, or a fixed one from the browser's colour picker. Text on a

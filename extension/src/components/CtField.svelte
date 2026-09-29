@@ -28,6 +28,22 @@
     </div>
     {@render note(field.hint)}
   </div>
+{:else if field.type === "switch"}
+  <div class="grid gap-1.5">
+    <span id="{uid}-label">{field.label}</span>
+    <div class="inline-flex w-fit gap-1 rounded-3xl bg-surface-container-highest p-1" role="radiogroup" aria-labelledby="{uid}-label" aria-describedby={described}>
+      {#each field.options as [value, label] (value)}
+        <button
+          type="button"
+          role="radio"
+          aria-checked={values[field.key] === value}
+          class="cursor-pointer rounded-full border-0 px-4 py-2 {values[field.key] === value ? 'bg-primary text-on-primary' : 'bg-transparent text-on-surface'}"
+          onclick={() => (values[field.key] = value)}>{label}</button
+        >
+      {/each}
+    </div>
+    {@render note(field.hint)}
+  </div>
 {:else if field.type === "checkbox"}
   <div class="grid gap-1">
     <div class="flex items-center gap-2.5">

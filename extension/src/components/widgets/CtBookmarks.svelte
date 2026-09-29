@@ -17,8 +17,8 @@
   }
 
   const PRESETS = [
-    { label: "Tiles", values: { even: true, tileWidth: "11rem", columns: "repeat(5, minmax(0, 1fr))", rows: "8.75rem", gap: "1.25rem" } },
-    { label: "List", values: { even: false, columns: "repeat(3, minmax(0, 1fr))", rows: "3.25rem", gap: "0.75rem" } },
+    { label: "Tiles", values: { count: 4, rowHeight: 8.75, gap: 1.25 } },
+    { label: "List", values: { count: 3, rowHeight: 3.25, gap: 0.75 } },
   ];
 
   export const item = (props: Record<string, any>) => ({
@@ -45,7 +45,10 @@
     label: "Bookmarks",
     defaults: {
       ...PRESETS[0].values,
-      flow: "row dense",
+      flow: "row",
+      placement: "floating",
+      topLine: true,
+      topLineColour: "primary",
       items: [
         // nf-fa-github, nf-fa-youtube, nf-fa-wikipedia_w, nf-dev-mozilla
         item({ name: "GitHub", url: "https://github.com", colour: "primary", glyph: "" }),
@@ -56,22 +59,14 @@
     },
     fields: [
       { type: "presets", label: "Start from", presets: PRESETS },
-      { key: "even", label: "Even rows", type: "checkbox", hint: "Spreads the tiles evenly over as few rows as fit: 5, or 3 and 2, never 4 and 1. Columns is ignored while it's on." },
-      { key: "tileWidth", label: "Narrowest tile", type: "text", hint: "For even rows: 11rem, 160px …" },
-      { key: "columns", label: "Columns", type: "text", hint: "grid-template-columns: repeat(5, minmax(0, 1fr)), 200px 1fr 2fr, repeat(auto-fill, minmax(10rem, 1fr)) …" },
-      { key: "rows", label: "Row height", type: "text", hint: "grid-auto-rows: 8.75rem, minmax(3.25rem, auto) …" },
-      { key: "gap", label: "Gap", type: "text", hint: "gap: 1.25rem, or 0.75rem 1.5rem for rows and columns." },
-      {
-        key: "flow",
-        label: "Flow",
-        type: "select",
-        options: [
-          ["row", "Rows"],
-          ["row dense", "Rows, filling gaps"],
-          ["column", "Columns"],
-          ["column dense", "Columns, filling gaps"],
-        ],
-      },
+      { key: "flow", label: "Flow", type: "switch", options: [["row", "Rows"], ["column", "Columns"]], hint: "Which way the tiles fill, gaps filled as they go." },
+      { key: "count", label: "Columns", type: "number", min: 1, max: 12, when: (v) => v.flow !== "column" },
+      { key: "count", label: "Rows", type: "number", min: 1, max: 12, when: (v) => v.flow === "column" },
+      { key: "rowHeight", label: "Row height", type: "range", min: 2, max: 16, step: 0.25, unit: "rem" },
+      { key: "gap", label: "Gap", type: "range", min: 0, max: 4, step: 0.25, unit: "rem" },
+      { key: "placement", label: "Placement", type: "switch", options: [["floating", "Floating"], ["docked", "Docked"]], hint: "Floating, rounded like the menu with the page's padding under it; docked, flush with the window's bottom." },
+      { key: "topLine", label: "Top line", type: "checkbox" },
+      { key: "topLineColour", label: "Line colour", type: "colour", when: (v) => v.topLine },
     ],
     actions: [{ icon: "add", title: "Add a bookmark", run: (settings, app) => editItem(app, settings, -1) }],
   };
@@ -79,32 +74,13 @@
 
 <script lang="ts">
   import { getContext } from "svelte";
-  import { evenColumns } from "../../layout.ts";
+  import { cssColour } from "../../scheme.ts";
   import type { App } from "../../store.svelte.ts";
   import CtIcon from "../CtIcon.svelte";
   import CtTile from "../CtTile.svelte";
 
   let { settings, editing = false }: { settings: any; editing?: boolean } = $props();
   const app = getContext<App>("ct");
-
-  let grid: HTMLElement | undefined = $state();
-  let probe: HTMLElement | undefined = $state();
-  let even: number | null = $state(null);
-  $effect(() => {
-    if (!settings.even || !grid || !probe) return void (even = null);
-    const spans = settings.items.map((it: any) => it.width);
-    // A frame later: changing the columns inside the observer's callback
-    // resizes what it observes, which the browser reports as a loop.
-    const layout = () =>
-      requestAnimationFrame(() => {
-        const gap = parseFloat(getComputedStyle(grid!).columnGap) || 0;
-        // The probe resolves the width setting, whatever its unit.
-        even = evenColumns(grid!.clientWidth, probe!.offsetWidth || 176, gap, spans);
-      });
-    const observer = new ResizeObserver(layout);
-    observer.observe(grid);
-    return () => observer.disconnect();
-  });
 
   const place = (it: any) => ({ "--col": it.column || `span ${it.width}`, "--row": it.row || `span ${it.height}` });
   function move(from: number, to: number) {
@@ -123,16 +99,17 @@
 </script>
 
 <div
-  class="ct-bookmarks box-border rounded-b-2xl border-0 border-t-4 border-solid border-primary bg-glass p-7 backdrop-blur-[8px] in-[.ct-edge-bottom]:rounded-b-none"
+  class="ct-bookmarks box-border rounded-t-2xl border-0 bg-glass p-7 backdrop-blur-[8px] {settings.placement === 'docked' ? 'rounded-b-none' : 'rounded-b-2xl'} {settings.topLine ? 'border-t-4 border-solid border-(--line)' : ''}"
+  style:--line={settings.topLine ? cssColour(settings.topLineColour) : undefined}
 >
+  <!-- Rows: a fixed number of columns, rows added as needed; columns: the
+       other way round, the columns sharing the width. Dense either way. -->
   <div
-    bind:this={grid}
-    class="relative grid auto-rows-(--rows) grid-cols-(--cols) gap-(--gap) {{ row: 'grid-flow-row', 'row dense': 'grid-flow-row-dense', column: 'grid-flow-col', 'column dense': 'grid-flow-col-dense' }[settings.flow as 'row'] ?? ''}"
-    style:--cols={even ? `repeat(${even}, minmax(0, 1fr))` : settings.columns}
-    style:--rows={settings.rows}
-    style:--gap={settings.gap}
+    class="relative grid gap-(--gap) {settings.flow === 'column' ? 'grid-flow-col-dense grid-rows-(--tracks) auto-cols-[minmax(0,1fr)]' : 'grid-flow-row-dense grid-cols-(--tracks) auto-rows-(--row)'}"
+    style:--tracks={settings.flow === "column" ? `repeat(${settings.count}, ${settings.rowHeight}rem)` : `repeat(${settings.count}, minmax(0, 1fr))`}
+    style:--row="{settings.rowHeight}rem"
+    style:--gap="{settings.gap}rem"
   >
-    <span bind:this={probe} class="invisible absolute w-(--w)" style:--w={settings.tileWidth} aria-hidden="true"></span>
     {#each settings.items as it, i (it.id)}
       {#if editing}
         <div

@@ -12,11 +12,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - *Padding* for the page's sides, top and bottom, tied or per axis, in *Settings*, *General*.
 - *Hide* on every part and tab, last in its own pen: the toolbar's warns that Ctrl+, still opens Settings without it, and a hidden open tab gives way to the first one still shown.
 - *Components* in Settings: every part, ours and yours, in one place, with a switch to show or hide it and a row that opens its settings, hidden ones included.
+- Bookmarks: *Placement*, floating (rounded like the menu, with the page's own padding under it) or docked (flush with the window's bottom edge). *Top line* and *Line colour*, for the border along its top edge.
 
 ### Changed
 
 - *Media*: beside the lyrics, the cover, title and controls sit on a card tinted with the scheme's primary container.
 - The pen's outline is drawn inside each part rather than around it, so it no longer loses sides to the menu's panel clipping it or a bookmark sitting flush on the window's edge. The menu itself now has a pen box of its own, editable as a whole.
+- Bookmarks: the grid's settings are numbers now (a flow switch, a count, row height and gap in rem) rather than CSS strings; older settings are carried over.
+
+### Removed
+
+- Bookmarks: *Even rows* and *Narrowest tile* (the grid always fills gaps as tiles are added, with the same effect as the Tiles preset).
 
 ## [0.1.1] - 2026-09-29
 

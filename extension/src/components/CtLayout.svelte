@@ -21,7 +21,7 @@
     : 'mr-0'}"
   style:--px="{pad.x}rem"
   style:--pt="{y}rem"
-  style:--pb="{y}rem"
+  style:--pb={app.settings.bookmarks.placement === "docked" && !app.settings.bookmarks.hidden ? "0rem" : `${y}rem`}
 >
   <CtMenu />
   {#if !app.settings.bookmarks.hidden}

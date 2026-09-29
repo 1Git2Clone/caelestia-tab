@@ -45,8 +45,13 @@ glass behind it can be turned off.
 
 ## Bookmarks
 
-Tiles on a CSS grid you define, or in even rows, each with a line under it in
-the colour that goes with the tile's, one of your own, or none. See
+Tiles on a grid: rows or columns (a preset, or a switch), how many of the
+other axis, row height and gap in rem, gaps filled as tiles are added. Each
+tile has a line under it in the colour that goes with the tile's, one of your
+own, or none. Floating (the default), the grid sits rounded like the menu,
+with the page's padding under it; docked, it's flush with the window's
+bottom edge, no padding below it. A line along its top edge, on by default, in
+a colour of its own; the top corners stay rounded either way. See
 [The new tab](../architecture/newtab.md#bookmarks).
 
 ## The menu's tabs

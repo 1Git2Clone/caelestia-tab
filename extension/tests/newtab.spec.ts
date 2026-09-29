@@ -459,6 +459,31 @@ test("with everything hidden, the page is empty and Ctrl+, still opens Settings"
   await expect(panel(page)).toBeVisible();
 });
 
+test("the bookmarks' count follows the flow's name, and they float or dock", async ({ page }) => {
+  await page.getByTitle("Edit", { exact: true }).click();
+  await page.getByTitle("Edit Bookmarks").click();
+  await expect(panel(page).getByRole("spinbutton", { name: "Columns" })).toHaveValue("4");
+  await panel(page).getByRole("radio", { name: "Columns" }).click();
+  await expect(panel(page).getByRole("spinbutton", { name: "Rows" })).toBeVisible();
+  await expect(panel(page).getByRole("spinbutton", { name: "Columns" })).toHaveCount(0);
+  const bottom = () => page.locator(".ct-bookmarks").evaluate((el) => innerHeight - el.getBoundingClientRect().bottom);
+  expect(await bottom()).toBeCloseTo(40, 0);
+  await panel(page).getByRole("radio", { name: "Docked" }).click();
+  await expect.poll(bottom).toBeCloseTo(0, 0);
+});
+
+test("the bookmarks' top line is optional, and its colour a setting", async ({ page }) => {
+  const bookmarks = page.locator(".ct-bookmarks");
+  await expect(bookmarks).toHaveCSS("border-top-width", "4px");
+  await page.getByTitle("Edit", { exact: true }).click();
+  await page.getByTitle("Edit Bookmarks").click();
+  await panel(page).getByRole("checkbox", { name: "Top line" }).uncheck();
+  await expect(bookmarks).toHaveCSS("border-top-width", "0px");
+  await panel(page).getByRole("checkbox", { name: "Top line" }).check();
+  await panel(page).getByRole("radiogroup", { name: "Line colour" }).getByRole("radio", { name: "Secondary", exact: true }).click();
+  await expect(bookmarks).toHaveAttribute("style", /--line: var\(--caelestia-secondary\)/);
+});
+
 test("Settings › Components lists ours and yours, toggles them and opens their settings", async ({ page }) => {
   await page.keyboard.press("Control+,");
   await panel(page).getByRole("tab", { name: "Components" }).click();

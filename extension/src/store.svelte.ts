@@ -3,6 +3,7 @@
 // every other tab's change (and the helper's) arrives here, so open tabs stay
 // in step with each other and with caelestia.
 import type { Component } from "svelte";
+import { bookmarkOptions } from "./bookmarks.ts";
 import { stable } from "./json.ts";
 import { tstOptions, TREE_STYLE_TAB } from "./treestyletab.ts";
 import type { Scheme } from "./types.ts";
@@ -98,6 +99,8 @@ export function complete(saved: any): Settings {
   }
   delete (s as any).widgets;
   delete (s as any).layout;
+  // Read the old CSS-string shape before the defaults below fill in what it lacks.
+  s.bookmarks = bookmarkOptions(s.bookmarks ?? {});
   for (const [key, info] of Object.entries(parts)) {
     s[key as "clock"] = { ...structuredClone(info.defaults), ...s[key as "clock"] };
   }

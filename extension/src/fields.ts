@@ -28,6 +28,8 @@ export type Field = When &
   | { key: string; label: string; hint?: string; type: "number"; min?: number; max?: number; step?: number }
   | { key: string; label: string; hint?: string; type: "range"; min: number; max: number; step?: number; unit?: string }
   | { key: string; label: string; hint?: string; type: "select"; options: [string, string][] }
+  // One of two values, side by side.
+  | { key: string; label: string; hint?: string; type: "switch"; options: [[string, string], [string, string]] }
   // A scheme colour token (primary, surfaceContainer …) or a #rrggbb.
   | { key: string; label: string; hint?: string; type: "colour" }
   // A URL or an uploaded file, as a data: URL.
