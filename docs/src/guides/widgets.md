@@ -9,6 +9,15 @@ bookmarks, or the open tab) for its settings in the side panel. The menu has
 its own pen box too: on the button while it's closed, on the whole panel
 while it's open.
 
+## Hiding
+
+Hide is the last option in every part's and tab's pen. Hiding the menu takes
+the button and the panel, not the clock (which shows in its place, as it does
+while the menu is simply closed); the toolbar's own Hide warns that Ctrl+,
+still opens Settings without it, and Components there shows it again. A
+hidden tab leaves the bar, and if it was the open one, the first tab still
+shown takes its place.
+
 ## Page
 
 The padding round the page: tied by default at 2.5rem on every side, or

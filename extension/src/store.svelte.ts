@@ -25,7 +25,8 @@ export interface Settings {
   bookmarks: Record<string, any>;
   // Whether the menu is open and on which tab (kept, so a new tab opens as
   // the last one was left), and each tab's settings, by its component's name.
-  menu: { open: boolean; tab: string; tabs: Record<string, Record<string, any>> };
+  // `hidden` takes the button and the panel, not the clock.
+  menu: { open: boolean; tab: string; tabs: Record<string, Record<string, any>>; hidden?: boolean };
   sites: typeof SITES;
   treeStyleTab: typeof TREE_STYLE_TAB;
   css: string;

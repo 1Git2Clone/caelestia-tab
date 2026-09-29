@@ -41,13 +41,19 @@ export type Field = When &
   );
 
 // A part of the page or a menu tab: its name, its settings' defaults and
-// the fields that edit them.
+// the fields that edit them. Every part and tab gets a Hide checkbox, last
+// in its form, so a component implements nothing to be hideable; a
+// component that exports neither `widget` nor `tab` is a building block for
+// others, with no pen, no Hide and no row in Settings › Components.
 export interface WidgetInfo {
   label: string;
   defaults: Record<string, any>;
   fields: Field[];
   // Toolbar buttons, for the bookmarks' +.
   actions?: { icon: string; title: string; run: (settings: any, app: App) => void }[];
+  // Under the Hide checkbox every part and tab gets, when hiding it needs a
+  // word of warning.
+  hideHint?: string;
 }
 
 // A menu tab: a component that exports `tab`. Its glyph (a Nerd Font one)

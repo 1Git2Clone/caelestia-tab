@@ -91,8 +91,11 @@ npm run --prefix extension build
 ```
 
 Every `.svelte` file there is compiled with ours. One that exports `tab` is a
-menu tab; the rest are components your tabs import
-(`import Card from "./Card.svelte"`).
+menu tab, and gets Hide for free, last in its own pen, like every part of the
+page. The rest are components your tabs import
+(`import Card from "./Card.svelte"`); a component that exports neither
+`widget` nor `tab` is a building block for others, with no pen, no Hide and no
+row in Settings › Components.
 They reach ours through `$ct`: `$ct/fields.ts`, `$ct/store.svelte.ts` (`tell`,
 `edit`, the `App` type), `$ct/components/CtIcon.svelte`,
 `$ct/components/CtMarquee.svelte` and so on. Style them

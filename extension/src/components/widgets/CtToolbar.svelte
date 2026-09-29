@@ -20,6 +20,7 @@
       { key: "edit", label: "The pen, for edit mode", type: "checkbox" },
       { key: "settings", label: "Settings", type: "checkbox", hint: "Without it, Ctrl+, still opens them." },
     ],
+    hideHint: "Settings open with Ctrl+, without it, and Components there shows it again.",
   };
 </script>
 

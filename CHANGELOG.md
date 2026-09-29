@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - *Padding* for the page's sides, top and bottom, tied or per axis, in *Settings*, *General*.
+- *Hide* on every part and tab, last in its own pen: the toolbar's warns that Ctrl+, still opens Settings without it, and a hidden open tab gives way to the first one still shown.
 
 ### Changed
 

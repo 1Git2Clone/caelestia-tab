@@ -418,3 +418,43 @@ test("the page's padding is one setting, or two when untied", async ({ page }) =
   await expect(main).toHaveCSS("padding-top", "16px");
   await expect(main).toHaveCSS("padding-left", "64px");
 });
+
+test("any part hides from its pen, the toolbar with a warning", async ({ page }) => {
+  await page.getByTitle("Edit", { exact: true }).click();
+  await page.getByTitle("Edit Toolbar").click();
+  // Hide is last in the form, so its warning is the last "Ctrl+," text (the
+  // Settings checkbox's own hint mentions it too).
+  await expect(panel(page).getByText(/Ctrl\+,/).last()).toBeVisible();
+  await page.getByTitle("Edit Clock and date").click();
+  const hide = panel(page).getByRole("checkbox", { name: "Hide" });
+  await hide.check();
+  await expect(page.locator(".ct-clock")).toHaveCount(0);
+  await hide.uncheck();
+  await expect(page.locator(".ct-clock")).toBeVisible();
+});
+
+test("a hidden tab leaves the bar, and the menu opens on the next one", async ({ page }) => {
+  await menuButton(page).click();
+  await tabButton(page, "Hello").click();
+  await page.getByTitle("Edit", { exact: true }).click();
+  await page.getByTitle("Edit Hello").click();
+  await panel(page).getByRole("checkbox", { name: "Hide" }).check();
+  await expect(tabButton(page, "Hello")).toHaveCount(0);
+  await expect(page.locator(".hello")).toHaveCount(0);
+  await expect(page.locator(".ct-tab")).toHaveCount(1);
+});
+
+test("with everything hidden, the page is empty and Ctrl+, still opens Settings", async ({ page }) => {
+  await page.evaluate(async () => {
+    const store = (window as any).browser.storage.local;
+    // Nothing's been saved yet on a fresh page (no change to write back).
+    const settings = (await store.get("settings")).settings ?? {};
+    for (const k of ["clock", "toolbar", "bookmarks", "menu"]) settings[k] = { ...settings[k], hidden: true };
+    await store.set({ settings });
+  });
+  await page.reload();
+  await expect(page.locator(".ct-menu nav")).toHaveCount(0);
+  await expect(page.locator(".ct-clock, .ct-bookmarks, .ct-toolbar")).toHaveCount(0);
+  await page.keyboard.press("Control+,");
+  await expect(panel(page)).toBeVisible();
+});

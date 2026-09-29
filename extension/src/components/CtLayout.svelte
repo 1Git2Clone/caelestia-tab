@@ -24,10 +24,12 @@
   style:--pb="{y}rem"
 >
   <CtMenu />
-  <section class="ct-part relative min-w-0" use:edges>
-    <CtBookmarks settings={app.settings.bookmarks} editing={app.editing} />
-    {#if app.editing}<CtEditOverlay info={parts.bookmarks} at={(s) => s.bookmarks} />{/if}
-  </section>
+  {#if !app.settings.bookmarks.hidden}
+    <section class="ct-part relative min-w-0" use:edges>
+      <CtBookmarks settings={app.settings.bookmarks} editing={app.editing} />
+      {#if app.editing}<CtEditOverlay info={parts.bookmarks} at={(s) => s.bookmarks} />{/if}
+    </section>
+  {/if}
   {#if !app.scheme && app.helperError}
     <p class="absolute top-1/2 left-1/2 m-0 -translate-1/2 rounded-2xl bg-error px-4 py-2.5 text-on-error">No colours yet: {app.helperError}. See Settings, Advanced.</p>
   {/if}
