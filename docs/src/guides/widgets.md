@@ -18,6 +18,14 @@ still opens Settings without it, and Components there shows it again. A
 hidden tab leaves the bar, and if it was the open one, the first tab still
 shown takes its place.
 
+## Settings › Components
+
+The second tab lists every placeable part: *Ours* (the menu, the clock, the
+toolbar, the bookmarks and caelestia-tab's own menu tabs), then *Yours*. Each
+row's switch shows or hides it, greyed when off; the rest of the row opens its
+settings, the same form as its pen. It's the only way to a hidden part's
+settings, and to a tab's while another covers it.
+
 ## Page
 
 The padding round the page: tied by default at 2.5rem on every side, or

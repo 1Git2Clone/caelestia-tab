@@ -21,6 +21,17 @@ colour scheme. It's meant for a broad audience, not one setup.
   custom reusable components can be declared too.
 - Done well, it could become part of caelestia shell, or at least earn stars.
 
+## Plugins from git, and an editor in the browser (noted 2026-09-30)
+
+- A library of our components and types, so a user's components get
+  autocomplete, and live in their own git repos.
+- A Plugins section in Settings that imports those repos, with a rebuild
+  button that builds the extension with them.
+- Settings › Components' *+* then creates one.
+- An editor in the page for components, the custom CSS and each website's
+  CSS, with autocomplete on the scheme's variables and our components.
+  Until then, user components are files and a build (Plugins guide).
+
 ## Scope and packaging
 
 - Works in Firefox and its forks, not just Floorp, and in Chromium browsers.

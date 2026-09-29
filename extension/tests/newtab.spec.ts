@@ -458,3 +458,22 @@ test("with everything hidden, the page is empty and Ctrl+, still opens Settings"
   await page.keyboard.press("Control+,");
   await expect(panel(page)).toBeVisible();
 });
+
+test("Settings › Components lists ours and yours, toggles them and opens their settings", async ({ page }) => {
+  await page.keyboard.press("Control+,");
+  await panel(page).getByRole("tab", { name: "Components" }).click();
+  const yours = panel(page).getByRole("group", { name: "Yours" });
+  await expect(yours.getByRole("switch")).toHaveCount(1);
+  await expect(yours.getByRole("button", { name: "Hello" })).toBeVisible();
+  const clock = panel(page).getByRole("switch", { name: "Show Clock and date" });
+  await clock.uncheck();
+  await expect(page.locator(".ct-clock")).toHaveCount(0);
+  // The toggle writes to the live settings, even after they're replaced.
+  await page.reload();
+  await page.keyboard.press("Control+,");
+  await panel(page).getByRole("tab", { name: "Components" }).click();
+  await panel(page).getByRole("switch", { name: "Show Clock and date" }).check();
+  await expect(page.locator(".ct-clock")).toBeVisible();
+  await panel(page).getByRole("button", { name: "Toolbar" }).click();
+  await expect(title(page)).toHaveText("Toolbar");
+});

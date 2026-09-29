@@ -8,10 +8,12 @@
   import { fly } from "svelte/transition";
   import type { Field } from "../fields.ts";
   import { COLOURS } from "../scheme.ts";
-  import { complete, DEFAULTS, type App } from "../store.svelte.ts";
+  import { complete, DEFAULTS, edit, type App } from "../store.svelte.ts";
   import { button, hint, iconButton, input, primary } from "../ui.ts";
+  import { placeables, type Placeable } from "../widgets.ts";
   import CtForm from "./CtForm.svelte";
   import CtIcon from "./CtIcon.svelte";
+  import CtPartEditor from "./CtPartEditor.svelte";
   import CtTabs from "./CtTabs.svelte";
 
   const app = getContext<App>("ct");
@@ -101,6 +103,13 @@
     app.settings.sites.off = on ? off.filter((x) => x !== id) : [...off, id];
   }
 
+  // Ours first, then the user's; typed so svelte-check doesn't widen the
+  // tuple's second element to Placeable[] | Placeable[] and lose the union.
+  const groups: [string, Placeable[]][] = [
+    ["Ours", placeables.filter((c) => c.ours)],
+    ["Yours", placeables.filter((c) => !c.ours)],
+  ];
+
   const ALL = { origins: ["<all_urls>"] };
   let allowed: boolean | null = $state(null);
   browser.permissions.contains(ALL).then((v: boolean) => (allowed = v));
@@ -138,7 +147,7 @@
          nulls app.focus while its handler (a remove, say) is still running. -->
     <focus.component {...props} onclose={() => (app.focus = null)} />
   {:else}
-  <CtTabs tabs={["General", "Background", "Websites", "Browser", "Advanced"]} bind:current={tab} />
+  <CtTabs tabs={["General", "Components", "Background", "Websites", "Browser", "Advanced"]} bind:current={tab} />
 
   {#if tab === 0}
     <div class="grid gap-4">
@@ -152,11 +161,44 @@
         ]}
         values={app.settings.padding}
       />
-      <p class="m-0 {hint}">The clock, the toolbar, the bookmarks and each of the menu's tabs are edited from the page: turn on the pen and pick one.</p>
+      <p class="m-0 {hint}">
+        The clock, the toolbar, the bookmarks, the menu and each of its tabs are edited from the page (turn on the pen and pick one) or from Components.
+      </p>
     </div>
   {:else if tab === 1}
-    <CtForm fields={BACKGROUND} values={app.settings.background} />
+    <!-- A row's toggle shows or hides it; the rest of the row opens its
+         settings, the pen's form. Hidden rows are greyed. -->
+    <div class="grid gap-6">
+      {#each groups as [heading, list] (heading)}
+        <div class="grid gap-1" role="group" aria-labelledby="ct-components-{heading}">
+          <h3 id="ct-components-{heading}" class="m-0 mb-1 text-lg font-medium">{heading}</h3>
+          {#each list as c (c.name)}
+            <div class="flex items-center gap-2 rounded-xl px-3 py-1.5 hover:bg-surface-container-high">
+              <button
+                type="button"
+                class="min-w-0 flex-1 cursor-pointer truncate border-0 bg-transparent py-1 text-left text-base {c.at(app.settings).hidden ? 'text-on-surface-variant/60' : 'text-on-surface'}"
+                onclick={() => edit(app, c.label, CtPartEditor, () => ({ info: c.info, values: c.at(app.settings) }))}>{c.label}</button
+              >
+              <input
+                type="checkbox"
+                role="switch"
+                class="m-0 size-4.5 cursor-pointer accent-primary"
+                aria-label="Show {c.label}"
+                checked={!c.at(app.settings).hidden}
+                onchange={(e) => (c.at(app.settings).hidden = !e.currentTarget.checked)}
+              />
+            </div>
+          {:else}
+            <p class="m-0 {hint}">
+              None yet. Yours go in <code>~/.config/caelestia-tab/components/</code>, then <code>npm run --prefix extension build</code>: see the handbook's Plugins guide.
+            </p>
+          {/each}
+        </div>
+      {/each}
+    </div>
   {:else if tab === 2}
+    <CtForm fields={BACKGROUND} values={app.settings.background} />
+  {:else if tab === 3}
     <div class="grid gap-4">
       <p class="m-0">
         Recolours sites with catppuccin/userstyles, compiled against the live scheme. Your own Stylus styles and userscripts get the same colours as
@@ -214,7 +256,7 @@
         {/if}
       </div>
     </div>
-  {:else if tab === 3}
+  {:else if tab === 4}
     <h3 class="mt-0 text-lg font-medium">Tree Style Tab</h3>
     <p>Themes Tree Style Tab's sidebar like the new tab's background, and follows scheme switches live. Needs Tree Style Tab installed; nothing happens without it.</p>
     <CtForm fields={TST} values={app.settings.treeStyleTab} />
