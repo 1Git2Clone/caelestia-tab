@@ -1,5 +1,8 @@
 <!-- Edit mode's mark on a part of the page: an outline, and a chip that opens
-     the part's settings in the side panel. Above everything (z-3). -->
+     the part's settings in the side panel. Above everything (z-3). The
+     outline is drawn inside the part, not on top of it: the menu's panel
+     clips what overflows it, and the bookmarks can sit flush on the
+     window's edge, so an outward outline would be clipped or cut off. -->
 <script lang="ts">
   import { getContext } from "svelte";
   import type { WidgetInfo } from "../fields.ts";
@@ -13,7 +16,7 @@
   const app = getContext<App>("ct");
 </script>
 
-<div class="pointer-events-none absolute inset-0 z-3 rounded-2xl outline-2 outline-offset-2 outline-primary outline-dashed">
+<div class="ct-edit pointer-events-none absolute inset-0 z-3 rounded-2xl outline-2 -outline-offset-2 outline-primary outline-dashed">
   <button
     type="button"
     class="pointer-events-auto absolute -top-3.5 left-3 flex cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-full border-0 bg-primary px-3 py-1 text-sm text-on-primary shadow-md"

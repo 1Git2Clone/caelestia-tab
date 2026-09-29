@@ -155,6 +155,16 @@ test("the clock can't be edited while a tab covers it, and the open tab can", as
   await expect(page.locator(".ct-github header")).toContainText("Last refresh:");
 });
 
+test("the pen's outline is drawn inside each part, and the menu has its own", async ({ page }) => {
+  await page.getByTitle("Edit", { exact: true }).click();
+  await expect(page.locator(".ct-edit").first()).toHaveCSS("outline-offset", "-2px");
+  await expect(page.getByTitle("Edit Menu")).toBeVisible();
+  await menuButton(page).click();
+  await expect(page.getByTitle("Edit Menu")).toBeVisible();
+  await page.getByTitle("Edit Menu").click();
+  await expect(title(page)).toHaveText("Menu");
+});
+
 test("GitHub's last search shows in the tab's formats", async ({ page }) => {
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);

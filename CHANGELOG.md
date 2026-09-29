@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - *Media*: beside the lyrics, the cover, title and controls sit on a card tinted with the scheme's primary container.
+- The pen's outline is drawn inside each part rather than around it, so it no longer loses sides to the menu's panel clipping it or a bookmark sitting flush on the window's edge. The menu itself now has a pen box of its own, editable as a whole.
 
 ## [0.1.1] - 2026-09-29
 

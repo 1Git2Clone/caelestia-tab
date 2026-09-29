@@ -5,7 +5,9 @@ and the toolbar; the clock under it; and the bookmarks at the bottom. Open the
 menu and its tab covers the clock (see
 [The new tab](../architecture/newtab.md#the-page)). Everything is edited from
 the page: turn on the pen and pick a part (the toolbar, the clock, the
-bookmarks, or the open tab) for its settings in the side panel.
+bookmarks, or the open tab) for its settings in the side panel. The menu has
+its own pen box too: on the button while it's closed, on the whole panel
+while it's open.
 
 ## Page
 

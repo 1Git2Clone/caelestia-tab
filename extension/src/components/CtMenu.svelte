@@ -4,12 +4,20 @@
      be edited. Opening grows the panel out of the menu button and closing
      shrinks it back in; a tab slides in from the side it sits on. Whether it's
      open, and on which tab, is a setting: a new tab opens as the last was left. -->
+<script module lang="ts">
+  import type { WidgetInfo } from "../fields.ts";
+
+  // The menu's own settings are where it's open and on which tab; the pen
+  // edits the menu as a whole.
+  export const widget: WidgetInfo = { label: "Menu", defaults: {}, fields: [] };
+</script>
+
 <script lang="ts">
   import { getContext } from "svelte";
   import { cubicOut } from "svelte/easing";
   import { fade, fly, scale } from "svelte/transition";
   import type { App } from "../store.svelte.ts";
-  import { parts, tabs } from "../widgets.ts";
+  import { menu as menuInfo, parts, tabs } from "../widgets.ts";
   import CtEditOverlay from "./CtEditOverlay.svelte";
   import CtClock from "./widgets/CtClock.svelte";
   import CtToolbar from "./widgets/CtToolbar.svelte";
@@ -77,6 +85,7 @@
       </div>
     </div>
   {/if}
+  {#if app.editing && menu.open}<CtEditOverlay info={menuInfo} at={(s) => s.menu} />{/if}
 
   <!-- Two columns, the toolbar's sized to it, or three with it in the middle. -->
   <nav
@@ -85,18 +94,21 @@
   >
     <!-- ponytail: tabs that don't fit their side are clipped; a scroll or an
          overflow menu when someone has that many. -->
-    <div class="row-1 flex min-w-0 items-center gap-1 overflow-hidden {right ? 'col-2 flex-row-reverse justify-self-end' : 'col-1'}">
-      <button
-        bind:this={button}
-        type="button"
-        class="{tabButton(false)} {menu.open ? '' : 'bg-glass backdrop-blur-md'}"
-        title={menu.open ? "Close the menu" : "Open the menu"}
-        aria-label={menu.open ? "Close the menu" : "Open the menu"}
-        aria-expanded={menu.open}
-        onclick={toggle}
-      >
-        <span class="font-glyph text-xl" aria-hidden="true">{""}</span>
-      </button>
+    <div class="row-1 flex min-w-0 items-center gap-1 {menu.open ? 'overflow-hidden' : ''} {right ? 'col-2 flex-row-reverse justify-self-end' : 'col-1'}">
+      <span class="relative">
+        <button
+          bind:this={button}
+          type="button"
+          class="{tabButton(false)} {menu.open ? '' : 'bg-glass backdrop-blur-md'}"
+          title={menu.open ? "Close the menu" : "Open the menu"}
+          aria-label={menu.open ? "Close the menu" : "Open the menu"}
+          aria-expanded={menu.open}
+          onclick={toggle}
+        >
+          <span class="font-glyph text-xl" aria-hidden="true">{""}</span>
+        </button>
+        {#if app.editing && !menu.open}<CtEditOverlay info={menuInfo} at={(s) => s.menu} />{/if}
+      </span>
       {#if menu.open}
         {#each tabs as t (t.name)}
           <span class="h-6 w-px shrink-0 bg-outline-variant" transition:fade={{ duration: ms(150) }}></span>

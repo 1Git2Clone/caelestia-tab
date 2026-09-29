@@ -21,6 +21,11 @@ const info = (n: string) => Object.entries(ours).find(([path]) => name(path) ===
 // The page's parts, by their key in the settings.
 export const parts = { clock: info("CtClock"), toolbar: info("CtToolbar"), bookmarks: info("CtBookmarks") };
 
+// The menu itself, edited as a whole rather than filled from `parts`'
+// defaults: its settings (where it's open and on which tab) have their own
+// shape.
+export const menu = info("CtMenu");
+
 // The menu's tabs: ours first, then the user's by name.
 export const tabs = Object.entries(all)
   .filter(([, m]) => m.tab)
