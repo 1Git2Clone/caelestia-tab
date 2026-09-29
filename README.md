@@ -44,6 +44,18 @@ and Firefox-based browsers (Floorp, Zen, LibreWolf, Waterfox).
 The browser's window frame is [CaelestiaFox](https://addons.mozilla.org/en-US/firefox/addon/caelestiafox)'s
 job; the two work side by side.
 
+## Showcase
+
+[![The new tab: the clock and bookmarks over the wallpaper, in the scheme's colours](assets/new-tab.jpg)](assets/new-tab.png)
+
+[![The pen editing the new tab in place, with the GitHub tab's settings open](assets/editing.jpg)](assets/editing.png)
+
+[![The GitHub tab: pull requests, review requests, issues and recent activity](assets/github.jpg)](assets/github.png)
+
+[![The Media tab: a Spotify track with its cover, controls and lyrics](assets/media.jpg)](assets/media.png)
+
+[![The same new tab after switching to another wallpaper and scheme](assets/another-scheme.jpg)](assets/another-scheme.png)
+
 ## Quick start
 
 ```sh
