@@ -394,3 +394,17 @@ test("settings from when the page was a grid of widgets keep each part's", async
   await expect(page.locator(".ct-clock")).toContainText("~");
   await expect(page.locator(".ct-tile")).toHaveText(/Kept/);
 });
+
+test("the page's padding is one setting, or two when untied", async ({ page }) => {
+  const main = page.locator(".ct-page");
+  await expect(main).toHaveCSS("padding-top", "40px");
+  await expect(main).toHaveCSS("padding-left", "40px");
+  await page.keyboard.press("Control+,");
+  await panel(page).getByRole("slider", { name: "Padding" }).fill("4");
+  await expect(main).toHaveCSS("padding-top", "64px");
+  await expect(main).toHaveCSS("padding-right", "64px");
+  await panel(page).getByRole("checkbox", { name: "Same on every side" }).uncheck();
+  await panel(page).getByRole("slider", { name: "Vertical" }).fill("1");
+  await expect(main).toHaveCSS("padding-top", "16px");
+  await expect(main).toHaveCSS("padding-left", "64px");
+});

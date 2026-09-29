@@ -11,12 +11,17 @@
   import CtBookmarks from "./widgets/CtBookmarks.svelte";
 
   const app = getContext<App>("ct");
+  const pad = $derived(app.settings.padding);
+  const y = $derived(pad.tied ? pad.x : pad.y);
 </script>
 
 <main
-  class="ct-page relative z-1 box-border grid h-screen grid-rows-[minmax(0,1fr)_auto] gap-8 px-10 pt-4 transition-[margin-right] duration-[260ms] ease-out motion-reduce:transition-none {app.panel
+  class="ct-page relative z-1 box-border grid h-screen grid-rows-[minmax(0,1fr)_auto] gap-8 px-(--px) pt-(--pt) pb-(--pb) transition-[margin-right] duration-[260ms] ease-out motion-reduce:transition-none {app.panel
     ? 'mr-[min(30rem,100vw)]'
     : 'mr-0'}"
+  style:--px="{pad.x}rem"
+  style:--pt="{y}rem"
+  style:--pb="{y}rem"
 >
   <CtMenu />
   <section class="ct-part relative min-w-0" use:edges>

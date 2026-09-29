@@ -143,6 +143,15 @@
   {#if tab === 0}
     <div class="grid gap-4">
       <CtForm fields={[{ key: "font", label: "Font", type: "font", hint: "The whole page's, unless a part sets its own." }]} values={app.settings} />
+      <CtForm
+        fields={[
+          { key: "tied", label: "Same on every side", type: "checkbox" },
+          { key: "x", label: "Padding", type: "range", min: 0, max: 6, step: 0.25, unit: "rem", when: (v) => v.tied },
+          { key: "x", label: "Horizontal", type: "range", min: 0, max: 6, step: 0.25, unit: "rem", when: (v) => !v.tied },
+          { key: "y", label: "Vertical", type: "range", min: 0, max: 6, step: 0.25, unit: "rem", when: (v) => !v.tied },
+        ]}
+        values={app.settings.padding}
+      />
       <p class="m-0 {hint}">The clock, the toolbar, the bookmarks and each of the menu's tabs are edited from the page: turn on the pen and pick one.</p>
     </div>
   {:else if tab === 1}

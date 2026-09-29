@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- *Padding* for the page's sides, top and bottom, tied or per axis, in *Settings*, *General*.
+
 ### Changed
 
 - *Media*: beside the lyrics, the cover, title and controls sit on a card tinted with the scheme's primary container.

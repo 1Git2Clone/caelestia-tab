@@ -12,6 +12,9 @@ import { parts, tabs } from "./widgets.ts";
 export interface Settings {
   // The page's font, CSS font-family; empty for the default.
   font: string;
+  // The page's padding, rem: `x` left and right, `y` top and bottom, or
+  // `x` all round while tied.
+  padding: { tied: boolean; x: number; y: number };
   // The component that draws the settings panel.
   panel: string;
   background: { source: "wallpaper" | "colour" | "none"; colour: string; dim: number; blur: number };
@@ -53,6 +56,7 @@ export interface App {
 
 export const DEFAULTS: Settings = {
   font: "",
+  padding: { tied: true, x: 2.5, y: 2.5 },
   panel: "CtSettings",
   background: { source: "wallpaper", colour: "surfaceContainer", dim: 20, blur: 0 },
   clock: {},
@@ -76,6 +80,7 @@ export function complete(saved: any): Settings {
   s.sites = { ...structuredClone(SITES), ...s.sites };
   s.treeStyleTab = tstOptions(s.treeStyleTab);
   s.background = { ...DEFAULTS.background, ...s.background };
+  s.padding = { ...DEFAULTS.padding, ...s.padding };
   s.menu = { ...structuredClone(DEFAULTS.menu), ...s.menu };
   if (Array.isArray(saved?.widgets)) {
     const find = (c: string) => saved.widgets.find((w: any) => (w.component ?? RENAMED[w.plugin] ?? w.plugin) === c)?.settings;

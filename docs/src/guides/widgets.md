@@ -7,6 +7,11 @@ menu and its tab covers the clock (see
 the page: turn on the pen and pick a part (the toolbar, the clock, the
 bookmarks, or the open tab) for its settings in the side panel.
 
+## Page
+
+The padding round the page: tied by default at 2.5rem on every side, or
+untied into *Horizontal* and *Vertical*, in *Settings*, *General*.
+
 ## Toolbar
 
 The bookmarks' +, the pen and the settings button, each of which can be
