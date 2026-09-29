@@ -70,7 +70,9 @@ Fields, in order:
 6. *Placement*: switch, Floating (default) | Docked. Floating: rounded all
    round, the page's bottom padding under it. Docked: flush with the bottom,
    square bottom corners, as today.
-7. *Hide* (C).
+7. *Top line*: checkbox (default on), and *Line colour*: colour field
+   (default primary), shown while the line is on. Added 2026-09-30.
+8. *Hide* (C).
 
 - Both placements keep the 4px primary top border; its top corners are
   rounded like the menu's (`rounded-2xl`, the same radius), and the border
