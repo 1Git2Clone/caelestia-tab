@@ -484,6 +484,21 @@ test("the bookmarks' top line is optional, and its colour a setting", async ({ p
   await expect(bookmarks).toHaveAttribute("style", /--line: var\(--caelestia-secondary\)/);
 });
 
+test("with no bookmarks the menu fills the page, but edit mode keeps their pen box", async ({ page }) => {
+  await page.evaluate(async () => {
+    const store = (window as any).browser.storage.local;
+    const settings = (await store.get("settings")).settings ?? {};
+    settings.bookmarks = { ...settings.bookmarks, items: [] };
+    await store.set({ settings });
+  });
+  await page.reload();
+  await expect(page.locator(".ct-bookmarks")).toHaveCount(0);
+  const menuBottom = () => page.locator(".ct-menu").evaluate((el) => innerHeight - el.getBoundingClientRect().bottom);
+  await expect.poll(menuBottom).toBeCloseTo(40, 0);
+  await page.getByTitle("Edit", { exact: true }).click();
+  await expect(page.getByTitle("Edit Bookmarks")).toBeVisible();
+});
+
 test("Settings › Components lists ours and yours, toggles them and opens their settings", async ({ page }) => {
   await page.keyboard.press("Control+,");
   await panel(page).getByRole("tab", { name: "Components" }).click();

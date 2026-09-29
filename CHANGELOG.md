@@ -19,10 +19,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - *Media*: beside the lyrics, the cover, title and controls sit on a card tinted with the scheme's primary container.
 - The pen's outline is drawn inside each part rather than around it, so it no longer loses sides to the menu's panel clipping it or a bookmark sitting flush on the window's edge. The menu itself now has a pen box of its own, editable as a whole.
 - Bookmarks: the grid's settings are numbers now (a flow switch, a count, row height and gap in rem) rather than CSS strings; older settings are carried over.
+- Hidden bookmarks, or none, give the menu the whole page; in edit mode an empty list stays on the page for its pen box.
 
 ### Removed
 
-- Bookmarks: *Even rows* and *Narrowest tile* (the grid always fills gaps as tiles are added, with the same effect as the Tiles preset).
+- Bookmarks: *Even rows* and *Narrowest tile* (the grid always fills gaps as tiles are added).
 
 ## [0.1.1] - 2026-09-29
 
