@@ -42,10 +42,22 @@
   // Svelte only intros a *local* transition for a block that changes after
   // its component has mounted, not for one already there on the first render.
   let focusDir = $state(1);
+  // Set for one render when the tabs reappear from an editor closing (a back
+  // to null, not a tab picked): that remount of the {#key tab} block below is
+  // an #if/:else branch swap, not a real tab change, so it gets no sideways
+  // fly of its own, only the vertical one the editor plays; a real tab switch
+  // right after still animates, since this clears itself straight after.
+  let noFly = $state(false);
   let prevFocus: App["focus"] = null;
   $effect.pre(() => {
-    if (focus !== prevFocus) focusDir = focus === null || focus === prevFocus?.back ? -1 : 1;
+    if (focus !== prevFocus) {
+      focusDir = focus === null || focus === prevFocus?.back ? -1 : 1;
+      if (focus === null && prevFocus !== null) noFly = true;
+    }
     prevFocus = focus;
+  });
+  $effect(() => {
+    noFly = false;
   });
 
   // The new tab's background and Tree Style Tab's sidebar take the same
@@ -173,11 +185,16 @@
              editor nulls app.focus while its handler (a remove, say) is
              still running. Svelte makes the leaving element inert on its own,
              but aria-hidden is what actually drops it from a role query
-             while both it and the one opening share the DOM for the fly. -->
+             while both it and the one opening share the DOM for the fly.
+             Going back and forth quickly (the list to a bookmark and back)
+             can reverse an outro into an intro on the same element rather
+             than swap in a fresh one, so the aria-hidden an earlier outro
+             left behind needs clearing on the way back in too. -->
         <div
           class="[grid-area:1/1]"
           in:fly={{ y: 48 * focusDir, duration: ms(220), easing: cubicOut }}
           out:fly={{ y: -48 * focusDir, duration: ms(220), easing: cubicOut }}
+          onintrostart={(e) => (e.currentTarget as HTMLElement).removeAttribute("aria-hidden")}
           onoutrostart={(e) => (e.currentTarget as HTMLElement).setAttribute("aria-hidden", "true")}
         >
           <focus.component {...props} onclose={() => (app.focus = null)} />
@@ -192,8 +209,9 @@
       <!-- Same crossing trick, sideways: mirrors the menu's own tabs. -->
       <div
         class="[grid-area:1/1]"
-        in:fly={{ x: 48 * dir, duration: ms(220), easing: cubicOut }}
+        in:fly={{ x: 48 * dir, duration: noFly ? 0 : ms(220), easing: cubicOut }}
         out:fly={{ x: -48 * dir, duration: ms(220), easing: cubicOut }}
+        onintrostart={(e) => (e.currentTarget as HTMLElement).removeAttribute("aria-hidden")}
         onoutrostart={(e) => (e.currentTarget as HTMLElement).setAttribute("aria-hidden", "true")}
       >
   {#if tab === 0}
