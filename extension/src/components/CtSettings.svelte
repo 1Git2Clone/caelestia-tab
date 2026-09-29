@@ -103,12 +103,11 @@
     app.settings.sites.off = on ? off.filter((x) => x !== id) : [...off, id];
   }
 
-  // Ours first, then the user's; typed so svelte-check doesn't widen the
-  // tuple's second element to Placeable[] | Placeable[] and lose the union.
-  const groups: [string, Placeable[]][] = [
-    ["Ours", placeables.filter((c) => c.ours)],
-    ["Yours", placeables.filter((c) => !c.ours)],
-  ];
+  // One list, a tree: the menu, then its tabs indented under it (`tabs`
+  // already sorts them ours first), then the other parts, in placeables'
+  // own order rather than the root each tab's `parent` points at.
+  const list: Placeable[] = placeables.filter((c) => !c.parent).flatMap((r) => [r, ...placeables.filter((c) => c.parent === r.name)]);
+  const parentOf = (c: Placeable): Placeable | undefined => (c.parent ? placeables.find((p) => p.name === c.parent) : undefined);
 
   const ALL = { origins: ["<all_urls>"] };
   let allowed: boolean | null = $state(null);
@@ -167,34 +166,36 @@
     </div>
   {:else if tab === 1}
     <!-- A row's toggle shows or hides it; the rest of the row opens its
-         settings, the pen's form. Hidden rows are greyed. -->
-    <div class="grid gap-6">
-      {#each groups as [heading, list] (heading)}
-        <div class="grid gap-1" role="group" aria-labelledby="ct-components-{heading}">
-          <h3 id="ct-components-{heading}" class="m-0 mb-1 text-lg font-medium">{heading}</h3>
-          {#each list as c (c.name)}
-            <div class="flex items-center gap-2 rounded-xl px-3 py-1.5 hover:bg-surface-container-high">
-              <button
-                type="button"
-                class="min-w-0 flex-1 cursor-pointer truncate border-0 bg-transparent py-1 text-left text-base {c.at(app.settings).hidden ? 'text-on-surface-variant/60' : 'text-on-surface'}"
-                onclick={() => edit(app, c.label, CtPartEditor, () => ({ info: c.info, values: c.at(app.settings) }))}>{c.label}</button
-              >
-              <input
-                type="checkbox"
-                role="switch"
-                class="m-0 size-4.5 cursor-pointer accent-primary"
-                aria-label="Show {c.label}"
-                checked={!c.at(app.settings).hidden}
-                onchange={(e) => (c.at(app.settings).hidden = !e.currentTarget.checked)}
-              />
-            </div>
-          {:else}
-            <p class="m-0 {hint}">
-              None yet. Yours go in <code>~/.config/caelestia-tab/components/</code>, then <code>npm run --prefix extension build</code>: see the handbook's Plugins guide.
-            </p>
-          {/each}
+         settings, the pen's form. Hidden rows are greyed. While a row's
+         parent (the menu, for a tab) is hidden, its own toggle is greyed and
+         disabled too, though its value is untouched; the row still opens
+         its settings. -->
+    <div class="grid gap-1">
+      {#each list as c (c.name)}
+        {@const parentHidden = !!parentOf(c)?.at(app.settings).hidden}
+        <div class="flex items-center gap-2 rounded-xl px-3 py-1.5 hover:bg-surface-container-high {c.parent ? 'ml-4 border-l border-solid border-outline-variant pl-3' : ''}">
+          <button
+            type="button"
+            class="min-w-0 flex-1 cursor-pointer truncate border-0 bg-transparent py-1 text-left text-base {c.at(app.settings).hidden || parentHidden ? 'text-on-surface-variant/60' : 'text-on-surface'}"
+            onclick={() => edit(app, c.label, CtPartEditor, () => ({ info: c.info, values: c.at(app.settings) }))}
+            >{c.label} {#if !c.ours}<span class="rounded-full bg-surface-container-highest px-2 py-0.5 text-xs">yours</span>{/if}</button
+          >
+          <input
+            type="checkbox"
+            role="switch"
+            class="m-0 size-4.5 accent-primary {parentHidden ? '' : 'cursor-pointer'}"
+            aria-label="Show {c.label}"
+            checked={!c.at(app.settings).hidden}
+            disabled={parentHidden}
+            onchange={(e) => (c.at(app.settings).hidden = !e.currentTarget.checked)}
+          />
         </div>
       {/each}
+      {#if placeables.every((c) => c.ours)}
+        <p class="m-0 {hint}">
+          None yet. Yours go in <code>~/.config/caelestia-tab/components/</code>, then <code>npm run --prefix extension build</code>: see the handbook's Plugins guide.
+        </p>
+      {/if}
     </div>
   {:else if tab === 2}
     <CtForm fields={BACKGROUND} values={app.settings.background} />

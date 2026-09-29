@@ -58,7 +58,7 @@ export interface App {
 
 export const DEFAULTS: Settings = {
   font: "",
-  padding: { tied: true, x: 2.5, y: 2.5 },
+  padding: { tied: true, x: 1.25, y: 1.25 },
   panel: "CtSettings",
   background: { source: "wallpaper", colour: "surfaceContainer", dim: 20, blur: 0 },
   clock: {},

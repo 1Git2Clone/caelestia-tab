@@ -407,8 +407,8 @@ test("settings from when the page was a grid of widgets keep each part's", async
 
 test("the page's padding is one setting, or two when untied", async ({ page }) => {
   const main = page.locator(".ct-page");
-  await expect(main).toHaveCSS("padding-top", "40px");
-  await expect(main).toHaveCSS("padding-left", "40px");
+  await expect(main).toHaveCSS("padding-top", "20px");
+  await expect(main).toHaveCSS("padding-left", "20px");
   await page.keyboard.press("Control+,");
   await panel(page).getByRole("slider", { name: "Padding" }).fill("4");
   await expect(main).toHaveCSS("padding-top", "64px");
@@ -467,7 +467,7 @@ test("the bookmarks' count follows the flow's name, and they float or dock", asy
   await expect(panel(page).getByRole("spinbutton", { name: "Rows" })).toBeVisible();
   await expect(panel(page).getByRole("spinbutton", { name: "Columns" })).toHaveCount(0);
   const bottom = () => page.locator(".ct-bookmarks").evaluate((el) => innerHeight - el.getBoundingClientRect().bottom);
-  expect(await bottom()).toBeCloseTo(40, 0);
+  expect(await bottom()).toBeCloseTo(20, 0);
   await panel(page).getByRole("radio", { name: "Docked" }).click();
   await expect.poll(bottom).toBeCloseTo(0, 0);
 });
@@ -494,17 +494,16 @@ test("with no bookmarks the menu fills the page, but edit mode keeps their pen b
   await page.reload();
   await expect(page.locator(".ct-bookmarks")).toHaveCount(0);
   const menuBottom = () => page.locator(".ct-menu").evaluate((el) => innerHeight - el.getBoundingClientRect().bottom);
-  await expect.poll(menuBottom).toBeCloseTo(40, 0);
+  await expect.poll(menuBottom).toBeCloseTo(20, 0);
   await page.getByTitle("Edit", { exact: true }).click();
   await expect(page.getByTitle("Edit Bookmarks")).toBeVisible();
 });
 
-test("Settings › Components lists ours and yours, toggles them and opens their settings", async ({ page }) => {
+test("Settings › Components lists every part as a tree, toggles them and opens their settings", async ({ page }) => {
   await page.keyboard.press("Control+,");
   await panel(page).getByRole("tab", { name: "Components" }).click();
-  const yours = panel(page).getByRole("group", { name: "Yours" });
-  await expect(yours.getByRole("switch")).toHaveCount(1);
-  await expect(yours.getByRole("button", { name: "Hello" })).toBeVisible();
+  // The user's tab is under the menu, like ours, but carries the "yours" label.
+  await expect(panel(page).getByRole("button", { name: "Hello" })).toContainText("yours");
   const clock = panel(page).getByRole("switch", { name: "Show Clock and date" });
   await clock.uncheck();
   await expect(page.locator(".ct-clock")).toHaveCount(0);
@@ -516,4 +515,22 @@ test("Settings › Components lists ours and yours, toggles them and opens their
   await expect(page.locator(".ct-clock")).toBeVisible();
   await panel(page).getByRole("button", { name: "Toolbar" }).click();
   await expect(title(page)).toHaveText("Toolbar");
+});
+
+test("hiding the menu greys and disables its tabs' switches, without touching their own hidden", async ({ page }) => {
+  await page.keyboard.press("Control+,");
+  await panel(page).getByRole("tab", { name: "Components" }).click();
+  const menuSwitch = panel(page).getByRole("switch", { name: "Show Menu" });
+  const githubSwitch = panel(page).getByRole("switch", { name: "Show GitHub" });
+  await menuSwitch.uncheck();
+  await expect(githubSwitch).toBeDisabled();
+  await expect(githubSwitch).toBeChecked();
+  // Its row still opens GitHub's settings, disabled or not.
+  await panel(page).getByRole("button", { name: "GitHub" }).click();
+  await expect(title(page)).toHaveText("GitHub");
+  await page.getByTitle("Back to settings").click();
+  await menuSwitch.check();
+  await expect(githubSwitch).toBeEnabled();
+  await menuButton(page).click();
+  await expect(tabButton(page, "GitHub")).toBeVisible();
 });

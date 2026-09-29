@@ -35,11 +35,13 @@ export const tabs = Object.entries(all)
 
 // Every component the page places, and so hides: a part, the menu or a menu
 // tab. `at` finds its settings in app.settings afresh each time (see App.focus).
-export type Placeable = { name: string; label: string; info: WidgetInfo; ours: boolean; at: (s: Settings) => Record<string, any> };
+// A tab's `parent` is its menu's name, for Settings › Components' tree: while
+// the parent is hidden, a child's own switch is disabled (but not its value).
+export type Placeable = { name: string; label: string; info: WidgetInfo; ours: boolean; parent?: string; at: (s: Settings) => Record<string, any> };
 export const placeables: Placeable[] = [
   { name: "CtMenu", label: menu.label, info: menu, ours: true, at: (s) => s.menu },
   { name: "CtClock", label: parts.clock.label, info: parts.clock, ours: true, at: (s) => s.clock },
   { name: "CtToolbar", label: parts.toolbar.label, info: parts.toolbar, ours: true, at: (s) => s.toolbar },
   { name: "CtBookmarks", label: parts.bookmarks.label, info: parts.bookmarks, ours: true, at: (s) => s.bookmarks },
-  ...tabs.map((t) => ({ name: t.name, label: t.tab.label, info: t.tab as WidgetInfo, ours: t.name.startsWith("Ct"), at: (s: Settings) => s.menu.tabs[t.name] })),
+  ...tabs.map((t) => ({ name: t.name, label: t.tab.label, info: t.tab as WidgetInfo, ours: t.name.startsWith("Ct"), parent: "CtMenu", at: (s: Settings) => s.menu.tabs[t.name] })),
 ];
