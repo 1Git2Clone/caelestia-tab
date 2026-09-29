@@ -111,11 +111,20 @@ once, so the page's style doesn't carry a copy of the image as text.
 The settings are a panel docked to the window's right edge, not a modal: the
 page moves over to stay in view beside it, so a change shows as it's made.
 Every editor opens in the same panel, never in a pop-up: a part's settings from the pen, a bookmark from its edit button or the +. `edit(app, title,
-component, props)` puts one there (`app.focus`), with a back arrow to the
-settings, and Escape steps back. Editors change the real settings, not a
+component, props, back?)` puts one there (`app.focus`), with a back arrow to
+`back` if given, else to the main settings, and Escape does the same step.
+A pen opening one screen while another is already open is not a sub-screen of
+it, so `back` is unset and its own back arrow goes to the main settings, not
+the one that was open before it. Editors change the real settings, not a
 copy, so the page shows each change as it's made and there's nothing to save.
 A new bookmark is added before its editor opens, so it's on the page while
 it's filled in.
+
+Switching between the six main tabs slides sideways, like the menu's own
+tabs; a screen opening slides up over whatever was showing, and back slides
+it down again. Opening the panel itself, with no inner switch, only plays
+its own slide from the edge. `prefers-reduced-motion` turns every duration to
+0.
 
 A part's form is drawn from its component's `fields` (see
 [Writing a menu tab](../guides/plugins.md)): the settings panel knows nothing

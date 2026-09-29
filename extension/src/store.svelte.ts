@@ -52,8 +52,11 @@ export interface App {
   // and `props` should be: a function that finds what's edited in
   // app.settings each time, since app.settings is replaced whole when
   // another tab or the settings file changes it, and an editor holding the
-  // old objects would edit nothing anyone sees.
-  focus: { title: string | (() => string); component: Component<any>; props: Record<string, any> | (() => Record<string, any>) } | null;
+  // old objects would edit nothing anyone sees. `back` is the focus to
+  // return to, for a screen opened as a sub-screen of the one already open;
+  // unset, back goes to the main settings, which is also what a pen opening
+  // one screen while another is open does (not a sub-screen of it).
+  focus: { title: string | (() => string); component: Component<any>; props: Record<string, any> | (() => Record<string, any>); back?: App["focus"] } | null;
 }
 
 export const DEFAULTS: Settings = {
@@ -118,9 +121,16 @@ const store = browser.storage.local;
 // The helper's topics that widgets read through app.data.
 const TOPICS = ["github", "media", "lyrics"];
 
-// Opens an editor in the side panel.
-export function edit(app: App, title: string | (() => string), component: Component<any>, props: Record<string, any> | (() => Record<string, any>)) {
-  app.focus = { title, component, props };
+// Opens an editor in the side panel. `back`, unset except for a sub-screen of
+// the one already open, is where its back arrow returns to.
+export function edit(
+  app: App,
+  title: string | (() => string),
+  component: Component<any>,
+  props: Record<string, any> | (() => Record<string, any>),
+  back?: App["focus"],
+) {
+  app.focus = { title, component, props, back };
   app.panel = true;
 }
 

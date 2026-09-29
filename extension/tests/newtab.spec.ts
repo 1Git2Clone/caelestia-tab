@@ -101,6 +101,17 @@ test("Escape steps out of an editor, then closes the panel", async ({ page }) =>
   await expect(panel(page)).toHaveCount(0);
 });
 
+test("back from a component opened by the pen goes to the main settings, not one opened before it", async ({ page }) => {
+  await page.getByTitle("Edit", { exact: true }).click();
+  await page.getByTitle("Edit Clock and date").click();
+  await expect(title(page)).toHaveText("Clock and date");
+  await page.getByTitle("Edit Toolbar").click();
+  await expect(title(page)).toHaveText("Toolbar");
+  await page.getByTitle("Back to settings").click();
+  await expect(title(page)).toHaveText("Settings");
+  await expect(panel(page).getByRole("tablist")).toBeVisible();
+});
+
 test("edits survive a reload", async ({ page }) => {
   await page.getByTitle("Edit", { exact: true }).click();
   await page.getByTitle("Edit Clock and date").click();

@@ -24,6 +24,29 @@
   const focus = $derived(app.focus);
   const title = $derived(typeof focus?.title === "function" ? focus.title() || "Untitled" : (focus?.title ?? "Settings"));
   const props = $derived(typeof focus?.props === "function" ? focus.props() : focus?.props);
+  const ms = (n: number) => (still ? 0 : n);
+
+  // Which way the six tabs slide: from where the picked one sits relative to
+  // the last (mirrors CtMenu's tabs).
+  let dir = $state(1);
+  let prevTab = 0;
+  $effect.pre(() => {
+    if (tab !== prevTab) dir = tab > prevTab ? 1 : -1;
+    prevTab = tab;
+  });
+
+  // Which way a focused screen slides: up to open one (whether over the main
+  // tabs or another screen, the panel already open), down for back, whether
+  // to `back` or, unset, to the main tabs. A fresh mount (a pen opening the
+  // panel with a screen already focused) plays no transition here at all:
+  // Svelte only intros a *local* transition for a block that changes after
+  // its component has mounted, not for one already there on the first render.
+  let focusDir = $state(1);
+  let prevFocus: App["focus"] = null;
+  $effect.pre(() => {
+    if (focus !== prevFocus) focusDir = focus === null || focus === prevFocus?.back ? -1 : 1;
+    prevFocus = focus;
+  });
 
   // The new tab's background and Tree Style Tab's sidebar take the same
   // choices; `none` is what "no background of ours" means for each.
@@ -136,18 +159,43 @@
 >
   <header class="mb-4 flex items-center gap-2">
     {#if app.focus}
-      <button type="button" class={iconButton} title="Back to settings" onclick={() => (app.focus = null)}><CtIcon name="left" /></button>
+      <button type="button" class={iconButton} title="Back to settings" onclick={() => (app.focus = app.focus?.back ?? null)}><CtIcon name="left" /></button>
     {/if}
     <h2 class="m-0 min-w-0 flex-1 truncate text-2xl font-normal">{title}</h2>
     <button type="button" class={iconButton} title="Close" onclick={() => ((app.focus = null), (app.panel = false))}><CtIcon name="close" /></button>
   </header>
   {#if focus}
-    <!-- The editor's props come from `focus`, not app.focus: closing an editor
-         nulls app.focus while its handler (a remove, say) is still running. -->
-    <focus.component {...props} onclose={() => (app.focus = null)} />
+    <!-- One grid cell, so the leaving screen and the one opening cross
+         without the panel jumping to the new one's height. -->
+    <div class="grid grid-cols-[minmax(0,1fr)]">
+      {#key focus}
+        <!-- The editor's props come from `focus`, not app.focus: closing an
+             editor nulls app.focus while its handler (a remove, say) is
+             still running. Svelte makes the leaving element inert on its own,
+             but aria-hidden is what actually drops it from a role query
+             while both it and the one opening share the DOM for the fly. -->
+        <div
+          class="[grid-area:1/1]"
+          in:fly={{ y: 48 * focusDir, duration: ms(220), easing: cubicOut }}
+          out:fly={{ y: -48 * focusDir, duration: ms(220), easing: cubicOut }}
+          onoutrostart={(e) => (e.currentTarget as HTMLElement).setAttribute("aria-hidden", "true")}
+        >
+          <focus.component {...props} onclose={() => (app.focus = null)} />
+        </div>
+      {/key}
+    </div>
   {:else}
   <CtTabs tabs={["General", "Components", "Background", "Websites", "Browser", "Advanced"]} bind:current={tab} />
 
+  <div class="grid grid-cols-[minmax(0,1fr)]">
+    {#key tab}
+      <!-- Same crossing trick, sideways: mirrors the menu's own tabs. -->
+      <div
+        class="[grid-area:1/1]"
+        in:fly={{ x: 48 * dir, duration: ms(220), easing: cubicOut }}
+        out:fly={{ x: -48 * dir, duration: ms(220), easing: cubicOut }}
+        onoutrostart={(e) => (e.currentTarget as HTMLElement).setAttribute("aria-hidden", "true")}
+      >
   {#if tab === 0}
     <div class="grid gap-4">
       <CtForm fields={[{ key: "font", label: "Font", type: "font", hint: "The whole page's, unless a part sets its own." }]} values={app.settings} />
@@ -287,5 +335,8 @@
       </div>
     </div>
   {/if}
+      </div>
+    {/key}
+  </div>
   {/if}
 </aside>
