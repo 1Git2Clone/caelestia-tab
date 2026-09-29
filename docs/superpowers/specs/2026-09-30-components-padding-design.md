@@ -103,8 +103,9 @@ page. In edit mode an empty bookmarks part still shows, for its pen box.
 ## Testing
 
 - `node --test`: the bookmarks migration (each old shape → numbers, junk →
-  defaults), and the placeables list (a module with neither export isn't in
-  it).
+  defaults), from a pure `bookmarks.ts` (the store needs the browser).
+- The placeables list is `import.meta.glob`, Vite's, so it's checked in the
+  UI: Components' *Yours* lists the fixture tab and no building blocks.
 - The Playwright spec (`extension/tests/newtab.spec.ts`): hiding a part from
   the Components section removes it from the page and greys its row; the
   menu fills the page with the bookmarks hidden.
