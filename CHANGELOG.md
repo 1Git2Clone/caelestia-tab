@@ -7,11 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-
-- *X offset* and *Y offset* for Tree Style Tab's wallpaper, in *Settings*, *Browser*: -100% to 100%, centred at 0, to move the part of the wallpaper the narrow sidebar shows.
-
-## [0.1.1] - 2026-09-28
+## [0.1.1] - 2026-09-29
 
 ### Changed
 
@@ -22,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - *Private activity*: off, every GitHub column is public repositories only (searches get `is:public`, activity is your public events). Both sides are kept, so flipping it doesn't ask GitHub again.
+- *X offset* and *Y offset* for Tree Style Tab's wallpaper, in *Settings*, *Browser*: -100% to 100%, centred at 0, to move the part of the wallpaper the narrow sidebar shows.
 
 ## [0.1.0] - 2026-09-28
 
