@@ -49,7 +49,8 @@ Tabs of your own come after these (see [Writing a menu tab](plugins.md)).
 - **Media**: a tab per player at the top (four a row, two on a narrow page,
   the last row's sharing the whole width), then the one picked, or the one
   playing: its cover, title, album and artist, year and controls, and the
-  lyrics beside them when there's room, under them when there isn't. The
+  lyrics beside them when there's room (these on a card tinted with the
+  primary container), under them when there isn't. The
   cover's size and its column's width are settings. Timed lyrics follow the
   song and a line clicked plays from there; scroll them yourself and they stop
   following until you've stopped with the current line in view. Lyrics

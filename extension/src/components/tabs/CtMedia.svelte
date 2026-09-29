@@ -165,10 +165,16 @@
           in:fly={{ x: 48 * dir, duration: still ? 0 : 220, easing: cubicOut }}
           out:fly={{ x: -48 * dir, duration: still ? 0 : 220, easing: cubicOut }}
         >
-          <div class="grid min-w-0 grid-cols-[minmax(0,1fr)] justify-items-center gap-3 {wide ? 'content-center' : 'content-start'}">
+          <!-- Side by side, a card around the cover and controls shows what the
+               space beside the lyrics belongs to. -->
+          <div
+            class="grid min-w-0 grid-cols-[minmax(0,1fr)] justify-items-center gap-3 {wide
+              ? 'box-border w-[calc(var(--cover)+3rem)] max-w-full place-self-center rounded-3xl bg-primary-container/60 p-6'
+              : 'content-start'}"
+            style:--cover="{settings.cover}rem"
+          >
             <div
               class="aspect-square w-[min(var(--cover),100%)] rounded-2xl bg-surface-container-high bg-(image:--art) bg-cover bg-center"
-              style:--cover="{settings.cover}rem"
               style:--art={p.art ? `url(${JSON.stringify(p.art)})` : "none"}
             ></div>
             <div class="grid w-full min-w-0 grid-cols-[minmax(0,1fr)] gap-0.5 text-center">
