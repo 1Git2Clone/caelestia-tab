@@ -3,3 +3,8 @@
 # diffs and language stats.
 extension/public/userstyles/** linguist-vendored -diff
 extension/public/vendor/** linguist-vendored -diff
+# Binary: never normalised, never diffed as text.
+*.png binary
+*.jpg binary
+*.webp binary
+*.woff2 binary
