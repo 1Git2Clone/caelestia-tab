@@ -140,11 +140,12 @@ The `Ct*` components use Tailwind classes only. A value only known at run time
 Each component also carries a stable `ct-*` class (`ct-tile`, `ct-clock`,
 `ct-bookmarks` …) for your custom CSS to target.
 
-The page's parts get `ct-edge-top`, `-bottom`, `-left` and `-right` while they
-touch that edge of the window (`edges` in `layout.ts`, rechecked on resize and
-zoom); the clock squares its corners there with `in-[.ct-edge-bottom]:rounded-b-none`
-and its siblings. The bookmarks square their bottom corners from their own
-*Placement* setting instead (docked), not the window edge.
+The bookmarks' wrapper (`CtLayout.svelte`, the only thing wrapped in `edges`
+from `layout.ts`) gets `ct-edge-top`, `-bottom`, `-left` and `-right` while it
+touches that edge of the window, a hook for custom CSS to square a corner
+there (see [Writing a menu tab](../guides/plugins.md)). The bookmarks' own
+corners come from their *Placement* setting instead (docked), not the window
+edge.
 
 ## Bookmarks
 
