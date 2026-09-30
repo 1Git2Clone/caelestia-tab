@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Settings: the six main tabs slide sideways like the menu's own tabs, and a screen opening (the pen, a Components row, a bookmark) slides up over whatever was showing, with back sliding it down again; opening the panel itself is unchanged. Back goes to the screen a sub-screen was opened from, else to the main settings, even when a pen opened one screen while another was already open.
+- Settings: the six main tabs spread from edge to edge on every row and slide sideways like the menu's own tabs, and a screen opening (the pen, a Components row, a bookmark) slides up over whatever was showing, with back sliding it down again; opening the panel itself is unchanged. Back goes to the screen a sub-screen was opened from, else to the main settings, even when a pen opened one screen while another was already open.
 - *Media*: beside the lyrics, the cover, title and controls sit on a card tinted with the scheme's primary container.
 - The pen's outline is drawn inside each part rather than around it, so it no longer loses sides to the menu's panel clipping it or a bookmark sitting flush on the window's edge. The menu itself now has a pen box of its own, editable as a whole.
 - Bookmarks: the grid's settings are numbers now (a flow switch, a count, row height and gap in rem) rather than CSS strings; older settings are carried over.

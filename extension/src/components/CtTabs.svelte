@@ -2,7 +2,7 @@
   let { tabs, current = $bindable(0) }: { tabs: string[]; current?: number } = $props();
 </script>
 
-<div role="tablist" class="ct-tabs mb-6 inline-flex flex-wrap gap-1 rounded-3xl bg-surface-container-highest p-1">
+<div role="tablist" class="ct-tabs mb-6 flex flex-wrap justify-between gap-1 rounded-3xl bg-surface-container-highest p-1">
   {#each tabs as tab, i (tab)}
     <button
       type="button"
