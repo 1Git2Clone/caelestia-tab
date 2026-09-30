@@ -837,13 +837,22 @@ test("the defaults are the maintainer's own setup: font, padding, bookmarks and 
   expect(settings.clock.hour12).toBe(true);
 });
 
-test("Settings' tabs line up in columns: edges at the edges, the middle ones centred on each other", async ({ page }) => {
+test("Settings' tabs are centred in equal columns, so each column lines up", async ({ page }) => {
   await page.keyboard.press("Control+,");
-  const box = async (name: string) => (await panel(page).getByRole("tab", { name, exact: true }).boundingBox())!;
-  const [components, browser] = [await box("Components"), await box("Browser")];
-  expect(Math.abs(components.x + components.width / 2 - (browser.x + browser.width / 2))).toBeLessThan(1);
-  const [general, websites] = [await box("General"), await box("Websites")];
-  expect(Math.abs(general.x - websites.x)).toBeLessThan(1);
-  const [background, advanced] = [await box("Background"), await box("Advanced")];
-  expect(Math.abs(background.x + background.width - (advanced.x + advanced.width))).toBeLessThan(1);
+  // Measured together once the panel has slid in: mid-slide, tabs read apart
+  // would come from different frames.
+  const at = await panel(page).evaluate(async (el) => {
+    await Promise.all(el.getAnimations({ subtree: true }).map((a) => a.finished));
+    return Object.fromEntries(
+      [...el.querySelectorAll('[role="tab"]')].map((t) => {
+        const b = t.getBoundingClientRect();
+        return [t.textContent!.trim(), b.x + b.width / 2];
+      }),
+    );
+  });
+  for (const [top, bottom] of [["General", "Websites"], ["Components", "Browser"], ["Background", "Advanced"]]) {
+    expect(Math.abs(at[top] - at[bottom])).toBeLessThan(1);
+  }
+  // Evenly spaced: the gaps between column centres match.
+  expect(Math.abs(at.Components - at.General - (at.Background - at.Components))).toBeLessThan(1);
 });
