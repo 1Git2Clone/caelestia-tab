@@ -836,3 +836,14 @@ test("the defaults are the maintainer's own setup: font, padding, bookmarks and 
   ]);
   expect(settings.clock.hour12).toBe(true);
 });
+
+test("Settings' tabs line up in columns: edges at the edges, the middle ones centred on each other", async ({ page }) => {
+  await page.keyboard.press("Control+,");
+  const box = async (name: string) => (await panel(page).getByRole("tab", { name, exact: true }).boundingBox())!;
+  const [components, browser] = [await box("Components"), await box("Browser")];
+  expect(Math.abs(components.x + components.width / 2 - (browser.x + browser.width / 2))).toBeLessThan(1);
+  const [general, websites] = [await box("General"), await box("Websites")];
+  expect(Math.abs(general.x - websites.x)).toBeLessThan(1);
+  const [background, advanced] = [await box("Background"), await box("Advanced")];
+  expect(Math.abs(background.x + background.width - (advanced.x + advanced.width))).toBeLessThan(1);
+});
