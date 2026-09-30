@@ -856,3 +856,30 @@ test("Settings' tabs are centred in equal columns, so each column lines up", asy
   // Evenly spaced: the gaps between column centres match.
   expect(Math.abs(at.Components - at.General - (at.Background - at.Components))).toBeLessThan(1);
 });
+
+test("Settings' tabs take as many columns as fit, in even rows", async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 800 });
+  await page.keyboard.press("Control+,");
+  const at = await panel(page).evaluate(async (el) => {
+    await Promise.all(el.getAnimations({ subtree: true }).map((a) => a.finished));
+    const bar = el.querySelector('[role="tablist"]')!.getBoundingClientRect();
+    return {
+      bar: [bar.left, bar.right],
+      tabs: Object.fromEntries(
+        [...el.querySelectorAll('[role="tab"]')].map((t) => {
+          const b = t.getBoundingClientRect();
+          return [t.textContent!.trim(), [b.left, b.right, b.left + b.width / 2]];
+        }),
+      ),
+    };
+  });
+  // Too narrow for three: two columns of three rows, all inside the bar.
+  const centre = (n: string) => at.tabs[n][2];
+  expect(Math.abs(centre("General") - centre("Background"))).toBeLessThan(1);
+  expect(Math.abs(centre("Components") - centre("Websites"))).toBeLessThan(1);
+  expect(centre("Components") - centre("General")).toBeGreaterThan(20);
+  for (const [left, right] of Object.values(at.tabs)) {
+    expect(left).toBeGreaterThanOrEqual(at.bar[0]);
+    expect(right).toBeLessThanOrEqual(at.bar[1]);
+  }
+});
