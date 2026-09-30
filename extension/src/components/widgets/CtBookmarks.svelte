@@ -50,19 +50,29 @@
   export const widget: WidgetInfo = {
     label: "Bookmarks",
     defaults: {
-      ...PRESETS[0].values,
+      count: 5,
+      rowHeight: 3.25,
+      gap: 2,
       flow: "row",
       placement: "floating",
       topLine: true,
       topLineColour: "primary",
       dimHidden: false,
       items: [
-        // nf-fa-github, nf-fa-youtube, nf-fa-wikipedia_w, nf-dev-mozilla
-        item({ name: "GitHub", url: "https://github.com", colour: "primary", glyph: "" }),
-        item({ name: "YouTube", url: "https://www.youtube.com", colour: "tertiary", width: 2, glyph: "" }),
-        item({ name: "Wikipedia", url: "https://www.wikipedia.org", colour: "secondary", glyph: "" }),
-        item({ name: "MDN", url: "https://developer.mozilla.org", colour: "primaryContainer", glyph: "" }),
+        // nf-oct-mail, nf-linux-forgejo, nf-fa-github, nf-fa-music, nf-fa-youtube,
+        // nf-fa-steam, nf-fa-play, nf-fa-images, nf-dev-grafana, nf-md-script_text
+        item({ id: "06e760b0-3a8f-47e8-a7f1-73418a3d7c97", name: "Roundcube", url: "https://developer.mozilla.org", colour: "primary", glyph: "\uf42f" }),
+        item({ id: "633d282e-a1bb-4a36-b9cb-e3b51146a1b6", name: "Foregejo", url: "git.hu-tao.dev", colour: "secondary", glyph: "\uf335" }),
+        item({ id: "75de1339-58a5-4b66-9c4c-ad0bb0c66831", name: "GitHub", url: "https://github.com", colour: "surfaceContainerHighest", glyph: "\uf09b" }),
+        item({ id: "e91e66c8-82ac-4c04-8cb1-17feb53d6494", name: "Navidrome", url: "music.hu-tao.dev", colour: "primaryContainer", glyph: "\uf001" }),
+        item({ id: "3f7ad348-45f4-48da-8905-f94d4f22adb0", name: "YouTube", url: "https://www.youtube.com", colour: "secondaryContainer", glyph: "\uf16a" }),
+        item({ id: "cd7d5293-2993-42d3-980d-bf55ebbb2c3d", name: "Steam", url: "store.steampowered.com", colour: "secondaryContainer", glyph: "\uf1b6" }),
+        item({ id: "ef1f55f8-3ec2-4147-b0fd-d7c3f1291a92", name: "Stremio", url: "web.stremio.com", colour: "primaryContainer", glyph: "\uf04b" }),
+        item({ id: "a01791e8-17d6-4b27-9f85-a01d3ba676af", name: "Pixiv", url: "pixiv.net", colour: "secondaryContainer", glyph: "\uf00f" }),
+        item({ id: "5c555ec7-e9fb-4bbb-aed3-d7492de54c1b", name: "Grafana", url: "grafana.hu-tao.dev", colour: "secondary", glyph: "\ue7f3" }),
+        item({ id: "d438dcff-0ea7-418d-a6a3-c11b98388640", name: "Dozzle", url: "dozzle.hu-tao.dev", colour: "primary", glyph: "\u{f0bc2}" }),
       ],
+      hidden: true,
     },
     fields: [
       { type: "presets", label: "Start from", presets: PRESETS },

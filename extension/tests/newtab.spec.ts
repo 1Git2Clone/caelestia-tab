@@ -12,6 +12,70 @@ const SCHEME = {
   colours: Object.fromEntries(["primary", "onPrimary", "surface", "onSurface", "background", "shadow", "outlineVariant"].map((n) => [n, "445566"])),
 };
 
+const STORAGE_KEY = "__caelestia_tab_storage";
+
+// Today's defaults are the maintainer's own setup (five hidden bookmarks, the
+// menu open on Media): most of this suite was written against the settings
+// that shipped before that change (four shown bookmarks, the menu closed on
+// load), and is testing that behaviour, not which values are the defaults.
+// Seeded once, before the page's first load, so those tests don't need
+// rewriting around a fixture that isn't the point of what they check; a
+// test after real defaults (see "the defaults are the maintainer's own
+// setup" below) clears it and reloads instead. Skipped once storage already
+// has something in it, so a test that seeds its own settings still can.
+function seedScaffolding(page: Page) {
+  return page.addInitScript(
+    ({ key }) => {
+      if (localStorage.getItem(key)) return;
+      const item = (props: Record<string, unknown>) => ({
+        id: crypto.randomUUID(),
+        name: "",
+        url: "",
+        letter: "",
+        glyph: "",
+        showLetter: true,
+        showName: true,
+        image: "",
+        colour: "primary",
+        line: "auto",
+        lineColour: "primary",
+        width: 1,
+        height: 1,
+        column: "",
+        row: "",
+        hidden: false,
+        ...props,
+      });
+      localStorage.setItem(
+        key,
+        JSON.stringify({
+          settings: {
+            menu: { open: false, tab: "", tabs: {} },
+            bookmarks: {
+              count: 4,
+              rowHeight: 8.75,
+              gap: 1.25,
+              flow: "row",
+              placement: "floating",
+              topLine: true,
+              topLineColour: "primary",
+              dimHidden: false,
+              hidden: false,
+              items: [
+                item({ name: "GitHub", url: "https://github.com", colour: "primary" }),
+                item({ name: "YouTube", url: "https://www.youtube.com", colour: "tertiary", width: 2 }),
+                item({ name: "Wikipedia", url: "https://www.wikipedia.org", colour: "secondary" }),
+                item({ name: "MDN", url: "https://developer.mozilla.org", colour: "primaryContainer" }),
+              ],
+            },
+          },
+        }),
+      );
+    },
+    { key: STORAGE_KEY },
+  );
+}
+
 let errors: string[];
 test.beforeEach(async ({ page }) => {
   errors = [];
@@ -19,6 +83,7 @@ test.beforeEach(async ({ page }) => {
   page.on("dialog", (d) => d.accept());
   await page.addInitScript(`window.__scheme = ${JSON.stringify(SCHEME)};`);
   await page.addInitScript({ path: path.join(import.meta.dirname, "browser-shim.js") });
+  await seedScaffolding(page);
   await page.goto("/newtab.html");
   await expect(page.locator(".ct-clock")).toBeVisible();
 });
@@ -81,6 +146,9 @@ test("Components: the menu's tabs share its box, Clock and date has its own", as
 });
 
 test("Websites: a section's toggle-all switches every site in it, and only that section", async ({ page }) => {
+  // Today's default sites are the maintainer's own two custom ones; this
+  // test is about the toggle-all mechanics with exactly one added mid-test.
+  await seed(page, { settings: { sites: { enabled: true, off: [], accent: "primary", overrides: {}, custom: [] } } });
   await page.getByTitle("Settings", { exact: true }).click();
   await panel(page).getByRole("tab", { name: "Websites" }).click();
   const filter = panel(page).getByRole("searchbox", { name: "Filter sites" });
@@ -106,6 +174,9 @@ test("Websites: a section's toggle-all switches every site in it, and only that 
 });
 
 test("a site of your own is added from the filter, by Enter or its + row", async ({ page }) => {
+  // Today's default sites are the maintainer's own two custom ones; this
+  // test is about adding a site from the filter, starting from none.
+  await seed(page, { settings: { sites: { enabled: true, off: [], accent: "primary", overrides: {}, custom: [] } } });
   await page.getByTitle("Settings", { exact: true }).click();
   await panel(page).getByRole("tab", { name: "Websites" }).click();
   const filter = panel(page).getByRole("searchbox", { name: "Filter sites" });
@@ -250,7 +321,9 @@ test("GitHub shows your activity, and a rate limit keeps the last results", asyn
       error: "GitHub said 403: API rate limit exceeded",
       limitedUntil: until.getTime(),
     },
-    settings: { menu: { open: true, tab: "CtGitHub", tabs: {} } },
+    // Private activity, on: today's default is off, but this is about the
+    // rate limit and the last results, not the privacy toggle.
+    settings: { menu: { open: true, tab: "CtGitHub", tabs: { CtGitHub: { private: true } } } },
   });
   const tab = page.locator(".ct-github");
   await expect(tab.getByRole("heading", { name: "Recent activity" })).toBeVisible();
@@ -275,7 +348,9 @@ test("activity is a line of the searches, once, and the private toggle swaps eve
       activity: [push("me/secret")],
       publicActivity: [push("me/open")],
     },
-    settings: { menu: { open: true, tab: "CtGitHub", tabs: { CtGitHub: { searches: `PRs: ${q}\nMine: @activity\nAgain: @activity\nHalf typed:` } } } },
+    // Private activity starts on here (today's default is off): the test
+    // itself flips it off partway through.
+    settings: { menu: { open: true, tab: "CtGitHub", tabs: { CtGitHub: { searches: `PRs: ${q}\nMine: @activity\nAgain: @activity\nHalf typed:`, private: true } } } },
   });
   const tab = page.locator(".ct-github");
   await expect(tab.getByRole("heading", { level: 3 })).toHaveText([/^PRs\s*2$/, "Mine"]);
@@ -455,11 +530,16 @@ test("settings from when the page was a grid of widgets keep each part's", async
   await page.evaluate(async () => {
     await (window as any).browser.storage.local.set({
       settings: {
+        // The menu's own default now opens on load (today's default): this
+        // test is about the old widget-grid shape migrating, not that.
+        menu: { open: false, tab: "", tabs: {} },
         layout: { areas: '"toolbar" "clock" "bookmarks"' },
         widgets: [
           { id: "toolbar", component: "CtToolbar", place: {}, settings: { settings: true, edit: true, actions: true } },
           { id: "clock", component: "CtClock", place: {}, settings: { timeSeparator: "~" } },
-          { id: "bookmarks", component: "CtBookmarks", place: {}, settings: { items: [{ id: "a", name: "Kept", url: "", colour: "primary", showName: true, width: 1, height: 1 }] } },
+          // hidden: false — today's default bookmarks are hidden; this test
+          // is about the old widget-grid shape migrating, not that.
+          { id: "bookmarks", component: "CtBookmarks", place: {}, settings: { hidden: false, items: [{ id: "a", name: "Kept", url: "", colour: "primary", showName: true, width: 1, height: 1 }] } },
         ],
       },
     });
@@ -718,4 +798,30 @@ test("hiding the menu greys and disables its tabs' switches, without touching th
   await expect(githubSwitch).toBeEnabled();
   await menuButton(page).click();
   await expect(tabButton(page, "GitHub")).toBeVisible();
+});
+
+test("the defaults are the maintainer's own setup: font, padding, bookmarks and the clock", async ({ page }) => {
+  // A truly empty page: the scaffolding seeded for the rest of this suite
+  // (see seedScaffolding above) would stand in for real settings otherwise.
+  await page.addInitScript((key) => localStorage.removeItem(key), STORAGE_KEY);
+  await page.reload();
+  await page.keyboard.press("Control+,");
+  await panel(page).getByRole("tab", { name: "Advanced" }).click();
+  const settings = JSON.parse(await panel(page).locator("textarea").last().inputValue());
+  expect(settings.font).toBe("Rubik");
+  expect(settings.padding).toMatchObject({ tied: true, x: 1.25, y: 2.5 });
+  expect(settings.bookmarks.count).toBe(5);
+  expect(settings.bookmarks.items.map((it: any) => it.name)).toEqual([
+    "Roundcube",
+    "Foregejo",
+    "GitHub",
+    "Navidrome",
+    "YouTube",
+    "Steam",
+    "Stremio",
+    "Pixiv",
+    "Grafana",
+    "Dozzle",
+  ]);
+  expect(settings.clock.hour12).toBe(true);
 });

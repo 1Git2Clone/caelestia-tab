@@ -38,12 +38,12 @@ With [Tree Style Tab](https://addons.mozilla.org/en-US/firefox/addon/tree-style-
 installed, its sidebar follows the scheme live, with the same choices as the
 new tab's background (*Settings*, *Browser*):
 
-- **A colour** (the default: primary, dimmed 86%): the colour dimmed towards
-  the surface mixed towards black (40% in dark mode, 12% in light, where
-  surfaces grey quickly), so it sits a step darker than the page in both
-  modes and a high dim is a light tint.
-- **The caelestia wallpaper**, dimmed towards the scheme's background and
-  blurred as you set, with the tabs on a translucent tint of primary. *X
+- **A colour**: the colour dimmed towards the surface mixed towards black
+  (40% in dark mode, 12% in light, where surfaces grey quickly), so it sits a
+  step darker than the page in both modes and a high dim is a light tint.
+- **The caelestia wallpaper** (the default: surface container highest, dimmed
+  50%, blurred 7px, shifted left 50%), dimmed towards the scheme's background
+  and blurred as you set, with the tabs on a translucent tint of primary. *X
   offset* and *Y offset* (-100% to 100%, 0 centred) move it: -100 lines up
   its left or top edge with the sidebar's, 100 its right or bottom. The
   sidebar gets a copy scaled to 900 px, since TST keeps the style in every

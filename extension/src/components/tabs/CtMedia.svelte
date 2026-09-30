@@ -4,7 +4,7 @@
   export const tab: TabInfo = {
     label: "Media",
     glyph: "", // nf-fa-music
-    defaults: { player: "", lyrics: true, cover: 16, left: 22 },
+    defaults: { player: "", lyrics: true, cover: 15, left: 22 },
     fields: [
       { key: "lyrics", label: "Look up lyrics", type: "checkbox", hint: "From lrclib.net when the player sends none: the artist, title and album go there." },
       { key: "cover", label: "Cover size", type: "range", min: 6, max: 30, step: 0.5, unit: "rem" },

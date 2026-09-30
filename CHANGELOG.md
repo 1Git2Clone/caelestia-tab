@@ -24,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Hidden bookmarks, or none, give the menu the whole page; in edit mode an empty list stays on the page for its pen box.
 - *Websites* in Settings: split into *User-defined* and *catppuccin/userstyles* sections, each with a toggle-all checkbox (ticked when every site in it is on, dashed when some are) that switches the whole section at once, whether or not the filter is hiding some of its sites.
 - The clock centres on the menu's whole section now, not the space under the bar, so it no longer sits above the page's true centre when the bookmarks are hidden or empty.
+- The shipped defaults are the maintainer's own setup instead of a generic one: font Rubik, vertical padding 2.5rem once untied, ten bookmarks (hidden by default, five to a row), the menu open on Media, and GitHub's Private activity off.
+- Sites and Tree Style Tab default to the maintainer's own too: two custom overrides (Forgejo, Navidrome) alongside the vendored ones, and the sidebar tinted from the wallpaper rather than a flat colour.
 
 ### Removed
 

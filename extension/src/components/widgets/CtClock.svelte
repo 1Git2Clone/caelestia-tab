@@ -33,17 +33,17 @@
     label: "Clock and date",
     defaults: {
       hour12: true,
-      leadingZero: false,
+      leadingZero: true,
       seconds: false,
-      timeSeparator: "|",
+      timeSeparator: ":",
       // Font sizes are in pt; `timeSize` and `dateSize` were rem and are left
       // alone rather than read as pt.
-      timePt: 66,
+      timePt: 46,
       timeFont: "",
       weight: 300,
       date: true,
       dateStyle: "long",
-      dateSeparator: "/",
+      dateSeparator: "•",
       datePt: 22,
       dateFont: "",
       glass: true,

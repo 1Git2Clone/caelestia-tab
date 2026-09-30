@@ -70,7 +70,9 @@ test("the Tree Style Tab sidebar follows the background's choices", async () => 
   const scheme = { mode: "dark", colours };
   const tint = tstStyle(scheme, tstOptions({ source: "colour", colour: "tertiary", dim: 80 }), null);
   assert.match(tint, /--tabbar-bg: color-mix\(in srgb, #00aa00 20%/);
-  const wall = tstStyle(scheme, tstOptions({ source: "wallpaper", dim: 30, blur: 4 }), "data:image/jpeg;base64,x");
+  // x and y seeded at 0 (today's default is -50, moved): this is testing the
+  // centring behaviour, not the default's own offset.
+  const wall = tstStyle(scheme, tstOptions({ source: "wallpaper", dim: 30, blur: 4, x: 0, y: 0 }), "data:image/jpeg;base64,x");
   assert.match(wall, /--tabbar-bg: transparent !important/);
   assert.match(wall, /url\("data:image\/jpeg;base64,x"\)/);
   assert.match(wall, /blur\(4px\)/);
@@ -79,5 +81,29 @@ test("the Tree Style Tab sidebar follows the background's choices", async () => 
   const moved = tstStyle(scheme, tstOptions({ source: "wallpaper", x: -100, y: 40 }), "data:image/jpeg;base64,x");
   assert.match(moved, /\) 0% 70% \/ cover/);
   assert.equal(tstOptions({ tint: false }).source, "none", "the old off switch still means off");
-  assert.deepEqual(tstOptions({ source: "tint", strength: 20, dim: 45 }), { source: "colour", colour: "primary", dim: 80, blur: 0, x: 0, y: 0 }, "an old tint's strength becomes its dim");
+  assert.deepEqual(
+    tstOptions({ source: "tint", strength: 20, dim: 45, colour: "primary", blur: 0, x: 0, y: 0 }),
+    { source: "colour", colour: "primary", dim: 80, blur: 0, x: 0, y: 0 },
+    "an old tint's strength becomes its dim",
+  );
+});
+
+test("the defaults are the maintainer's own setup: Tree Style Tab and the sites", async () => {
+  const { TREE_STYLE_TAB } = await import("../extension/src/treestyletab.ts");
+  assert.deepEqual(TREE_STYLE_TAB, { source: "wallpaper", colour: "surfaceContainerHighest", dim: 50, blur: 7, x: -50, y: 0 });
+
+  const { SITES } = await import("../extension/src/userstyles.ts");
+  assert.equal(SITES.enabled, true);
+  assert.deepEqual(SITES.off, []);
+  assert.equal(SITES.accent, "primary");
+  assert.deepEqual(
+    SITES.custom.map((c) => c.name).sort(),
+    ["Forgejo", "Navidome"].sort(),
+    "kept verbatim, typo and all",
+  );
+  assert.equal(SITES.overrides.mdbook.when, "#mdbook-body-container");
+  assert.equal(SITES.overrides.codeberg.css, "", "no override CSS of its own");
+  assert.equal(SITES.overrides["spotify-web"].domains, "");
+  const forgejoId = SITES.custom.find((c) => c.name === "Forgejo").id;
+  assert.match(SITES.overrides[forgejoId].domains, /git\.hu-tao\.dev/);
 });

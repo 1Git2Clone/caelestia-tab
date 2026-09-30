@@ -15,7 +15,10 @@
         `Recent activity: ${ACTIVITY}`,
       ].join("\n"),
       limit: 6,
-      private: true,
+      private: false,
+      // Superseded by `searches`' own activity line (see ACTIVITY above);
+      // kept as a harmless leftover of the settings this default is copied from.
+      activity: true,
       updated: "Updated at",
       today: "HH:mm",
       yesterday: "[yesterday], HH:mm",

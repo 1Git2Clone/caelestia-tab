@@ -60,14 +60,14 @@ export interface App {
 }
 
 export const DEFAULTS: Settings = {
-  font: "",
-  padding: { tied: true, x: 1.25, y: 1.25 },
+  font: "Rubik",
+  padding: { tied: true, x: 1.25, y: 2.5 },
   panel: "CtSettings",
-  background: { source: "wallpaper", colour: "surfaceContainer", dim: 20, blur: 0 },
+  background: { source: "wallpaper", colour: "surfaceContainer", dim: 70, blur: 0 },
   clock: {},
   toolbar: {},
   bookmarks: {},
-  menu: { open: false, tab: "", tabs: {} },
+  menu: { open: true, tab: "CtMedia", tabs: {} },
   sites: SITES,
   treeStyleTab: TREE_STYLE_TAB,
   css: "",
