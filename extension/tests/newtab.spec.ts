@@ -112,6 +112,24 @@ test("back from a component opened by the pen goes to the main settings, not one
   await expect(panel(page).getByRole("tablist")).toBeVisible();
 });
 
+test("opening a screen from Components slides up, back slides down, and later tab switches still slide sideways", async ({ page }) => {
+  await page.keyboard.press("Control+,");
+  await panel(page).getByRole("tab", { name: "Components" }).click();
+  await panel(page).getByRole("button", { name: "Clock and date" }).click();
+  await expect(title(page)).toHaveText("Clock and date");
+  const running = () => panel(page).evaluate((el) => el.getAnimations({ subtree: true }).length);
+  await expect.poll(running).toBeGreaterThan(0);
+
+  await page.getByTitle("Back to settings").click();
+  await expect(panel(page).getByRole("tablist")).toBeVisible();
+  await expect.poll(running).toBeGreaterThan(0);
+
+  // A tab switch right after that back must still slide sideways: it used to
+  // lose its intro for good after the first back (a stuck `noFly`).
+  await panel(page).getByRole("tab", { name: "Background" }).click();
+  await expect.poll(running).toBeGreaterThan(0);
+});
+
 test("edits survive a reload", async ({ page }) => {
   await page.getByTitle("Edit", { exact: true }).click();
   await page.getByTitle("Edit Clock and date").click();
@@ -496,12 +514,15 @@ test("the bookmarks' top line is optional, and its colour a setting", async ({ p
 });
 
 // From Settings › Components (not the page's pen, so app.editing stays off)
-// to the bookmarks' own Bookmarks screen.
+// to the bookmarks' own Bookmarks screen. The second "Bookmarks" (its screen
+// field, inside the editor the first click opens) is told apart from the
+// Components row of the same name by its hint, since the row's own outro can
+// still share the DOM with it for the opening screen's fly.
 async function openBookmarkList(page: Page) {
   await page.getByTitle("Settings", { exact: true }).click();
   await panel(page).getByRole("tab", { name: "Components" }).click();
   await panel(page).getByRole("button", { name: "Bookmarks", exact: true }).click();
-  await panel(page).getByRole("button", { name: "Bookmarks", exact: true }).click();
+  await panel(page).getByRole("button", { name: "Bookmarks", description: "Reorder them, or switch one off." }).click();
 }
 
 test("the bookmarks' list reorders by Alt+arrow or a drag, and reorders the page", async ({ page }) => {
@@ -526,6 +547,16 @@ test("the bookmarks' list reorders by Alt+arrow or a drag, and reorders the page
   await expect(page.locator(".ct-tile").nth(3)).toContainText("GitHub");
 });
 
+test("Alt+ArrowDown twice from the first row moves it two places, not back to where it started", async ({ page }) => {
+  await openBookmarkList(page);
+  const rows = panel(page).getByRole("listitem");
+  await rows.nth(0).getByRole("button", { name: /GitHub/ }).last().focus();
+  await page.keyboard.press("Alt+ArrowDown");
+  await page.keyboard.press("Alt+ArrowDown");
+  await expect(rows.nth(2)).toContainText("GitHub");
+  await expect(page.locator(".ct-tile").nth(2)).toContainText("GitHub");
+});
+
 test("switching a bookmark off hides its tile; dimHidden shows it dimmed only while editing", async ({ page }) => {
   await openBookmarkList(page);
   await panel(page).getByRole("switch", { name: "Show Wikipedia" }).uncheck();
@@ -541,6 +572,13 @@ test("switching a bookmark off hides its tile; dimHidden shows it dimmed only wh
   await expect(dimmed).toHaveCSS("opacity", "0.4");
   await page.getByTitle("Done editing").click();
   await expect(page.locator(".ct-tile", { hasText: "Wikipedia" })).toHaveCount(0);
+});
+
+test("clicking a bookmark row's padding, not the handle or the switch, opens it", async ({ page }) => {
+  await openBookmarkList(page);
+  // Just inside the row's own left padding, before the drag handle.
+  await panel(page).getByRole("listitem").first().click({ position: { x: 4, y: 4 } });
+  await expect(title(page)).toHaveText("GitHub");
 });
 
 test("back from a bookmark opened from the list returns to it, then Bookmarks, then Settings", async ({ page }) => {

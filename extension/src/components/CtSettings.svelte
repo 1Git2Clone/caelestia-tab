@@ -42,22 +42,10 @@
   // Svelte only intros a *local* transition for a block that changes after
   // its component has mounted, not for one already there on the first render.
   let focusDir = $state(1);
-  // Set for one render when the tabs reappear from an editor closing (a back
-  // to null, not a tab picked): that remount of the {#key tab} block below is
-  // an #if/:else branch swap, not a real tab change, so it gets no sideways
-  // fly of its own, only the vertical one the editor plays; a real tab switch
-  // right after still animates, since this clears itself straight after.
-  let noFly = $state(false);
   let prevFocus: App["focus"] = null;
   $effect.pre(() => {
-    if (focus !== prevFocus) {
-      focusDir = focus === null || focus === prevFocus?.back ? -1 : 1;
-      if (focus === null && prevFocus !== null) noFly = true;
-    }
+    if (focus !== prevFocus) focusDir = focus === null || focus === prevFocus?.back ? -1 : 1;
     prevFocus = focus;
-  });
-  $effect(() => {
-    noFly = false;
   });
 
   // The new tab's background and Tree Style Tab's sidebar take the same
@@ -176,44 +164,50 @@
     <h2 class="m-0 min-w-0 flex-1 truncate text-2xl font-normal">{title}</h2>
     <button type="button" class={iconButton} title="Close" onclick={() => ((app.focus = null), (app.panel = false))}><CtIcon name="close" /></button>
   </header>
-  {#if focus}
-    <!-- One grid cell, so the leaving screen and the one opening cross
-         without the panel jumping to the new one's height. -->
-    <div class="grid grid-cols-[minmax(0,1fr)]">
-      {#key focus}
-        <!-- The editor's props come from `focus`, not app.focus: closing an
-             editor nulls app.focus while its handler (a remove, say) is
-             still running. Svelte makes the leaving element inert on its own,
-             but aria-hidden is what actually drops it from a role query
-             while both it and the one opening share the DOM for the fly.
-             Going back and forth quickly (the list to a bookmark and back)
-             can reverse an outro into an intro on the same element rather
-             than swap in a fresh one, so the aria-hidden an earlier outro
-             left behind needs clearing on the way back in too. -->
-        <div
-          class="[grid-area:1/1]"
-          in:fly={{ y: 48 * focusDir, duration: ms(220), easing: cubicOut }}
-          out:fly={{ y: -48 * focusDir, duration: ms(220), easing: cubicOut }}
-          onintrostart={(e) => (e.currentTarget as HTMLElement).removeAttribute("aria-hidden")}
-          onoutrostart={(e) => (e.currentTarget as HTMLElement).setAttribute("aria-hidden", "true")}
-        >
-          <focus.component {...props} onclose={() => (app.focus = null)} />
-        </div>
-      {/key}
-    </div>
-  {:else}
-  <CtTabs tabs={["General", "Components", "Background", "Websites", "Browser", "Advanced"]} bind:current={tab} />
-
+  <!-- One grid cell, so the leaving screen (a focused editor, or the main
+       tabs) and the one opening cross without the panel jumping to the new
+       one's height. One `{#key focus}` layer around the whole {#if}/{:else}
+       below: Svelte only plays a *local* transition (this `fly`) when its
+       own direct block re-runs, and an {#if}/{:else} branch swap on its own
+       would recreate this block fresh each time rather than re-key it, so
+       nothing would play. Keeping the key outside the branch means a focus
+       change re-keys this same block, and the tabs' own {#key tab} below
+       ends up freshly mounted whenever the tabs reappear from an editor
+       closing, so it plays no sideways fly of its own on a back, only the
+       vertical one here. -->
   <div class="grid grid-cols-[minmax(0,1fr)]">
-    {#key tab}
-      <!-- Same crossing trick, sideways: mirrors the menu's own tabs. -->
+    {#key focus}
+      <!-- The editor's props come from `focus`, not app.focus: closing an
+           editor nulls app.focus while its handler (a remove, say) is
+           still running. Svelte makes the leaving element inert on its own,
+           but aria-hidden is what actually drops it from a role query
+           while both it and the one opening share the DOM for the fly.
+           Going back and forth quickly (the list to a bookmark and back)
+           can reverse an outro into an intro on the same element rather
+           than swap in a fresh one, so the aria-hidden an earlier outro
+           left behind needs clearing on the way back in too. -->
       <div
         class="[grid-area:1/1]"
-        in:fly={{ x: 48 * dir, duration: noFly ? 0 : ms(220), easing: cubicOut }}
-        out:fly={{ x: -48 * dir, duration: ms(220), easing: cubicOut }}
+        in:fly={{ y: 48 * focusDir, duration: ms(220), easing: cubicOut }}
+        out:fly={{ y: -48 * focusDir, duration: ms(220), easing: cubicOut }}
         onintrostart={(e) => (e.currentTarget as HTMLElement).removeAttribute("aria-hidden")}
         onoutrostart={(e) => (e.currentTarget as HTMLElement).setAttribute("aria-hidden", "true")}
       >
+        {#if focus}
+          <focus.component {...props} onclose={() => (app.focus = null)} />
+        {:else}
+          <CtTabs tabs={["General", "Components", "Background", "Websites", "Browser", "Advanced"]} bind:current={tab} />
+
+          <div class="grid grid-cols-[minmax(0,1fr)]">
+            {#key tab}
+              <!-- Same crossing trick, sideways: mirrors the menu's own tabs. -->
+              <div
+                class="[grid-area:1/1]"
+                in:fly={{ x: 48 * dir, duration: ms(220), easing: cubicOut }}
+                out:fly={{ x: -48 * dir, duration: ms(220), easing: cubicOut }}
+                onintrostart={(e) => (e.currentTarget as HTMLElement).removeAttribute("aria-hidden")}
+                onoutrostart={(e) => (e.currentTarget as HTMLElement).setAttribute("aria-hidden", "true")}
+              >
   {#if tab === 0}
     <div class="grid gap-4">
       <CtForm fields={[{ key: "font", label: "Font", type: "font", hint: "The whole page's, unless a part sets its own." }]} values={app.settings} />
@@ -353,8 +347,11 @@
       </div>
     </div>
   {/if}
+              </div>
+            {/key}
+          </div>
+        {/if}
       </div>
     {/key}
   </div>
-  {/if}
 </aside>

@@ -3,7 +3,7 @@
      its own controls focused). A row opens the same editor the tile's own
      Edit does, `back` to this list. -->
 <script lang="ts">
-  import { getContext } from "svelte";
+  import { getContext, tick } from "svelte";
   import { type App } from "../store.svelte.ts";
   import CtIcon from "./CtIcon.svelte";
   import { editItem } from "./widgets/CtBookmarks.svelte";
@@ -36,10 +36,12 @@
 </script>
 
 <div role="list" class="grid gap-1">
-  {#each order as idx, pos (idx)}
+  {#each order as idx, pos (settings.items[idx].id)}
     {@const it = settings.items[idx]}
     <!-- The keydown only notices Alt+arrows from whichever of the row's own
-         controls has focus; it doesn't make the row itself a control. -->
+         controls has focus; it doesn't make the row itself a control. The
+         click opens the bookmark from anywhere in the row but the handle
+         and the switch, which each already handle their own click. -->
     <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
     <div
       role="listitem"
@@ -55,15 +57,30 @@
         move(dragging, over);
         dragging = over = -1;
       }}
-      onkeydown={(e) => {
+      onkeydown={async (e) => {
         if (!e.altKey) return;
-        if (e.key === "ArrowUp") (e.preventDefault(), move(idx, idx - 1));
-        else if (e.key === "ArrowDown") (e.preventDefault(), move(idx, idx + 1));
+        if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
+        e.preventDefault();
+        // The moved row is keyed by id, so it's the same element afterwards,
+        // but Firefox blurs a focused element that a keyed each physically
+        // reorders; refocus it once the reorder's reached the DOM so a
+        // second Alt+arrow (or a screen reader user tabbing on) still lands
+        // on it, not the document.
+        const target = e.target as HTMLElement;
+        move(idx, e.key === "ArrowUp" ? idx - 1 : idx + 1);
+        await tick();
+        target.focus();
+      }}
+      onclick={(e) => {
+        if (!(e.target as HTMLElement).closest("[data-handle], button, input")) editItem(app, settings, idx, app.focus);
       }}
     >
+      <!-- Pointer-draggable only: Alt+arrows move it from the row's own
+           controls instead, so it's not a keyboard target. -->
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
       <span
-        role="button"
-        tabindex="0"
+        data-handle
+        tabindex="-1"
         class="grid cursor-grab place-items-center rounded-lg border-0 bg-transparent px-1.5 py-1 text-current hover:bg-[color-mix(in_srgb,var(--caelestia-primary)_15%,transparent)]"
         title="Drag to move"
         aria-label="Drag to move {it.name || 'this bookmark'}"
