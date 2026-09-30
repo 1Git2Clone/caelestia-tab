@@ -4,6 +4,7 @@
      pen, a bookmark. There are no pop-ups. -->
 <script lang="ts">
   import { getContext } from "svelte";
+  import { flip } from "svelte/animate";
   import { cubicOut } from "svelte/easing";
   import { fly } from "svelte/transition";
   import type { Field } from "../fields.ts";
@@ -370,7 +371,6 @@
           }}
         >
           <summary class="flex cursor-pointer items-center gap-2 rounded-xl px-3 py-1.5 hover:bg-surface-container-high">
-            <span class="min-w-0 flex-1 truncate">{s.name}</span>
             <!-- preventDefault: a click in a summary would open the site too. -->
             <button
               type="button"
@@ -380,6 +380,7 @@
               aria-pressed={starred(s.id)}
               onclick={(e) => (e.preventDefault(), e.stopPropagation(), star(s.id))}><CtIcon name={starred(s.id) ? "star" : "starOutline"} /></button
             >
+            <span class="min-w-0 flex-1 truncate">{s.name}</span>
             <input
               type="checkbox"
               class="m-0 size-4.5 accent-primary"
@@ -409,7 +410,7 @@
           />
         </h3>
         {#each shownCustom as s (s.id)}
-          {@render siteRow(s)}
+          <div animate:flip={{ duration: still ? 0 : 220, easing: cubicOut }}>{@render siteRow(s)}</div>
         {:else}
           {#if !typed}
             <p class="m-0 px-3 pb-1.5 {hint}">Type a name in the filter above to add one of your own.</p>
@@ -435,7 +436,7 @@
           />
         </h3>
         {#each shownVendored as s (s.id)}
-          {@render siteRow(s)}
+          <div animate:flip={{ duration: still ? 0 : 220, easing: cubicOut }}>{@render siteRow(s)}</div>
         {/each}
       </div>
     </div>

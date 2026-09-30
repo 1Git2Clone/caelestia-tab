@@ -14,7 +14,8 @@ empty *User-defined* section, which hints that typing a name in the filter
 adds one. Each section's heading has its own checkbox that switches every
 site in that section on or off at once (ticked when all of them are on,
 dashed when some are), whether or not the filter is hiding any of them.
-Each site's star keeps it at the top of its section: starred sites come
+Each site's star, left of its name, keeps it at the top of its section, the
+rows sliding to their new places: starred sites come
 first, alphabetically, then the rest, alphabetically.
 
 The names are caelestia's colour names in kebab case: `surfaceContainerHigh`

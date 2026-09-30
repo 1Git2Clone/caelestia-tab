@@ -908,6 +908,12 @@ test("a starred site sorts first in its section, then the rest alphabetically", 
   const before = await names();
   const third = before[2];
   await vendored.getByRole("button", { name: `Star ${third}`, exact: true }).click();
+  // The rows slide to their new places rather than jump.
+  expect(await vendored.evaluate((el) => el.getAnimations({ subtree: true }).length)).toBeGreaterThan(0);
+  // Left of its name: star, name, switch.
+  const row = vendored.locator("summary").filter({ hasText: third });
+  const [starX, nameX] = [await row.getByRole("button").boundingBox(), await row.locator("span").boundingBox()];
+  expect(starX!.x).toBeLessThan(nameX!.x);
   await expect(vendored.getByRole("button", { name: `Star ${third}`, exact: true })).toHaveAttribute("aria-pressed", "true");
   const after = await names();
   expect(after[0]).toBe(third);
