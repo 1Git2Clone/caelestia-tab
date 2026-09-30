@@ -27,7 +27,9 @@ go (see [Writing a menu tab](plugins.md)). *Predefined* holds ours as a tree,
 each part or group in its own box, the same gap between every box: the menu,
 with its tabs indented under it and marked with a line on their left, then
 the clock, the toolbar and the bookmarks, each in a box of its own. Each
-row's switch shows or hides it, greyed when off; the rest of the row opens its
+section's title has a switch that shows or hides everything in it at once
+(ticked when all of it shows, dashed when some does), and each row's switch
+shows or hides that one, greyed when off; the rest of the row opens its
 settings, the same form as its pen. While a tab's menu is hidden, its own
 switch is greyed and disabled too, though its setting is untouched (turn the
 menu back on and it's exactly as it was); the row still opens its settings.

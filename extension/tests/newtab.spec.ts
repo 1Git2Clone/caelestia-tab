@@ -883,3 +883,35 @@ test("Settings' tabs take as many columns as fit, in even rows", async ({ page }
     expect(right).toBeLessThanOrEqual(at.bar[1]);
   }
 });
+
+test("Predefined's switch hides and shows every part at once", async ({ page }) => {
+  await page.keyboard.press("Control+,");
+  await panel(page).getByRole("tab", { name: "Components" }).click();
+  const all = panel(page).getByRole("checkbox", { name: "Every predefined component" });
+  await all.uncheck();
+  await expect(page.locator(".ct-clock, .ct-bookmarks")).toHaveCount(0);
+  await expect(panel(page).getByRole("switch", { name: "Show Toolbar" })).not.toBeChecked();
+  // One back on: the section's switch is part-way.
+  await panel(page).getByRole("switch", { name: "Show Clock and date" }).check();
+  expect(await all.evaluate((el) => (el as HTMLInputElement).indeterminate)).toBe(true);
+  await all.check();
+  await expect(page.locator(".ct-clock")).toBeVisible();
+  await expect(panel(page).getByRole("switch", { name: "Show Toolbar" })).toBeChecked();
+});
+
+test("a starred site sorts first in its section, then the rest alphabetically", async ({ page }) => {
+  await page.keyboard.press("Control+,");
+  await panel(page).getByRole("tab", { name: "Websites" }).click();
+  const vendored = panel(page).locator(".ct-group").filter({ hasText: "catppuccin/userstyles" });
+  const names = async () => (await vendored.locator("summary").allInnerTexts()).map((n) => n.trim());
+  await expect.poll(async () => (await names()).length).toBeGreaterThan(3);
+  const before = await names();
+  const third = before[2];
+  await vendored.getByRole("button", { name: `Star ${third}`, exact: true }).click();
+  await expect(vendored.getByRole("button", { name: `Star ${third}`, exact: true })).toHaveAttribute("aria-pressed", "true");
+  const after = await names();
+  expect(after[0]).toBe(third);
+  expect(after.slice(1)).toEqual(before.filter((n) => n !== third));
+  const saved = (await page.evaluate(() => (window as any).browser.storage.local.get("settings"))).settings.sites.favourites;
+  expect(saved).toHaveLength(1);
+});

@@ -28,6 +28,8 @@ export interface Override {
 export const SITES = {
   enabled: true,
   off: [] as string[],
+  // Starred sites, listed first in their section.
+  favourites: [] as string[],
   accent: "primary",
   overrides: {
     codeberg: { css: "", domains: "", when: "" },

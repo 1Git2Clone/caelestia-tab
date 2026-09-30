@@ -108,8 +108,18 @@
   const typed = $derived(filter.trim());
   // User-defined on top, catppuccin/userstyles under it; the filter narrows
   // both, but a section's toggle-all always takes every site in it.
-  const shownCustom = $derived(app.settings.sites.custom.filter((s) => s.name.toLowerCase().includes(typed.toLowerCase())));
-  const shownVendored = $derived(styles.filter((s) => s.name.toLowerCase().includes(typed.toLowerCase())));
+  // Starred first, then the rest, each alphabetically.
+  const starred = (id: string) => app.settings.sites.favourites.includes(id);
+  const sorted = (list: { id: string; name: string }[]) =>
+    list
+      .filter((s) => s.name.toLowerCase().includes(typed.toLowerCase()))
+      .sort((a, b) => Number(starred(b.id)) - Number(starred(a.id)) || a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
+  const shownCustom = $derived(sorted(app.settings.sites.custom));
+  const shownVendored = $derived(sorted(styles));
+  function star(id: string) {
+    const f = app.settings.sites.favourites;
+    app.settings.sites.favourites = starred(id) ? f.filter((x) => x !== id) : [...f, id];
+  }
   const customIds = $derived(app.settings.sites.custom.map((s) => s.id));
   const vendoredIds = $derived(styles.map((s) => s.id));
   const mine = (id: string) => app.settings.sites.custom.some((s) => s.id === id);
@@ -154,6 +164,12 @@
   // already sorts them ours first), then the other parts, in placeables'
   // own order rather than the root each tab's `parent` points at.
   const list: Placeable[] = placeables.filter((c) => !c.parent).flatMap((r) => [r, ...placeables.filter((c) => c.parent === r.name)]);
+  // A section's switch shows or hides everything in it, like Websites'.
+  const yours = list.filter((c) => !c.ours);
+  const ours = list.filter((c) => c.ours);
+  const allShown = (cs: Placeable[]) => cs.length > 0 && cs.every((c) => !c.at(app.settings).hidden);
+  const anyShown = (cs: Placeable[]) => cs.some((c) => !c.at(app.settings).hidden);
+  const showAll = (cs: Placeable[], on: boolean) => cs.forEach((c) => (c.at(app.settings).hidden = !on));
   const parentOf = (c: Placeable): Placeable | undefined => (c.parent ? placeables.find((p) => p.name === c.parent) : undefined);
 
   const ALL = { origins: ["<all_urls>"] };
@@ -276,7 +292,19 @@
          part), so the menu's tabs read as its box's contents. -->
     <div class="grid gap-4">
       <section class="ct-section grid gap-1 rounded-2xl border border-solid border-outline-variant p-1" aria-labelledby="ct-components-yours">
-        <h3 id="ct-components-yours" class="m-0 px-3 py-1.5 text-xl font-medium">User-defined</h3>
+        <h3 id="ct-components-yours" class="m-0 flex items-center gap-2 px-3 py-1.5 text-xl font-medium">
+          <span class="min-w-0 flex-1 truncate">User-defined</span>
+          {#if yours.length}
+            <input
+              type="checkbox"
+              class="m-0 size-4.5 cursor-pointer accent-primary"
+              aria-label="Every user-defined component"
+              checked={allShown(yours)}
+              use:indeterminate={anyShown(yours) && !allShown(yours)}
+              onchange={(e) => showAll(yours, e.currentTarget.checked)}
+            />
+          {/if}
+        </h3>
         {#each list.filter((c) => !c.ours) as c (c.name)}
           {@render row(c)}
         {:else}
@@ -286,7 +314,19 @@
         {/each}
       </section>
       <section class="ct-section grid gap-2 rounded-2xl border border-solid border-outline-variant p-1" aria-labelledby="ct-components-ours">
-        <h3 id="ct-components-ours" class="m-0 px-3 py-1.5 text-xl font-medium">Predefined</h3>
+        <h3 id="ct-components-ours" class="m-0 flex items-center gap-2 px-3 py-1.5 text-xl font-medium">
+          <span class="min-w-0 flex-1 truncate">Predefined</span>
+          {#if ours.length}
+            <input
+              type="checkbox"
+              class="m-0 size-4.5 cursor-pointer accent-primary"
+              aria-label="Every predefined component"
+              checked={allShown(ours)}
+              use:indeterminate={anyShown(ours) && !allShown(ours)}
+              onchange={(e) => showAll(ours, e.currentTarget.checked)}
+            />
+          {/if}
+        </h3>
         {#each list.filter((c) => c.ours && !c.parent) as root (root.name)}
           <div class="ct-group grid gap-1 rounded-xl border border-solid border-outline-variant p-1">
             {#each [root, ...list.filter((c) => c.ours && c.parent === root.name)] as c (c.name)}
@@ -331,6 +371,15 @@
         >
           <summary class="flex cursor-pointer items-center gap-2 rounded-xl px-3 py-1.5 hover:bg-surface-container-high">
             <span class="min-w-0 flex-1 truncate">{s.name}</span>
+            <!-- preventDefault: a click in a summary would open the site too. -->
+            <button
+              type="button"
+              class="grid cursor-pointer place-items-center rounded-full border-0 bg-transparent p-0.5 text-lg text-primary"
+              title={starred(s.id) ? `Unstar ${s.name}` : `Star ${s.name}`}
+              aria-label="Star {s.name}"
+              aria-pressed={starred(s.id)}
+              onclick={(e) => (e.preventDefault(), e.stopPropagation(), star(s.id))}><CtIcon name={starred(s.id) ? "star" : "starOutline"} /></button
+            >
             <input
               type="checkbox"
               class="m-0 size-4.5 accent-primary"
