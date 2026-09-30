@@ -4,6 +4,17 @@ Every page gets the live scheme as CSS custom properties on `:root`, so your
 own Stylus styles and userscripts can follow caelestia as well as the bundled
 themes do.
 
+## Settings › Websites
+
+The fourth tab lists every site in two sections: *User-defined* (yours, see
+below) on top, then *catppuccin/userstyles* (the bundled ones) under it. The
+filter box above both narrows either section to sites whose name matches; a
+section with nothing left after filtering shows just its heading, except an
+empty *User-defined* section, which hints that typing a name in the filter
+adds one. Each section's heading has its own checkbox that switches every
+site in that section on or off at once (ticked when all of them are on,
+dashed when some are), whether or not the filter is hiding any of them.
+
 The names are caelestia's colour names in kebab case: `surfaceContainerHigh`
 becomes `--caelestia-surface-container-high`. The Material colours are all
 there (`primary`, `on-primary`, `primary-container`, `surface`, `outline` and

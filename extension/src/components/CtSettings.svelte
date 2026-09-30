@@ -100,8 +100,26 @@
     .then((r) => r.json())
     .then((index) => (styles = index.styles));
   const typed = $derived(filter.trim());
-  const shown = $derived([...styles, ...app.settings.sites.custom].filter((s) => s.name.toLowerCase().includes(typed.toLowerCase())));
+  // User-defined on top, catppuccin/userstyles under it; the filter narrows
+  // both, but a section's toggle-all always takes every site in it.
+  const shownCustom = $derived(app.settings.sites.custom.filter((s) => s.name.toLowerCase().includes(typed.toLowerCase())));
+  const shownVendored = $derived(styles.filter((s) => s.name.toLowerCase().includes(typed.toLowerCase())));
+  const customIds = $derived(app.settings.sites.custom.map((s) => s.id));
+  const vendoredIds = $derived(styles.map((s) => s.id));
   const mine = (id: string) => app.settings.sites.custom.some((s) => s.id === id);
+  const isOn = (id: string) => !app.settings.sites.off.includes(id);
+  const allOn = (ids: string[]) => ids.length > 0 && ids.every(isOn);
+  const anyOn = (ids: string[]) => ids.some(isOn);
+  function toggleAll(ids: string[], on: boolean) {
+    const off = app.settings.sites.off;
+    app.settings.sites.off = on ? off.filter((x) => !ids.includes(x)) : [...off, ...ids.filter((id) => !off.includes(id))];
+  }
+  // `indeterminate` is a DOM property, not an attribute Svelte can bind as a
+  // plain value; an action keeps it in sync with the derived expression.
+  function indeterminate(node: HTMLInputElement, value: boolean) {
+    node.indeterminate = value;
+    return { update: (v: boolean) => (node.indeterminate = v) };
+  }
   // The one open, to open a site just added.
   let expanded = $state("");
   // A site of your own, named as typed: added and opened.
@@ -287,33 +305,51 @@
         bind:value={filter}
         onkeydown={(e) => e.key === "Enter" && (e.preventDefault(), addSite())}
       />
+      {#snippet siteRow(s: { id: string; name: string })}
+        <details
+          class="rounded-xl open:bg-surface-container-high open:p-3"
+          open={expanded === s.id}
+          ontoggle={(e) => {
+            if (e.currentTarget.open) open(s.id);
+            else if (expanded === s.id) expanded = "";
+          }}
+        >
+          <summary class="flex cursor-pointer items-center gap-2 py-1">
+            <input
+              type="checkbox"
+              class="m-0 size-4.5 accent-primary"
+              checked={!app.settings.sites.off.includes(s.id)}
+              onclick={(e) => e.stopPropagation()}
+              onchange={(e) => toggle(s.id, e.currentTarget.checked)}
+            />
+            {s.name}
+          </summary>
+          {#if app.settings.sites.overrides[s.id]}
+            <div class="pt-3"><CtForm fields={mine(s.id) ? OWN : OVERRIDE} values={app.settings.sites.overrides[s.id]} /></div>
+          {/if}
+          {#if mine(s.id)}
+            <button type="button" class="{button} mt-3" onclick={() => removeSite(s.id)}>Remove this site</button>
+          {/if}
+        </details>
+      {/snippet}
       <div class="grid gap-1">
-        {#each shown as s (s.id)}
-          <details
-            class="rounded-xl open:bg-surface-container-high open:p-3"
-            open={expanded === s.id}
-            ontoggle={(e) => {
-              if (e.currentTarget.open) open(s.id);
-              else if (expanded === s.id) expanded = "";
-            }}
-          >
-            <summary class="flex cursor-pointer items-center gap-2 py-1">
-              <input
-                type="checkbox"
-                class="m-0 size-4.5 accent-primary"
-                checked={!app.settings.sites.off.includes(s.id)}
-                onclick={(e) => e.stopPropagation()}
-                onchange={(e) => toggle(s.id, e.currentTarget.checked)}
-              />
-              {s.name}
-            </summary>
-            {#if app.settings.sites.overrides[s.id]}
-              <div class="pt-3"><CtForm fields={mine(s.id) ? OWN : OVERRIDE} values={app.settings.sites.overrides[s.id]} /></div>
-            {/if}
-            {#if mine(s.id)}
-              <button type="button" class="{button} mt-3" onclick={() => removeSite(s.id)}>Remove this site</button>
-            {/if}
-          </details>
+        <h3 class="m-0 flex items-center gap-2 text-base font-medium">
+          <input
+            type="checkbox"
+            class="m-0 size-4.5 cursor-pointer accent-primary"
+            aria-label="Every user-defined site"
+            checked={allOn(customIds)}
+            use:indeterminate={anyOn(customIds) && !allOn(customIds)}
+            onchange={(e) => toggleAll(customIds, e.currentTarget.checked)}
+          />
+          User-defined
+        </h3>
+        {#each shownCustom as s (s.id)}
+          {@render siteRow(s)}
+        {:else}
+          {#if !typed}
+            <p class="m-0 {hint}">Type a name in the filter above to add one of your own.</p>
+          {/if}
         {/each}
         {#if typed}
           <!-- Enter in the filter does the same. -->
@@ -321,6 +357,22 @@
             <CtIcon name="add" />Add “{typed}”, a site of your own
           </button>
         {/if}
+      </div>
+      <div class="grid gap-1">
+        <h3 class="m-0 flex items-center gap-2 text-base font-medium">
+          <input
+            type="checkbox"
+            class="m-0 size-4.5 cursor-pointer accent-primary"
+            aria-label="Every catppuccin/userstyles site"
+            checked={allOn(vendoredIds)}
+            use:indeterminate={anyOn(vendoredIds) && !allOn(vendoredIds)}
+            onchange={(e) => toggleAll(vendoredIds, e.currentTarget.checked)}
+          />
+          catppuccin/userstyles
+        </h3>
+        {#each shownVendored as s (s.id)}
+          {@render siteRow(s)}
+        {/each}
       </div>
     </div>
   {:else if tab === 4}

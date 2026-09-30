@@ -80,6 +80,31 @@ test("Components: the menu's tabs share its box, Clock and date has its own", as
   await expect(menuGroup.getByRole("button", { name: "Clock and date" })).toHaveCount(0);
 });
 
+test("Websites: a section's toggle-all switches every site in it, and only that section", async ({ page }) => {
+  await page.getByTitle("Settings", { exact: true }).click();
+  await panel(page).getByRole("tab", { name: "Websites" }).click();
+  const filter = panel(page).getByRole("searchbox", { name: "Filter sites" });
+  await filter.fill("Navidrome");
+  await filter.press("Enter");
+  await filter.fill("");
+
+  const total = await page.evaluate(async () => (await (await fetch("/userstyles/index.json")).json()).styles.length);
+  const getSites = async () => (await page.evaluate(() => (window as any).browser.storage.local.get("settings"))).settings.sites;
+
+  const vendoredAll = panel(page).getByRole("checkbox", { name: "Every catppuccin/userstyles site" });
+  await vendoredAll.click();
+  await expect.poll(async () => (await getSites()).off.length).toBe(total);
+  expect((await getSites()).off).not.toContain((await getSites()).custom[0].id);
+
+  await vendoredAll.click();
+  await expect.poll(async () => (await getSites()).off.length).toBe(0);
+
+  const userAll = panel(page).getByRole("checkbox", { name: "Every user-defined site" });
+  await userAll.click();
+  const sites = await getSites();
+  expect(sites.off).toEqual([sites.custom[0].id]);
+});
+
 test("a site of your own is added from the filter, by Enter or its + row", async ({ page }) => {
   await page.getByTitle("Settings", { exact: true }).click();
   await panel(page).getByRole("tab", { name: "Websites" }).click();
