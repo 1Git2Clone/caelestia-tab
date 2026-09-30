@@ -20,19 +20,19 @@ shown takes its place.
 
 ## Settings › Components
 
-The second tab lists every placeable part as one tree, each part or group in
-its own rounded, bordered box, the same gap between every box: the menu,
-with its tabs indented under it and marked with a line on their left (ours
-first, then a user's, in the order the bar shows them), then the clock, the
-toolbar and the bookmarks, each in a box of its own. A user's own tab or part
-carries a small *yours* label. Each row's switch shows or hides it, greyed
-when off; the rest of the row opens its settings, the same form as its pen.
-While a tab's menu is hidden, its own switch is greyed and disabled too,
-though its setting is untouched (turn the menu back on and it's exactly as
-it was); the row still opens its settings. It's the only way to a hidden
-part's settings, and to a tab's while another covers it. When there are no
-components of your own, a note under the tree says where they go: see
-[Writing a menu tab](plugins.md).
+The second tab has two rounded, bordered sections, titled like Websites'.
+*User-defined* comes first: your own components, each a tab marked with a
+line on its left as the menu's, or, with none built in, a note on where they
+go (see [Writing a menu tab](plugins.md)). *Predefined* holds ours as a tree,
+each part or group in its own box, the same gap between every box: the menu,
+with its tabs indented under it and marked with a line on their left, then
+the clock, the toolbar and the bookmarks, each in a box of its own. Each
+row's switch shows or hides it, greyed when off; the rest of the row opens its
+settings, the same form as its pen. While a tab's menu is hidden, its own
+switch is greyed and disabled too, though its setting is untouched (turn the
+menu back on and it's exactly as it was); the row still opens its settings.
+It's the only way to a hidden part's settings, and to a tab's while another
+covers it.
 
 ## Page
 

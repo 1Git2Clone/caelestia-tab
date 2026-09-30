@@ -775,8 +775,11 @@ test("with the bookmarks hidden, the clock sits at the page's dead centre and th
 test("Settings › Components lists every part as a tree, toggles them and opens their settings", async ({ page }) => {
   await page.keyboard.press("Control+,");
   await panel(page).getByRole("tab", { name: "Components" }).click();
-  // The user's tab is under the menu, like ours, but carries the "yours" label.
-  await expect(panel(page).getByRole("button", { name: "Hello" })).toContainText("yours");
+  // The user's tab is in User-defined, still marked as the menu's; ours in Predefined.
+  const section = (name: string) => panel(page).getByRole("region", { name });
+  await expect(section("User-defined").getByRole("switch", { name: "Show Hello" })).toBeVisible();
+  await expect(section("Predefined").getByRole("switch", { name: "Show Hello" })).toHaveCount(0);
+  await expect(section("Predefined").getByRole("switch", { name: "Show GitHub" })).toBeVisible();
   const clock = panel(page).getByRole("switch", { name: "Show Clock and date" });
   await clock.uncheck();
   await expect(page.locator(".ct-clock")).toHaveCount(0);

@@ -252,38 +252,49 @@
          parent (the menu, for a tab) is hidden, its own toggle is greyed and
          disabled too, though its value is untouched; the row still opens
          its settings. -->
-    <div class="grid gap-2">
-      <!-- One box per root (the menu, or a lone part), so the menu's tabs
-           read as its box's contents rather than boxes of their own. -->
-      {#each list.filter((c) => !c.parent) as root (root.name)}
-        <div class="ct-group grid gap-1 rounded-xl border border-solid border-outline-variant p-1">
-          {#each [root, ...list.filter((c) => c.parent === root.name)] as c (c.name)}
-            {@const parentHidden = !!parentOf(c)?.at(app.settings).hidden}
-            <div class="flex items-center gap-2 rounded-xl px-3 py-1.5 hover:bg-surface-container-high {c.parent ? 'ml-4 border-0 border-l-2 border-solid border-primary pl-3' : ''}">
-              <button
-                type="button"
-                class="min-w-0 flex-1 cursor-pointer truncate border-0 bg-transparent py-1 text-left text-base {c.at(app.settings).hidden || parentHidden ? 'text-on-surface-variant/60' : 'text-on-surface'}"
-                onclick={() => edit(app, c.label, CtPartEditor, () => ({ info: c.info, values: c.at(app.settings) }))}
-                >{c.label} {#if !c.ours}<span class="rounded-full bg-surface-container-highest px-2 py-0.5 text-xs">yours</span>{/if}</button
-              >
-              <input
-                type="checkbox"
-                role="switch"
-                class="m-0 size-4.5 accent-primary {parentHidden ? '' : 'cursor-pointer'}"
-                aria-label="Show {c.label}"
-                checked={!c.at(app.settings).hidden}
-                disabled={parentHidden}
-                onchange={(e) => (c.at(app.settings).hidden = !e.currentTarget.checked)}
-              />
-            </div>
-          {/each}
-        </div>
-      {/each}
-      {#if placeables.every((c) => c.ours)}
-        <p class="m-0 {hint}">
-          None yet. Yours go in <code>~/.config/caelestia-tab/components/</code>, then <code>npm run --prefix extension build</code>: see the handbook's Plugins guide.
-        </p>
-      {/if}
+    {#snippet row(c: Placeable)}
+      {@const parentHidden = !!parentOf(c)?.at(app.settings).hidden}
+      <div class="flex items-center gap-2 rounded-xl px-3 py-1.5 hover:bg-surface-container-high {c.parent ? 'ml-4 border-0 border-l-2 border-solid border-primary pl-3' : ''}">
+        <button
+          type="button"
+          class="min-w-0 flex-1 cursor-pointer truncate border-0 bg-transparent py-1 text-left text-base {c.at(app.settings).hidden || parentHidden ? 'text-on-surface-variant/60' : 'text-on-surface'}"
+          onclick={() => edit(app, c.label, CtPartEditor, () => ({ info: c.info, values: c.at(app.settings) }))}>{c.label}</button
+        >
+        <input
+          type="checkbox"
+          role="switch"
+          class="m-0 size-4.5 accent-primary {parentHidden ? '' : 'cursor-pointer'}"
+          aria-label="Show {c.label}"
+          checked={!c.at(app.settings).hidden}
+          disabled={parentHidden}
+          onchange={(e) => (c.at(app.settings).hidden = !e.currentTarget.checked)}
+        />
+      </div>
+    {/snippet}
+    <!-- Yours on top, like Websites' own sites; each still marked as the
+         menu's while it's a tab. Ours: one box per root (the menu, or a lone
+         part), so the menu's tabs read as its box's contents. -->
+    <div class="grid gap-4">
+      <section class="ct-section grid gap-1 rounded-2xl border border-solid border-outline-variant p-1" aria-labelledby="ct-components-yours">
+        <h3 id="ct-components-yours" class="m-0 px-3 py-1.5 text-xl font-medium">User-defined</h3>
+        {#each list.filter((c) => !c.ours) as c (c.name)}
+          {@render row(c)}
+        {:else}
+          <p class="m-0 px-3 pb-1.5 {hint}">
+            None yet. Yours go in <code>~/.config/caelestia-tab/components/</code>, then <code>npm run --prefix extension build</code>: see the handbook's Plugins guide.
+          </p>
+        {/each}
+      </section>
+      <section class="ct-section grid gap-2 rounded-2xl border border-solid border-outline-variant p-1" aria-labelledby="ct-components-ours">
+        <h3 id="ct-components-ours" class="m-0 px-3 py-1.5 text-xl font-medium">Predefined</h3>
+        {#each list.filter((c) => c.ours && !c.parent) as root (root.name)}
+          <div class="ct-group grid gap-1 rounded-xl border border-solid border-outline-variant p-1">
+            {#each [root, ...list.filter((c) => c.ours && c.parent === root.name)] as c (c.name)}
+              {@render row(c)}
+            {/each}
+          </div>
+        {/each}
+      </section>
     </div>
   {:else if tab === 2}
     <CtForm fields={BACKGROUND} values={app.settings.background} />
