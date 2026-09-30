@@ -67,7 +67,7 @@ export const DEFAULTS: Settings = {
   clock: {},
   toolbar: {},
   bookmarks: {},
-  menu: { open: true, tab: "CtMedia", tabs: {} },
+  menu: { open: false, tab: "CtGitHub", tabs: {} },
   sites: SITES,
   treeStyleTab: TREE_STYLE_TAB,
   css: "",

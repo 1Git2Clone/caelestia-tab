@@ -14,10 +14,10 @@ const SCHEME = {
 
 const STORAGE_KEY = "__caelestia_tab_storage";
 
-// Today's defaults are the maintainer's own setup (five hidden bookmarks, the
-// menu open on Media): most of this suite was written against the settings
-// that shipped before that change (four shown bookmarks, the menu closed on
-// load), and is testing that behaviour, not which values are the defaults.
+// Today's defaults are the maintainer's own setup (ten bookmarks, five to a
+// row): most of this suite was written against the settings that shipped
+// before that change (four shown bookmarks), and is testing that behaviour,
+// not which values are the defaults.
 // Seeded once, before the page's first load, so those tests don't need
 // rewriting around a fixture that isn't the point of what they check; a
 // test after real defaults (see "the defaults are the maintainer's own
@@ -530,16 +530,11 @@ test("settings from when the page was a grid of widgets keep each part's", async
   await page.evaluate(async () => {
     await (window as any).browser.storage.local.set({
       settings: {
-        // The menu's own default now opens on load (today's default): this
-        // test is about the old widget-grid shape migrating, not that.
-        menu: { open: false, tab: "", tabs: {} },
         layout: { areas: '"toolbar" "clock" "bookmarks"' },
         widgets: [
           { id: "toolbar", component: "CtToolbar", place: {}, settings: { settings: true, edit: true, actions: true } },
           { id: "clock", component: "CtClock", place: {}, settings: { timeSeparator: "~" } },
-          // hidden: false — today's default bookmarks are hidden; this test
-          // is about the old widget-grid shape migrating, not that.
-          { id: "bookmarks", component: "CtBookmarks", place: {}, settings: { hidden: false, items: [{ id: "a", name: "Kept", url: "", colour: "primary", showName: true, width: 1, height: 1 }] } },
+          { id: "bookmarks", component: "CtBookmarks", place: {}, settings: { items: [{ id: "a", name: "Kept", url: "", colour: "primary", showName: true, width: 1, height: 1 }] } },
         ],
       },
     });
