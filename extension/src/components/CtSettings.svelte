@@ -26,6 +26,12 @@
   const props = $derived(typeof focus?.props === "function" ? focus.props() : focus?.props);
   const ms = (n: number) => (still ? 0 : n);
 
+  // aria-hidden goes on the leaving screen the moment its outro starts, not
+  // in onoutrostart (which Svelte only fires after the transition's delay,
+  // by when Playwright's already seen both screens as visible — inert alone
+  // doesn't hide them from a role query).
+  const leave = (n: Element, p: Parameters<typeof fly>[1]) => (n.setAttribute("aria-hidden", "true"), fly(n, p));
+
   // Which way the six tabs slide: from where the picked one sits relative to
   // the last (mirrors CtMenu's tabs).
   let dir = $state(1);
@@ -207,9 +213,8 @@
       <div
         class="[grid-area:1/1]"
         in:fly={{ y: 48 * focusDir, duration: ms(220), easing: cubicOut }}
-        out:fly={{ y: -48 * focusDir, duration: ms(220), easing: cubicOut }}
+        out:leave={{ y: -48 * focusDir, duration: ms(220), easing: cubicOut }}
         onintrostart={(e) => (e.currentTarget as HTMLElement).removeAttribute("aria-hidden")}
-        onoutrostart={(e) => (e.currentTarget as HTMLElement).setAttribute("aria-hidden", "true")}
       >
         {#if focus}
           <focus.component {...props} onclose={() => (app.focus = null)} />
@@ -222,9 +227,8 @@
               <div
                 class="[grid-area:1/1]"
                 in:fly={{ x: 48 * dir, duration: ms(220), easing: cubicOut }}
-                out:fly={{ x: -48 * dir, duration: ms(220), easing: cubicOut }}
+                out:leave={{ x: -48 * dir, duration: ms(220), easing: cubicOut }}
                 onintrostart={(e) => (e.currentTarget as HTMLElement).removeAttribute("aria-hidden")}
-                onoutrostart={(e) => (e.currentTarget as HTMLElement).setAttribute("aria-hidden", "true")}
               >
   {#if tab === 0}
     <div class="grid gap-4">
