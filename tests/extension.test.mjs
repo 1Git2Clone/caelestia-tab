@@ -65,7 +65,7 @@ test("bookmarks saved as CSS strings load as numbers, and junk as the defaults",
 });
 
 test("the Tree Style Tab sidebar follows the background's choices", async () => {
-  const { tstStyle, tstOptions } = await import("../extension/src/treestyletab.ts");
+  const { tstStyle, tstOptions, TREE_STYLE_TAB } = await import("../extension/src/treestyletab.ts");
   const colours = new Proxy({}, { get: (_, n) => ({ primary: "aa0000", tertiary: "00aa00" })[n] ?? "111111" });
   const scheme = { mode: "dark", colours };
   const tint = tstStyle(scheme, tstOptions({ source: "colour", colour: "tertiary", dim: 80 }), null);
@@ -82,9 +82,9 @@ test("the Tree Style Tab sidebar follows the background's choices", async () => 
   assert.match(moved, /\) 0% 70% \/ cover/);
   assert.equal(tstOptions({ tint: false }).source, "none", "the old off switch still means off");
   assert.deepEqual(
-    tstOptions({ source: "tint", strength: 20, dim: 45, colour: "primary", blur: 0, x: 0, y: 0 }),
-    { source: "colour", colour: "primary", dim: 80, blur: 0, x: 0, y: 0 },
-    "an old tint's strength becomes its dim",
+    tstOptions({ source: "tint", strength: 20 }),
+    { ...TREE_STYLE_TAB, source: "colour", dim: 80 },
+    "an old tint's strength becomes its dim, the rest from the defaults",
   );
 });
 

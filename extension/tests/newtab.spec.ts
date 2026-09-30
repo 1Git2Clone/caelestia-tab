@@ -167,6 +167,19 @@ test("Websites: a section's toggle-all switches every site in it, and only that 
   await vendoredAll.click();
   await expect.poll(async () => (await getSites()).off.length).toBe(0);
 
+  // One vendored site off, not all: the section's own toggle is neither
+  // checked nor unchecked.
+  await panel(page)
+    .locator("summary", { hasText: "Advent Of Code" })
+    .locator('input[type="checkbox"]')
+    .click();
+  await expect(vendoredAll).toHaveJSProperty("indeterminate", true);
+  await panel(page)
+    .locator("summary", { hasText: "Advent Of Code" })
+    .locator('input[type="checkbox"]')
+    .click();
+  await expect(vendoredAll).toHaveJSProperty("indeterminate", false);
+
   const userAll = panel(page).getByRole("checkbox", { name: "Every user-defined site" });
   await userAll.click();
   const sites = await getSites();
