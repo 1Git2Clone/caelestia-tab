@@ -70,6 +70,16 @@ test("a field only shows when it applies", async ({ page }) => {
   await expect(panel(page).getByRole("slider", { name: /^Blur/ })).toHaveCount(0);
 });
 
+test("Components: the menu's tabs share its box, Clock and date has its own", async ({ page }) => {
+  await page.getByTitle("Settings", { exact: true }).click();
+  await panel(page).getByRole("tab", { name: "Components" }).click();
+  const group = (name: string) => panel(page).locator(".ct-group").filter({ has: page.getByRole("button", { name, exact: true }) });
+  const menuGroup = group("Menu");
+  await expect(menuGroup.getByRole("button", { name: "GitHub" })).toBeVisible();
+  await expect(menuGroup.getByRole("button", { name: "Media" })).toBeVisible();
+  await expect(menuGroup.getByRole("button", { name: "Clock and date" })).toHaveCount(0);
+});
+
 test("a site of your own is added from the filter, by Enter or its + row", async ({ page }) => {
   await page.getByTitle("Settings", { exact: true }).click();
   await panel(page).getByRole("tab", { name: "Websites" }).click();
