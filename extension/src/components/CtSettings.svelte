@@ -311,14 +311,15 @@
       />
       {#snippet siteRow(s: { id: string; name: string })}
         <details
-          class="rounded-xl open:bg-surface-container-high open:p-3"
+          class="rounded-xl open:bg-surface-container-high open:pb-3 [&>:not(summary)]:mx-3"
           open={expanded === s.id}
           ontoggle={(e) => {
             if (e.currentTarget.open) open(s.id);
             else if (expanded === s.id) expanded = "";
           }}
         >
-          <summary class="flex cursor-pointer items-center gap-2 py-1">
+          <summary class="flex cursor-pointer items-center gap-2 rounded-xl px-3 py-1.5 hover:bg-surface-container-high">
+            <span class="min-w-0 flex-1 truncate">{s.name}</span>
             <input
               type="checkbox"
               class="m-0 size-4.5 accent-primary"
@@ -326,7 +327,6 @@
               onclick={(e) => e.stopPropagation()}
               onchange={(e) => toggle(s.id, e.currentTarget.checked)}
             />
-            {s.name}
           </summary>
           {#if app.settings.sites.overrides[s.id]}
             <div class="pt-3"><CtForm fields={mine(s.id) ? OWN : OVERRIDE} values={app.settings.sites.overrides[s.id]} /></div>
@@ -336,8 +336,9 @@
           {/if}
         </details>
       {/snippet}
-      <div class="grid gap-1">
-        <h3 class="m-0 flex items-center gap-2 text-base font-medium">
+      <div class="ct-group grid gap-1 rounded-2xl border border-solid border-outline-variant p-1">
+        <h3 class="m-0 flex items-center gap-2 px-3 py-1.5 text-xl font-medium">
+          <span class="min-w-0 flex-1 truncate">User-defined</span>
           <input
             type="checkbox"
             class="m-0 size-4.5 cursor-pointer accent-primary"
@@ -346,13 +347,12 @@
             use:indeterminate={anyOn(customIds) && !allOn(customIds)}
             onchange={(e) => toggleAll(customIds, e.currentTarget.checked)}
           />
-          User-defined
         </h3>
         {#each shownCustom as s (s.id)}
           {@render siteRow(s)}
         {:else}
           {#if !typed}
-            <p class="m-0 {hint}">Type a name in the filter above to add one of your own.</p>
+            <p class="m-0 px-3 pb-1.5 {hint}">Type a name in the filter above to add one of your own.</p>
           {/if}
         {/each}
         {#if typed}
@@ -362,8 +362,9 @@
           </button>
         {/if}
       </div>
-      <div class="grid gap-1">
-        <h3 class="m-0 flex items-center gap-2 text-base font-medium">
+      <div class="ct-group grid gap-1 rounded-2xl border border-solid border-outline-variant p-1">
+        <h3 class="m-0 flex items-center gap-2 px-3 py-1.5 text-xl font-medium">
+          <span class="min-w-0 flex-1 truncate">catppuccin/userstyles</span>
           <input
             type="checkbox"
             class="m-0 size-4.5 cursor-pointer accent-primary"
@@ -372,7 +373,6 @@
             use:indeterminate={anyOn(vendoredIds) && !allOn(vendoredIds)}
             onchange={(e) => toggleAll(vendoredIds, e.currentTarget.checked)}
           />
-          catppuccin/userstyles
         </h3>
         {#each shownVendored as s (s.id)}
           {@render siteRow(s)}
