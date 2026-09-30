@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bookmarks: the grid's settings are numbers now (a flow switch, a count, row height and gap in rem) rather than CSS strings; older settings are carried over.
 - Hidden bookmarks, or none, give the menu the whole page; in edit mode an empty list stays on the page for its pen box.
 - *Websites* in Settings: split into *User-defined* and *catppuccin/userstyles* sections, each with a toggle-all checkbox (ticked when every site in it is on, dashed when some are) that switches the whole section at once, whether or not the filter is hiding some of its sites.
+- The clock centres on the menu's whole section now, not the space under the bar, so it no longer sits above the page's true centre when the bookmarks are hidden or empty.
 
 ### Removed
 

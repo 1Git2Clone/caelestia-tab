@@ -146,8 +146,15 @@
   {/if}
 
   {#if !open && !app.settings.clock.hidden}
-    <div class="grid min-h-0 flex-1 place-items-center" in:fade={{ duration: ms(200), delay: ms(120) }}>
-      <div class="ct-part relative">
+    <!-- Centred on the whole section, not the space under the bar: padded by
+         the bar's own height on both sides so the clock's centre is the
+         section's centre, not riding up under the bar on a short page. -->
+    <div
+      class="pointer-events-none absolute inset-0 grid place-items-center py-(--bar)"
+      style:--bar="{bar}px"
+      in:fade={{ duration: ms(200), delay: ms(120) }}
+    >
+      <div class="ct-part relative pointer-events-auto">
         <CtClock settings={app.settings.clock} />
         {#if app.editing}<CtEditOverlay info={parts.clock} at={(s) => s.clock} />{/if}
       </div>

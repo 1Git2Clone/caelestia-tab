@@ -58,12 +58,14 @@ object as JSON as well.
 The page is fixed (`CtLayout`): the menu's section above the bookmarks. The
 section (`CtMenu`) has a bar along its top, with the menu button and the
 menu's tabs on one side and the toolbar (`CtToolbar`: the bookmarks' +, the
-pen, settings) on the other, and under the bar the clock. Opened, the menu is
-a panel over the whole section, growing out of the menu button (and shrinking
-back into it), with the open tab under the bar; the clock isn't drawn while
-it's covered. Switching tabs slides the new one in from the side its button
-is on. Whether the menu is open, and on which tab, is saved, so a new tab
-opens as the last one was left.
+pen, settings) on the other, and the clock centred on the section as a whole
+(not the space under the bar, so it stays at the section's true centre
+whatever the bar's height). Opened, the menu is a panel over the whole
+section, growing out of the menu button (and shrinking back into it), with
+the open tab under the bar; the clock isn't drawn while it's covered.
+Switching tabs slides the new one in from the side its button is on. Whether
+the menu is open, and on which tab, is saved, so a new tab opens as the last
+one was left.
 
 The toolbar's `side` puts it on the right (the tabs on the left), the left
 (the tabs on the right, mirrored so the menu button stays at the edge) or in

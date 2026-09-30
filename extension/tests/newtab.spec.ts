@@ -663,6 +663,27 @@ test("with no bookmarks the menu fills the page, but edit mode keeps their pen b
   await expect(page.getByTitle("Edit Bookmarks")).toBeVisible();
 });
 
+test("with the bookmarks hidden, the clock sits at the page's dead centre and the bar stays clickable", async ({ page }) => {
+  await page.evaluate(async () => {
+    const store = (window as any).browser.storage.local;
+    const settings = (await store.get("settings")).settings ?? {};
+    settings.bookmarks = { ...settings.bookmarks, hidden: true };
+    await store.set({ settings });
+  });
+  await page.reload();
+  await expect(page.locator(".ct-bookmarks")).toHaveCount(0);
+  const box = (await page.locator(".ct-clock").boundingBox())!;
+  const viewport = page.viewportSize()!;
+  expect(Math.abs(box.x + box.width / 2 - viewport.width / 2)).toBeLessThanOrEqual(2);
+  expect(Math.abs(box.y + box.height / 2 - viewport.height / 2)).toBeLessThanOrEqual(2);
+  // Centring the clock over the whole section must not steal clicks from the
+  // bar above it.
+  await menuButton(page).click();
+  await expect(tabButton(page, "Media")).toBeVisible();
+  await page.getByTitle("Settings", { exact: true }).click();
+  await expect(panel(page)).toBeVisible();
+});
+
 test("Settings › Components lists every part as a tree, toggles them and opens their settings", async ({ page }) => {
   await page.keyboard.press("Control+,");
   await panel(page).getByRole("tab", { name: "Components" }).click();
