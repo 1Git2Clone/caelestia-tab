@@ -94,9 +94,11 @@ jobs:
         env:
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          code=$(curl -sS -o reply -w '%{http_code}' -H "Authorization: token $TOKEN" \
-            "$GITHUB_SERVER_URL/api/v1/repos/$GITHUB_REPOSITORY/releases?limit=1")
-          [ "$code" = 200 ] || { echo "release API answered $code:" >&2; cat reply >&2; exit 1; }
+          url=$GITHUB_SERVER_URL/api/v1/repos/$GITHUB_REPOSITORY/releases?limit=1
+          code=$(curl -sS -D headers -o reply -w '%{http_code}' -H "Authorization: token $TOKEN" "$url")
+          # The headers too: Server and the like say who refused (Caddy,
+          # Forgejo, or something in front), which a bare 403 doesn't.
+          [ "$code" = 200 ] || { echo "GET $url answered $code:" >&2; cat headers reply >&2; exit 1; }
 
       - name: Publish
         if: env.DRY != 'true'
