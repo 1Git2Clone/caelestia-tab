@@ -1,10 +1,14 @@
 name: CI
 
+# Docs-only changes skip it: pages.yml builds the handbook, and nothing here
+# reads Markdown.
 on:
   push:
     branches: ["main"]
+    paths-ignore: ["docs/**", "**.md"]
   pull_request:
     branches: ["main"]
+    paths-ignore: ["docs/**", "**.md"]
   workflow_dispatch:
 
 # Cancel superseded runs when a branch is pushed repeatedly.
@@ -22,7 +26,9 @@ concurrency:
 # A job's nix store starts empty, so each job downloads its shell again: .#ci,
 # the dev shell less the UI tests' 2.2 GiB of browsers, for all but those
 # tests. And the runner takes two jobs at a time, so fmt, clippy and test are
-# one job, paying for the toolchain once.
+# one job, paying for the toolchain once, and the flake build is nix.yml's,
+# run only when the packaging changes: two jobs here fill the runner, a third
+# queued behind them.
 jobs:
   rust:
     runs-on: nix-node
@@ -70,13 +76,3 @@ jobs:
       # needs no installed browser or home directory.
       - name: playwright
         run: nix develop -c npm run --prefix extension test
-
-  nix:
-    runs-on: nix-node
-    steps:
-      - uses: actions/checkout@v7.0.1
-      # Builds the helper the way a flake user gets it, manifest included.
-      - run: nix build -L .#default && test -s result/lib/mozilla/native-messaging-hosts/caelestia_tab.json
-      # No end-to-end test here: nixpkgs' Firefox wrapper refuses to build
-      # without a home directory ("home directory /homeless-shelter exists"),
-      # which the runner doesn't have. .githooks/pre-push runs it locally.
