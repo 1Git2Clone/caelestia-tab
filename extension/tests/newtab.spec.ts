@@ -234,19 +234,34 @@ test("back from a component opened by the pen goes to the main settings, not one
 test("opening a screen from Components slides up, back slides down, and later tab switches still slide sideways", async ({ page }) => {
   await page.keyboard.press("Control+,");
   await panel(page).getByRole("tab", { name: "Components" }).click();
+  // Svelte's transitions go through Element.animate, so count its calls in the
+  // panel: polling getAnimations() misses a 220ms slide on a loaded runner.
+  await panel(page).evaluate(() => {
+    const animate = Element.prototype.animate;
+    const w = window as unknown as { __slides: number };
+    w.__slides = 0;
+    Element.prototype.animate = function (...args) {
+      if (this.closest(".ct-settings")) w.__slides++;
+      return animate.apply(this, args);
+    };
+  });
+  const slides = () => page.evaluate(() => (window as unknown as { __slides: number }).__slides);
+
+  let before = await slides();
   await panel(page).getByRole("button", { name: "Clock and date" }).click();
   await expect(title(page)).toHaveText("Clock and date");
-  const running = () => panel(page).evaluate((el) => el.getAnimations({ subtree: true }).length);
-  await expect.poll(running).toBeGreaterThan(0);
+  await expect.poll(slides).toBeGreaterThan(before);
 
+  before = await slides();
   await page.getByTitle("Back to settings").click();
   await expect(panel(page).getByRole("tablist")).toBeVisible();
-  await expect.poll(running).toBeGreaterThan(0);
+  await expect.poll(slides).toBeGreaterThan(before);
 
   // A tab switch right after that back must still slide sideways: it used to
   // lose its intro for good after the first back (a stuck `noFly`).
+  before = await slides();
   await panel(page).getByRole("tab", { name: "Background" }).click();
-  await expect.poll(running).toBeGreaterThan(0);
+  await expect.poll(slides).toBeGreaterThan(before);
 });
 
 test("edits survive a reload", async ({ page }) => {
