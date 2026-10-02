@@ -2,14 +2,18 @@
      describes it (aria-describedby), and a slider's value sits beside it, so
      assistive tech, and tests, find a field by its label alone. -->
 <script lang="ts">
+  import { getContext } from "svelte";
   import type { Field } from "../fields.ts";
+  import { edit, type App } from "../store.svelte.ts";
   import { button, hint, input } from "../ui.ts";
   import CtColour from "./CtColour.svelte";
   import CtFontPicker from "./CtFontPicker.svelte";
   import CtGlyphPicker from "./CtGlyphPicker.svelte";
+  import CtIcon from "./CtIcon.svelte";
   import CtImage from "./CtImage.svelte";
 
   let { field, values }: { field: Field; values: Record<string, any> } = $props();
+  const app = getContext<App>("ct");
   const uid = $props.id();
   const described = $derived(field.hint ? `${uid}-hint` : undefined);
 </script>
@@ -24,6 +28,22 @@
     <div class="flex flex-wrap gap-2">
       {#each field.presets as p (p.label)}
         <button type="button" class={button} onclick={() => Object.assign(values, structuredClone(p.values))}>{p.label}</button>
+      {/each}
+    </div>
+    {@render note(field.hint)}
+  </div>
+{:else if field.type === "switch"}
+  <div class="grid gap-1.5">
+    <span id="{uid}-label">{field.label}</span>
+    <div class="inline-flex w-fit gap-1 rounded-3xl bg-surface-container-highest p-1" role="radiogroup" aria-labelledby="{uid}-label" aria-describedby={described}>
+      {#each field.options as [value, label] (value)}
+        <button
+          type="button"
+          role="radio"
+          aria-checked={values[field.key] === value}
+          class="cursor-pointer rounded-full border-0 px-4 py-2 {values[field.key] === value ? 'bg-primary text-on-primary' : 'bg-transparent text-on-surface'}"
+          onclick={() => (values[field.key] = value)}>{label}</button
+        >
       {/each}
     </div>
     {@render note(field.hint)}
@@ -72,6 +92,18 @@
   <CtGlyphPicker label={field.label} hint={field.hint} words={field.words?.(values) ?? []} bind:value={values[field.key]} />
 {:else if field.type === "font"}
   <CtFontPicker label={field.label} hint={field.hint} bind:value={values[field.key]} />
+{:else if field.type === "screen"}
+  <div class="grid gap-1.5">
+    <button
+      type="button"
+      class="{button} flex w-full items-center justify-between gap-2 text-left"
+      aria-describedby={described}
+      onclick={() => edit(app, field.label, field.component, () => field.props(app), app.focus)}
+    >
+      {field.label}<CtIcon name="right" />
+    </button>
+    {@render note(field.hint)}
+  </div>
 {:else}
   <div class="grid gap-1.5">
     <label for={uid}>{field.label}</label>

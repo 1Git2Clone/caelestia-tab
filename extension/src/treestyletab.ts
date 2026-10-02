@@ -12,11 +12,11 @@ const TST = "treestyletab@piro.sakura.ne.jp";
 // background, blurred and moved off centre (x and y, -100 to 100); none
 // leaves TST alone.
 export const TREE_STYLE_TAB = {
-  source: "colour" as "colour" | "wallpaper" | "none",
-  colour: "primary",
-  dim: 86,
-  blur: 0,
-  x: 0,
+  source: "wallpaper" as "colour" | "wallpaper" | "none",
+  colour: "surfaceContainerHighest",
+  dim: 50,
+  blur: 7,
+  x: -50,
   y: 0,
 };
 

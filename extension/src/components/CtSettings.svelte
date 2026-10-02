@@ -4,14 +4,17 @@
      pen, a bookmark. There are no pop-ups. -->
 <script lang="ts">
   import { getContext } from "svelte";
+  import { flip } from "svelte/animate";
   import { cubicOut } from "svelte/easing";
   import { fly } from "svelte/transition";
   import type { Field } from "../fields.ts";
   import { COLOURS } from "../scheme.ts";
-  import { complete, DEFAULTS, type App } from "../store.svelte.ts";
+  import { complete, DEFAULTS, edit, type App } from "../store.svelte.ts";
   import { button, hint, iconButton, input, primary } from "../ui.ts";
+  import { placeables, type Placeable } from "../widgets.ts";
   import CtForm from "./CtForm.svelte";
   import CtIcon from "./CtIcon.svelte";
+  import CtPartEditor from "./CtPartEditor.svelte";
   import CtTabs from "./CtTabs.svelte";
 
   const app = getContext<App>("ct");
@@ -22,6 +25,35 @@
   const focus = $derived(app.focus);
   const title = $derived(typeof focus?.title === "function" ? focus.title() || "Untitled" : (focus?.title ?? "Settings"));
   const props = $derived(typeof focus?.props === "function" ? focus.props() : focus?.props);
+  const ms = (n: number) => (still ? 0 : n);
+
+  // aria-hidden goes on the leaving screen the moment its outro starts, not
+  // in onoutrostart (which Svelte only fires after the transition's delay,
+  // by when Playwright's already seen both screens as visible — inert alone
+  // doesn't hide them from a role query).
+  const leave = (n: Element, p: Parameters<typeof fly>[1]) => (n.setAttribute("aria-hidden", "true"), fly(n, p));
+
+  // Which way the six tabs slide: from where the picked one sits relative to
+  // the last (mirrors CtMenu's tabs).
+  let dir = $state(1);
+  let prevTab = 0;
+  $effect.pre(() => {
+    if (tab !== prevTab) dir = tab > prevTab ? 1 : -1;
+    prevTab = tab;
+  });
+
+  // Which way a focused screen slides: up to open one (whether over the main
+  // tabs or another screen, the panel already open), down for back, whether
+  // to `back` or, unset, to the main tabs. A fresh mount (a pen opening the
+  // panel with a screen already focused) plays no transition here at all:
+  // Svelte only intros a *local* transition for a block that changes after
+  // its component has mounted, not for one already there on the first render.
+  let focusDir = $state(1);
+  let prevFocus: App["focus"] = null;
+  $effect.pre(() => {
+    if (focus !== prevFocus) focusDir = focus === null || focus === prevFocus?.back ? -1 : 1;
+    prevFocus = focus;
+  });
 
   // The new tab's background and Tree Style Tab's sidebar take the same
   // choices; `none` is what "no background of ours" means for each.
@@ -75,8 +107,36 @@
     .then((r) => r.json())
     .then((index) => (styles = index.styles));
   const typed = $derived(filter.trim());
-  const shown = $derived([...styles, ...app.settings.sites.custom].filter((s) => s.name.toLowerCase().includes(typed.toLowerCase())));
+  // User-defined on top, catppuccin/userstyles under it; the filter narrows
+  // both, but a section's toggle-all always takes every site in it.
+  // Starred first, then the rest, each alphabetically.
+  const starred = (id: string) => app.settings.sites.favourites.includes(id);
+  const sorted = (list: { id: string; name: string }[]) =>
+    list
+      .filter((s) => s.name.toLowerCase().includes(typed.toLowerCase()))
+      .sort((a, b) => Number(starred(b.id)) - Number(starred(a.id)) || a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
+  const shownCustom = $derived(sorted(app.settings.sites.custom));
+  const shownVendored = $derived(sorted(styles));
+  function star(id: string) {
+    const f = app.settings.sites.favourites;
+    app.settings.sites.favourites = starred(id) ? f.filter((x) => x !== id) : [...f, id];
+  }
+  const customIds = $derived(app.settings.sites.custom.map((s) => s.id));
+  const vendoredIds = $derived(styles.map((s) => s.id));
   const mine = (id: string) => app.settings.sites.custom.some((s) => s.id === id);
+  const isOn = (id: string) => !app.settings.sites.off.includes(id);
+  const allOn = (ids: string[]) => ids.length > 0 && ids.every(isOn);
+  const anyOn = (ids: string[]) => ids.some(isOn);
+  function toggleAll(ids: string[], on: boolean) {
+    const off = app.settings.sites.off;
+    app.settings.sites.off = on ? off.filter((x) => !ids.includes(x)) : [...off, ...ids.filter((id) => !off.includes(id))];
+  }
+  // `indeterminate` is a DOM property, not an attribute Svelte can bind as a
+  // plain value; an action keeps it in sync with the derived expression.
+  function indeterminate(node: HTMLInputElement, value: boolean) {
+    node.indeterminate = value;
+    return { update: (v: boolean) => (node.indeterminate = v) };
+  }
   // The one open, to open a site just added.
   let expanded = $state("");
   // A site of your own, named as typed: added and opened.
@@ -100,6 +160,18 @@
     const off = app.settings.sites.off;
     app.settings.sites.off = on ? off.filter((x) => x !== id) : [...off, id];
   }
+
+  // One list, a tree: the menu, then its tabs indented under it (`tabs`
+  // already sorts them ours first), then the other parts, in placeables'
+  // own order rather than the root each tab's `parent` points at.
+  const list: Placeable[] = placeables.filter((c) => !c.parent).flatMap((r) => [r, ...placeables.filter((c) => c.parent === r.name)]);
+  // A section's switch shows or hides everything in it, like Websites'.
+  const yours = list.filter((c) => !c.ours);
+  const ours = list.filter((c) => c.ours);
+  const allShown = (cs: Placeable[]) => cs.length > 0 && cs.every((c) => !c.at(app.settings).hidden);
+  const anyShown = (cs: Placeable[]) => cs.some((c) => !c.at(app.settings).hidden);
+  const showAll = (cs: Placeable[], on: boolean) => cs.forEach((c) => (c.at(app.settings).hidden = !on));
+  const parentOf = (c: Placeable): Placeable | undefined => (c.parent ? placeables.find((p) => p.name === c.parent) : undefined);
 
   const ALL = { origins: ["<all_urls>"] };
   let allowed: boolean | null = $state(null);
@@ -128,26 +200,146 @@
 >
   <header class="mb-4 flex items-center gap-2">
     {#if app.focus}
-      <button type="button" class={iconButton} title="Back to settings" onclick={() => (app.focus = null)}><CtIcon name="left" /></button>
+      <button type="button" class={iconButton} title="Back to settings" onclick={() => (app.focus = app.focus?.back ?? null)}><CtIcon name="left" /></button>
     {/if}
     <h2 class="m-0 min-w-0 flex-1 truncate text-2xl font-normal">{title}</h2>
     <button type="button" class={iconButton} title="Close" onclick={() => ((app.focus = null), (app.panel = false))}><CtIcon name="close" /></button>
   </header>
-  {#if focus}
-    <!-- The editor's props come from `focus`, not app.focus: closing an editor
-         nulls app.focus while its handler (a remove, say) is still running. -->
-    <focus.component {...props} onclose={() => (app.focus = null)} />
-  {:else}
-  <CtTabs tabs={["General", "Background", "Websites", "Browser", "Advanced"]} bind:current={tab} />
+  <!-- One grid cell, so the leaving screen (a focused editor, or the main
+       tabs) and the one opening cross without the panel jumping to the new
+       one's height. One `{#key focus}` layer around the whole {#if}/{:else}
+       below: Svelte only plays a *local* transition (this `fly`) when its
+       own direct block re-runs, and an {#if}/{:else} branch swap on its own
+       would recreate this block fresh each time rather than re-key it, so
+       nothing would play. Keeping the key outside the branch means a focus
+       change re-keys this same block, and the tabs' own {#key tab} below
+       ends up freshly mounted whenever the tabs reappear from an editor
+       closing, so it plays no sideways fly of its own on a back, only the
+       vertical one here. -->
+  <div class="grid grid-cols-[minmax(0,1fr)]">
+    {#key focus}
+      <!-- The editor's props come from `focus`, not app.focus: closing an
+           editor nulls app.focus while its handler (a remove, say) is
+           still running. Svelte makes the leaving element inert on its own,
+           but aria-hidden is what actually drops it from a role query
+           while both it and the one opening share the DOM for the fly.
+           Going back and forth quickly (the list to a bookmark and back)
+           can reverse an outro into an intro on the same element rather
+           than swap in a fresh one, so the aria-hidden an earlier outro
+           left behind needs clearing on the way back in too. -->
+      <div
+        class="[grid-area:1/1]"
+        in:fly={{ y: 48 * focusDir, duration: ms(220), easing: cubicOut }}
+        out:leave={{ y: -48 * focusDir, duration: ms(220), easing: cubicOut }}
+        onintrostart={(e) => (e.currentTarget as HTMLElement).removeAttribute("aria-hidden")}
+      >
+        {#if focus}
+          <focus.component {...props} onclose={() => (app.focus = null)} />
+        {:else}
+          <CtTabs tabs={["General", "Components", "Background", "Websites", "Browser", "Advanced"]} bind:current={tab} />
 
+          <div class="grid grid-cols-[minmax(0,1fr)]">
+            {#key tab}
+              <!-- Same crossing trick, sideways: mirrors the menu's own tabs. -->
+              <div
+                class="[grid-area:1/1]"
+                in:fly={{ x: 48 * dir, duration: ms(220), easing: cubicOut }}
+                out:leave={{ x: -48 * dir, duration: ms(220), easing: cubicOut }}
+                onintrostart={(e) => (e.currentTarget as HTMLElement).removeAttribute("aria-hidden")}
+              >
   {#if tab === 0}
     <div class="grid gap-4">
       <CtForm fields={[{ key: "font", label: "Font", type: "font", hint: "The whole page's, unless a part sets its own." }]} values={app.settings} />
-      <p class="m-0 {hint}">The clock, the toolbar, the bookmarks and each of the menu's tabs are edited from the page: turn on the pen and pick one.</p>
+      <CtForm
+        fields={[
+          { key: "tied", label: "Same on every side", type: "checkbox" },
+          { key: "x", label: "Padding", type: "range", min: 0, max: 6, step: 0.25, unit: "rem", when: (v) => v.tied },
+          { key: "x", label: "Horizontal", type: "range", min: 0, max: 6, step: 0.25, unit: "rem", when: (v) => !v.tied },
+          { key: "y", label: "Vertical", type: "range", min: 0, max: 6, step: 0.25, unit: "rem", when: (v) => !v.tied },
+        ]}
+        values={app.settings.padding}
+      />
+      <p class="m-0 {hint}">
+        The clock, the toolbar, the bookmarks, the menu and each of its tabs are edited from the page (turn on the pen and pick one) or from Components.
+      </p>
     </div>
   {:else if tab === 1}
-    <CtForm fields={BACKGROUND} values={app.settings.background} />
+    <!-- A row's toggle shows or hides it; the rest of the row opens its
+         settings, the pen's form. Hidden rows are greyed. While a row's
+         parent (the menu, for a tab) is hidden, its own toggle is greyed and
+         disabled too, though its value is untouched; the row still opens
+         its settings. -->
+    {#snippet row(c: Placeable)}
+      {@const parentHidden = !!parentOf(c)?.at(app.settings).hidden}
+      <div class="flex items-center gap-2 rounded-xl px-3 py-1.5 hover:bg-surface-container-high {c.parent ? 'ml-4 border-0 border-l-2 border-solid border-primary pl-3' : ''}">
+        <button
+          type="button"
+          class="min-w-0 flex-1 cursor-pointer truncate border-0 bg-transparent py-1 text-left text-base {c.at(app.settings).hidden || parentHidden ? 'text-on-surface-variant/60' : 'text-on-surface'}"
+          onclick={() => edit(app, c.label, CtPartEditor, () => ({ info: c.info, values: c.at(app.settings) }))}>{c.label}</button
+        >
+        <input
+          type="checkbox"
+          role="switch"
+          class="m-0 size-4.5 accent-primary {parentHidden ? '' : 'cursor-pointer'}"
+          aria-label="Show {c.label}"
+          checked={!c.at(app.settings).hidden}
+          disabled={parentHidden}
+          onchange={(e) => (c.at(app.settings).hidden = !e.currentTarget.checked)}
+        />
+      </div>
+    {/snippet}
+    <!-- Yours on top, like Websites' own sites; each still marked as the
+         menu's while it's a tab. Ours: one box per root (the menu, or a lone
+         part), so the menu's tabs read as its box's contents. -->
+    <div class="grid gap-4">
+      <section class="ct-section grid gap-1 rounded-2xl border border-solid border-outline-variant p-1" aria-labelledby="ct-components-yours">
+        <h3 id="ct-components-yours" class="m-0 flex items-center gap-2 px-3 py-1.5 text-xl font-medium">
+          <span class="min-w-0 flex-1 truncate">User-defined</span>
+          {#if yours.length}
+            <input
+              type="checkbox"
+              class="m-0 size-4.5 cursor-pointer accent-primary"
+              aria-label="Every user-defined component"
+              checked={allShown(yours)}
+              use:indeterminate={anyShown(yours) && !allShown(yours)}
+              onchange={(e) => showAll(yours, e.currentTarget.checked)}
+            />
+          {/if}
+        </h3>
+        {#each list.filter((c) => !c.ours) as c (c.name)}
+          {@render row(c)}
+        {:else}
+          <p class="m-0 px-3 pb-1.5 {hint}">
+            None yet. Yours go in <code>~/.config/caelestia-tab/components/</code>, then <code>npm run --prefix extension build</code>: see the handbook's Plugins guide.
+          </p>
+        {/each}
+      </section>
+      <section class="ct-section grid gap-2 rounded-2xl border border-solid border-outline-variant p-1" aria-labelledby="ct-components-ours">
+        <h3 id="ct-components-ours" class="m-0 flex items-center gap-2 px-3 py-1.5 text-xl font-medium">
+          <span class="min-w-0 flex-1 truncate">Predefined</span>
+          {#if ours.length}
+            <input
+              type="checkbox"
+              class="m-0 size-4.5 cursor-pointer accent-primary"
+              aria-label="Every predefined component"
+              checked={allShown(ours)}
+              use:indeterminate={anyShown(ours) && !allShown(ours)}
+              onchange={(e) => showAll(ours, e.currentTarget.checked)}
+            />
+          {/if}
+        </h3>
+        {#each list.filter((c) => c.ours && !c.parent) as root (root.name)}
+          <div class="ct-group grid gap-1 rounded-xl border border-solid border-outline-variant p-1">
+            {#each [root, ...list.filter((c) => c.ours && c.parent === root.name)] as c (c.name)}
+              {@render row(c)}
+            {/each}
+          </div>
+        {/each}
+      </section>
+    </div>
   {:else if tab === 2}
+    <CtForm fields={BACKGROUND} values={app.settings.background} />
+  {:else if tab === 3}
     <div class="grid gap-4">
       <p class="m-0">
         Recolours sites with catppuccin/userstyles, compiled against the live scheme. Your own Stylus styles and userscripts get the same colours as
@@ -169,33 +361,60 @@
         bind:value={filter}
         onkeydown={(e) => e.key === "Enter" && (e.preventDefault(), addSite())}
       />
-      <div class="grid gap-1">
-        {#each shown as s (s.id)}
-          <details
-            class="rounded-xl open:bg-surface-container-high open:p-3"
-            open={expanded === s.id}
-            ontoggle={(e) => {
-              if (e.currentTarget.open) open(s.id);
-              else if (expanded === s.id) expanded = "";
-            }}
-          >
-            <summary class="flex cursor-pointer items-center gap-2 py-1">
-              <input
-                type="checkbox"
-                class="m-0 size-4.5 accent-primary"
-                checked={!app.settings.sites.off.includes(s.id)}
-                onclick={(e) => e.stopPropagation()}
-                onchange={(e) => toggle(s.id, e.currentTarget.checked)}
-              />
-              {s.name}
-            </summary>
-            {#if app.settings.sites.overrides[s.id]}
-              <div class="pt-3"><CtForm fields={mine(s.id) ? OWN : OVERRIDE} values={app.settings.sites.overrides[s.id]} /></div>
-            {/if}
-            {#if mine(s.id)}
-              <button type="button" class="{button} mt-3" onclick={() => removeSite(s.id)}>Remove this site</button>
-            {/if}
-          </details>
+      {#snippet siteRow(s: { id: string; name: string })}
+        <details
+          class="rounded-xl open:bg-surface-container-high open:pb-3 [&>:not(summary)]:mx-3"
+          open={expanded === s.id}
+          ontoggle={(e) => {
+            if (e.currentTarget.open) open(s.id);
+            else if (expanded === s.id) expanded = "";
+          }}
+        >
+          <summary class="flex cursor-pointer items-center gap-2 rounded-xl px-3 py-1.5 hover:bg-surface-container-high">
+            <!-- preventDefault: a click in a summary would open the site too. -->
+            <button
+              type="button"
+              class="grid cursor-pointer place-items-center rounded-full border-0 bg-transparent p-0.5 text-lg text-primary"
+              title={starred(s.id) ? `Unstar ${s.name}` : `Star ${s.name}`}
+              aria-label="Star {s.name}"
+              aria-pressed={starred(s.id)}
+              onclick={(e) => (e.preventDefault(), e.stopPropagation(), star(s.id))}><CtIcon name={starred(s.id) ? "star" : "starOutline"} /></button
+            >
+            <span class="min-w-0 flex-1 truncate">{s.name}</span>
+            <input
+              type="checkbox"
+              class="m-0 size-4.5 accent-primary"
+              checked={!app.settings.sites.off.includes(s.id)}
+              onclick={(e) => e.stopPropagation()}
+              onchange={(e) => toggle(s.id, e.currentTarget.checked)}
+            />
+          </summary>
+          {#if app.settings.sites.overrides[s.id]}
+            <div class="pt-3"><CtForm fields={mine(s.id) ? OWN : OVERRIDE} values={app.settings.sites.overrides[s.id]} /></div>
+          {/if}
+          {#if mine(s.id)}
+            <button type="button" class="{button} mt-3" onclick={() => removeSite(s.id)}>Remove this site</button>
+          {/if}
+        </details>
+      {/snippet}
+      <div class="ct-group grid gap-1 rounded-2xl border border-solid border-outline-variant p-1">
+        <h3 class="m-0 flex items-center gap-2 px-3 py-1.5 text-xl font-medium">
+          <span class="min-w-0 flex-1 truncate">User-defined</span>
+          <input
+            type="checkbox"
+            class="m-0 size-4.5 cursor-pointer accent-primary"
+            aria-label="Every user-defined site"
+            checked={allOn(customIds)}
+            use:indeterminate={anyOn(customIds) && !allOn(customIds)}
+            onchange={(e) => toggleAll(customIds, e.currentTarget.checked)}
+          />
+        </h3>
+        {#each shownCustom as s (s.id)}
+          <div animate:flip={{ duration: still ? 0 : 220, easing: cubicOut }}>{@render siteRow(s)}</div>
+        {:else}
+          {#if !typed}
+            <p class="m-0 px-3 pb-1.5 {hint}">Type a name in the filter above to add one of your own.</p>
+          {/if}
         {/each}
         {#if typed}
           <!-- Enter in the filter does the same. -->
@@ -204,8 +423,24 @@
           </button>
         {/if}
       </div>
+      <div class="ct-group grid gap-1 rounded-2xl border border-solid border-outline-variant p-1">
+        <h3 class="m-0 flex items-center gap-2 px-3 py-1.5 text-xl font-medium">
+          <span class="min-w-0 flex-1 truncate">catppuccin/userstyles</span>
+          <input
+            type="checkbox"
+            class="m-0 size-4.5 cursor-pointer accent-primary"
+            aria-label="Every catppuccin/userstyles site"
+            checked={allOn(vendoredIds)}
+            use:indeterminate={anyOn(vendoredIds) && !allOn(vendoredIds)}
+            onchange={(e) => toggleAll(vendoredIds, e.currentTarget.checked)}
+          />
+        </h3>
+        {#each shownVendored as s (s.id)}
+          <div animate:flip={{ duration: still ? 0 : 220, easing: cubicOut }}>{@render siteRow(s)}</div>
+        {/each}
+      </div>
     </div>
-  {:else if tab === 3}
+  {:else if tab === 4}
     <h3 class="mt-0 text-lg font-medium">Tree Style Tab</h3>
     <p>Themes Tree Style Tab's sidebar like the new tab's background, and follows scheme switches live. Needs Tree Style Tab installed; nothing happens without it.</p>
     <CtForm fields={TST} values={app.settings.treeStyleTab} />
@@ -235,5 +470,11 @@
       </div>
     </div>
   {/if}
-  {/if}
+              </div>
+            {/key}
+          </div>
+        {/if}
+      </div>
+    {/key}
+  </div>
 </aside>

@@ -21,9 +21,10 @@
   const Panel = $derived(components[app.settings.panel] ?? CtSettings);
 
   function keydown(e: KeyboardEvent) {
-    // Escape steps back out of an editor first, then closes the panel.
+    // Escape steps back out of an editor first, then closes the panel: the
+    // same step the back arrow takes (CtSettings).
     if (e.key === "Escape") {
-      if (app.focus) app.focus = null;
+      if (app.focus) app.focus = app.focus.back ?? null;
       else app.panel = false;
     }
     // Settings are reachable even with no toolbar on the page.

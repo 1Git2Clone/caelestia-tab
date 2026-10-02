@@ -5,7 +5,41 @@ and the toolbar; the clock under it; and the bookmarks at the bottom. Open the
 menu and its tab covers the clock (see
 [The new tab](../architecture/newtab.md#the-page)). Everything is edited from
 the page: turn on the pen and pick a part (the toolbar, the clock, the
-bookmarks, or the open tab) for its settings in the side panel.
+bookmarks, or the open tab) for its settings in the side panel. The menu has
+its own pen box too: on the button while it's closed, on the whole panel
+while it's open.
+
+## Hiding
+
+Hide is the last option in every part's and tab's pen. Hiding the menu takes
+the button and the panel, not the clock (which shows in its place, as it does
+while the menu is simply closed); the toolbar's own Hide warns that Ctrl+,
+still opens Settings without it, and Components there shows it again. A
+hidden tab leaves the bar, and if it was the open one, the first tab still
+shown takes its place.
+
+## Settings › Components
+
+The second tab has two rounded, bordered sections, titled like Websites'.
+*User-defined* comes first: your own components, each a tab marked with a
+line on its left as the menu's, or, with none built in, a note on where they
+go (see [Writing a menu tab](plugins.md)). *Predefined* holds ours as a tree,
+each part or group in its own box, the same gap between every box: the menu,
+with its tabs indented under it and marked with a line on their left, then
+the clock, the toolbar and the bookmarks, each in a box of its own. Each
+section's title has a switch that shows or hides everything in it at once
+(ticked when all of it shows, dashed when some does), and each row's switch
+shows or hides that one, greyed when off; the rest of the row opens its
+settings, the same form as its pen. While a tab's menu is hidden, its own
+switch is greyed and disabled too, though its setting is untouched (turn the
+menu back on and it's exactly as it was); the row still opens its settings.
+It's the only way to a hidden part's settings, and to a tab's while another
+covers it.
+
+## Page
+
+The padding round the page: tied by default at 1.25rem on every side, or
+untied into *Horizontal* and *Vertical*, in *Settings*, *General*.
 
 ## Toolbar
 
@@ -21,9 +55,24 @@ glass behind it can be turned off.
 
 ## Bookmarks
 
-Tiles on a CSS grid you define, or in even rows, each with a line under it in
-the colour that goes with the tile's, one of your own, or none. See
+Tiles on a grid: rows or columns (a preset, or a switch), how many of the
+other axis, row height and gap in rem, gaps filled as tiles are added. Each
+tile has a line under it in the colour that goes with the tile's, one of your
+own, or none. Floating (the default), the grid sits rounded like the menu,
+with the page's padding under it; docked, it's flush with the window's
+bottom edge, no padding below it. A line along its top edge, on by default, in
+a colour of its own; the top corners stay rounded either way. Hidden, or with
+no bookmarks, the menu takes the whole page; in edit mode an empty list stays
+on the page so its pen box can add one. See
 [The new tab](../architecture/newtab.md#bookmarks).
+
+Its own *Bookmarks* screen lists every one, in order: its glyph or letters,
+its name, and a switch to show or hide it, off leaving no tile on the page
+(none shown at all gives the menu the whole page too). Reorder by dragging a
+row's handle, or Alt+Up/Down with the row's own controls focused. A row opens
+the same editor its tile's own Edit does. *Show hidden bookmarks while
+editing* keeps hidden ones on the page while editing, dimmed, their edit bar
+still working, off by default.
 
 ## The menu's tabs
 

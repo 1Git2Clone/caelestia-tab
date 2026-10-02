@@ -47,9 +47,11 @@ export), which is how the pen edits them too.
 - The whole app state, `getContext<App>("ct")` (see
   [The new tab](../architecture/newtab.md#state)): the helper's data in
   `app.data`, `tell()` for a command to a helper plugin, and
-  `edit(app, title, component, props)` from `store.svelte.ts` for an editor of
-  your own in the side panel. The editor gets an `onclose` prop. There are no
-  pop-ups: an editor changes the settings directly, so the page shows it live.
+  `edit(app, title, component, props, back?)` from `store.svelte.ts` for an
+  editor of your own in the side panel; `back` is the screen its back arrow
+  returns to, unset for the main settings. The editor gets an `onclose` prop.
+  There are no pop-ups: an editor changes the settings directly, so the page
+  shows it live.
 
 The tab fills the panel under the bar and scrolls when it's taller; a
 `h-full` root can divide the height itself, as Media does.
@@ -60,8 +62,11 @@ The tab fills the panel under the bar and scrolls when it's taller; a
 `number`, `textarea`, `select`, `range`, `colour` (a scheme colour or a fixed
 one), `font` (a font-family, with the installed fonts offered), `image` (a URL
 or an upload), `glyph` (a Nerd Font glyph, with
-suggestions for the words its `words(values)` returns) and `presets` (buttons
-that set several keys at once). Any field can take `when: (values) => boolean`
+suggestions for the words its `words(values)` returns), `presets` (buttons
+that set several keys at once), `switch` (two-way, `options: [value, label][]`
+of exactly two) and `screen` (a full-width row that opens another component in
+the side panel, over this one, with `back` here).
+Any field can take `when: (values) => boolean`
 to show only when it applies, like a colour only when the source is a colour.
 `CtForm` draws them, bound to an object, and works inside your own components
 too.
@@ -91,8 +96,12 @@ npm run --prefix extension build
 ```
 
 Every `.svelte` file there is compiled with ours. One that exports `tab` is a
-menu tab; the rest are components your tabs import
-(`import Card from "./Card.svelte"`).
+menu tab, and gets Hide for free, last in its own pen, like every part of the
+page; once built in, it's also a row under *User-defined* in Settings › Components,
+above caelestia-tab's own. The rest are components your tabs import
+(`import Card from "./Card.svelte"`); a component that exports neither
+`widget` nor `tab` is a building block for others, with no pen, no Hide and no
+row in Settings › Components.
 They reach ours through `$ct`: `$ct/fields.ts`, `$ct/store.svelte.ts` (`tell`,
 `edit`, the `App` type), `$ct/components/CtIcon.svelte`,
 `$ct/components/CtMarquee.svelte` and so on. Style them

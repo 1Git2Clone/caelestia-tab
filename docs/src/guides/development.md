@@ -33,7 +33,8 @@ and `target/` in the Actions cache.
 │   │   ├── components/     # Ct* components; widgets/ holds the widgets
 │   │   ├── fields.ts       # the settings API: field types, WidgetInfo
 │   │   ├── widgets.ts      # finds every widget component
-│   │   ├── layout.ts       # even rows, window-edge detection
+│   │   ├── layout.ts       # window-edge detection
+│   │   ├── bookmarks.ts    # migrates older bookmark grid settings
 │   │   ├── background.ts   # helper connection, site theme injection
 │   │   ├── render.ts       # the new tab for svelte/server
 │   │   ├── scheme.ts       # the scheme as CSS variables, colour tokens

@@ -3,6 +3,7 @@
 // every other tab's change (and the helper's) arrives here, so open tabs stay
 // in step with each other and with caelestia.
 import type { Component } from "svelte";
+import { bookmarkOptions } from "./bookmarks.ts";
 import { stable } from "./json.ts";
 import { tstOptions, TREE_STYLE_TAB } from "./treestyletab.ts";
 import type { Scheme } from "./types.ts";
@@ -12,6 +13,9 @@ import { parts, tabs } from "./widgets.ts";
 export interface Settings {
   // The page's font, CSS font-family; empty for the default.
   font: string;
+  // The page's padding, rem: `x` left and right, `y` top and bottom, or
+  // `x` all round while tied.
+  padding: { tied: boolean; x: number; y: number };
   // The component that draws the settings panel.
   panel: string;
   background: { source: "wallpaper" | "colour" | "none"; colour: string; dim: number; blur: number };
@@ -22,7 +26,8 @@ export interface Settings {
   bookmarks: Record<string, any>;
   // Whether the menu is open and on which tab (kept, so a new tab opens as
   // the last one was left), and each tab's settings, by its component's name.
-  menu: { open: boolean; tab: string; tabs: Record<string, Record<string, any>> };
+  // `hidden` takes the button and the panel, not the clock.
+  menu: { open: boolean; tab: string; tabs: Record<string, Record<string, any>>; hidden?: boolean };
   sites: typeof SITES;
   treeStyleTab: typeof TREE_STYLE_TAB;
   css: string;
@@ -47,18 +52,22 @@ export interface App {
   // and `props` should be: a function that finds what's edited in
   // app.settings each time, since app.settings is replaced whole when
   // another tab or the settings file changes it, and an editor holding the
-  // old objects would edit nothing anyone sees.
-  focus: { title: string | (() => string); component: Component<any>; props: Record<string, any> | (() => Record<string, any>) } | null;
+  // old objects would edit nothing anyone sees. `back` is the focus to
+  // return to, for a screen opened as a sub-screen of the one already open;
+  // unset, back goes to the main settings, which is also what a pen opening
+  // one screen while another is open does (not a sub-screen of it).
+  focus: { title: string | (() => string); component: Component<any>; props: Record<string, any> | (() => Record<string, any>); back?: App["focus"] } | null;
 }
 
 export const DEFAULTS: Settings = {
-  font: "",
+  font: "Rubik",
+  padding: { tied: true, x: 1.25, y: 2.5 },
   panel: "CtSettings",
-  background: { source: "wallpaper", colour: "surfaceContainer", dim: 20, blur: 0 },
+  background: { source: "wallpaper", colour: "surfaceContainer", dim: 70, blur: 0 },
   clock: {},
   toolbar: {},
   bookmarks: {},
-  menu: { open: false, tab: "", tabs: {} },
+  menu: { open: false, tab: "CtGitHub", tabs: {} },
   sites: SITES,
   treeStyleTab: TREE_STYLE_TAB,
   css: "",
@@ -76,6 +85,7 @@ export function complete(saved: any): Settings {
   s.sites = { ...structuredClone(SITES), ...s.sites };
   s.treeStyleTab = tstOptions(s.treeStyleTab);
   s.background = { ...DEFAULTS.background, ...s.background };
+  s.padding = { ...DEFAULTS.padding, ...s.padding };
   s.menu = { ...structuredClone(DEFAULTS.menu), ...s.menu };
   if (Array.isArray(saved?.widgets)) {
     const find = (c: string) => saved.widgets.find((w: any) => (w.component ?? RENAMED[w.plugin] ?? w.plugin) === c)?.settings;
@@ -92,6 +102,8 @@ export function complete(saved: any): Settings {
   }
   delete (s as any).widgets;
   delete (s as any).layout;
+  // Read the old CSS-string shape before the defaults below fill in what it lacks.
+  s.bookmarks = bookmarkOptions(s.bookmarks ?? {});
   for (const [key, info] of Object.entries(parts)) {
     s[key as "clock"] = { ...structuredClone(info.defaults), ...s[key as "clock"] };
   }
@@ -109,9 +121,16 @@ const store = browser.storage.local;
 // The helper's topics that widgets read through app.data.
 const TOPICS = ["github", "media", "lyrics"];
 
-// Opens an editor in the side panel.
-export function edit(app: App, title: string | (() => string), component: Component<any>, props: Record<string, any> | (() => Record<string, any>)) {
-  app.focus = { title, component, props };
+// Opens an editor in the side panel. `back`, unset except for a sub-screen of
+// the one already open, is where its back arrow returns to.
+export function edit(
+  app: App,
+  title: string | (() => string),
+  component: Component<any>,
+  props: Record<string, any> | (() => Record<string, any>),
+  back?: App["focus"],
+) {
+  app.focus = { title, component, props, back };
   app.panel = true;
 }
 

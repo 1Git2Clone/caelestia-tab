@@ -58,12 +58,14 @@ object as JSON as well.
 The page is fixed (`CtLayout`): the menu's section above the bookmarks. The
 section (`CtMenu`) has a bar along its top, with the menu button and the
 menu's tabs on one side and the toolbar (`CtToolbar`: the bookmarks' +, the
-pen, settings) on the other, and under the bar the clock. Opened, the menu is
-a panel over the whole section, growing out of the menu button (and shrinking
-back into it), with the open tab under the bar; the clock isn't drawn while
-it's covered. Switching tabs slides the new one in from the side its button
-is on. Whether the menu is open, and on which tab, is saved, so a new tab
-opens as the last one was left.
+pen, settings) on the other, and the clock centred on the section as a whole
+(not the space under the bar, so it stays at the section's true centre
+whatever the bar's height). Opened, the menu is a panel over the whole
+section, growing out of the menu button (and shrinking back into it), with
+the open tab under the bar; the clock isn't drawn while it's covered.
+Switching tabs slides the new one in from the side its button is on. Whether
+the menu is open, and on which tab, is saved, so a new tab opens as the last
+one was left.
 
 The toolbar's `side` puts it on the right (the tabs on the left), the left
 (the tabs on the right, mirrored so the menu button stays at the edge) or in
@@ -111,11 +113,20 @@ once, so the page's style doesn't carry a copy of the image as text.
 The settings are a panel docked to the window's right edge, not a modal: the
 page moves over to stay in view beside it, so a change shows as it's made.
 Every editor opens in the same panel, never in a pop-up: a part's settings from the pen, a bookmark from its edit button or the +. `edit(app, title,
-component, props)` puts one there (`app.focus`), with a back arrow to the
-settings, and Escape steps back. Editors change the real settings, not a
+component, props, back?)` puts one there (`app.focus`), with a back arrow to
+`back` if given, else to the main settings, and Escape does the same step.
+A pen opening one screen while another is already open is not a sub-screen of
+it, so `back` is unset and its own back arrow goes to the main settings, not
+the one that was open before it. Editors change the real settings, not a
 copy, so the page shows each change as it's made and there's nothing to save.
 A new bookmark is added before its editor opens, so it's on the page while
 it's filled in.
+
+Switching between the six main tabs slides sideways, like the menu's own
+tabs; a screen opening slides up over whatever was showing, and back slides
+it down again. Opening the panel itself, with no inner switch, only plays
+its own slide from the edge. `prefers-reduced-motion` turns every duration to
+0.
 
 A part's form is drawn from its component's `fields` (see
 [Writing a menu tab](../guides/plugins.md)): the settings panel knows nothing
@@ -140,24 +151,34 @@ The `Ct*` components use Tailwind classes only. A value only known at run time
 Each component also carries a stable `ct-*` class (`ct-tile`, `ct-clock`,
 `ct-bookmarks` …) for your custom CSS to target.
 
-The bookmarks' wrapper gets `ct-edge-top`, `-bottom`, `-left` and `-right`
-while it touches that edge of the window (`edges` in `layout.ts`, rechecked on
-resize and zoom), and squares its corners there with
-`in-[.ct-edge-bottom]:rounded-b-none`.
+The bookmarks' wrapper (`CtLayout.svelte`, the only thing wrapped in `edges`
+from `layout.ts`) gets `ct-edge-top`, `-bottom`, `-left` and `-right` while it
+touches that edge of the window, a hook for custom CSS to square a corner
+there (see [Writing a menu tab](../guides/plugins.md)). The bookmarks' own
+corners come from their *Placement* setting instead (docked), not the window
+edge.
 
 ## Bookmarks
 
-`CtBookmarks` lays tiles out on a CSS grid whose `grid-template-columns`,
-`grid-auto-rows`, `gap` and `grid-auto-flow` are settings, typed as CSS. The
-Tiles and List presets only fill those fields in. A tile takes `span <width>`
-and `span <height>`, or any `grid-column` and `grid-row` value, which override
-the spans. A value the browser can't parse is dropped, so a half-typed
-setting leaves the grid as it was.
+`CtBookmarks` lays tiles out on a CSS grid: *Flow* (a switch) picks rows or
+columns, *Columns*/*Rows* (named for the flow) how many of the other axis,
+and *Row height* and *Gap* are both in rem. Rows fills a fixed number of
+columns and adds rows as needed; columns, the other way round, with the
+columns sharing the width. Either way gaps are filled as tiles are added
+(`grid-auto-flow: … dense`). The Tiles and List presets only fill *Columns*,
+*Row height* and *Gap* in. A tile takes `span <width>` and `span <height>`, or
+any `grid-column` and `grid-row` value, which override the spans.
 
-With *Even rows* on (the Tiles default), the columns come from the narrowest
-tile width instead: as many as fit, then as few as still need that many rows,
-so five tiles that don't fit on one row go 3 and 2, never 4 and 1
-(`evenColumns` in `layout.ts`, tested in `tests/extension.test.mjs`).
+Older settings (a `grid-template-columns` string, "even rows", a narrowest
+tile width) are read once, migrated by `bookmarkOptions` in `bookmarks.ts`
+(tested in `tests/extension.test.mjs`), and saved as the numbers above.
+
+*Placement* is floating (the default: rounded like the menu, with the page's
+own bottom padding under it) or docked (flush with the window's bottom edge,
+which also drops that padding — see `--pb` in `CtLayout.svelte`). The top
+corners stay rounded either way. *Top line* turns the top border on or off,
+and *Line colour* (shown while it's on) is a scheme colour or a fixed one,
+resolved with `cssColour` like a tile's.
 
 A tile shows its image, or its colour when it has none: a scheme colour, which
 follows the scheme, or a fixed one from the browser's colour picker. Text on a

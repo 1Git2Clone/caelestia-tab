@@ -16,6 +16,7 @@
 //       ],
 //     };
 //   </script>
+import type { Component } from "svelte";
 import type { App } from "./store.svelte.ts";
 
 // Every field can take `when`: shown only while it returns true for the
@@ -28,6 +29,8 @@ export type Field = When &
   | { key: string; label: string; hint?: string; type: "number"; min?: number; max?: number; step?: number }
   | { key: string; label: string; hint?: string; type: "range"; min: number; max: number; step?: number; unit?: string }
   | { key: string; label: string; hint?: string; type: "select"; options: [string, string][] }
+  // One of two values, side by side.
+  | { key: string; label: string; hint?: string; type: "switch"; options: [[string, string], [string, string]] }
   // A scheme colour token (primary, surfaceContainer …) or a #rrggbb.
   | { key: string; label: string; hint?: string; type: "colour" }
   // A URL or an uploaded file, as a data: URL.
@@ -38,16 +41,25 @@ export type Field = When &
   | { key: string; label: string; hint?: string; type: "glyph"; words?: (values: any) => string[] }
   // Buttons that set several keys at once.
   | { type: "presets"; label: string; hint?: string; presets: { label: string; values: Record<string, any> }[] }
+  // A full-width row that opens another screen in the side panel, over this
+  // one (a list of the part's own items, say), `back` to here.
+  | { type: "screen"; label: string; hint?: string; component: Component<any>; props: (app: App) => Record<string, any> }
   );
 
 // A part of the page or a menu tab: its name, its settings' defaults and
-// the fields that edit them.
+// the fields that edit them. Every part and tab gets a Hide checkbox, last
+// in its form, so a component implements nothing to be hideable; a
+// component that exports neither `widget` nor `tab` is a building block for
+// others, with no pen, no Hide and no row in Settings › Components.
 export interface WidgetInfo {
   label: string;
   defaults: Record<string, any>;
   fields: Field[];
   // Toolbar buttons, for the bookmarks' +.
   actions?: { icon: string; title: string; run: (settings: any, app: App) => void }[];
+  // Under the Hide checkbox every part and tab gets, when hiding it needs a
+  // word of warning.
+  hideHint?: string;
 }
 
 // A menu tab: a component that exports `tab`. Its glyph (a Nerd Font one)
