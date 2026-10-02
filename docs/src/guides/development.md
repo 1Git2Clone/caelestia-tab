@@ -9,10 +9,16 @@ sh scripts/setup-hooks.sh   # once per clone: the pre-commit hook
 ```
 
 `nix develop .#ci` is the same shell without rust-analyzer and the UI tests'
-browsers, half the download. CI uses it for every job but the UI tests and
-the release (which builds old tags, from before it), since each job starts
-with an empty store; the Rust job also keeps cargo's registry
-and `target/` in the Actions cache.
+browsers, half the download. CI uses it for every job but the UI tests (and
+the release of a tag from before it existed), since each job starts with an
+empty store; the Rust job also keeps cargo's registry and `target/` in the
+Actions cache.
+
+CI is `ci.yml`, the Rust and extension jobs on every change but a docs-only
+one; `nix.yml`, the flake's build, only when `flake.nix`, `flake.lock`,
+`Cargo.toml` or `Cargo.lock` change, since it compiles every crate from
+scratch; `pages.yml` when `docs/` does; and `release.yml` (see
+[Releasing](#releasing)).
 
 ## The layout
 
@@ -201,7 +207,11 @@ The pages workflow publishes `main` to
 
 Date the `[Unreleased]` section of `CHANGELOG.md`, bump `version` in
 `extension/public/manifest.json` and `Cargo.toml` (and `Cargo.lock` with it),
-commit, and tag it `v<version>`. Pushing the tag runs
+and open a pull request. Bumping the version makes `release.yml` dry-run on
+it: the two versions agree, the tag is free, the zips build, the notes aren't
+empty and the runner can reach the release API, with nothing published. Merge
+it, wait for `main`'s own CI on the merge commit, not only the PR's, and tag
+that commit `v<version>`. Pushing the tag runs
 `.forgejo/workflows/release.yml`, which builds the zips below and publishes
 them as the tag's release on Forgejo, with the version's `CHANGELOG.md`
 section as its notes. The run's log is public and prints the checksums, the
@@ -218,10 +228,13 @@ nix develop -c scripts/release-zip.sh <version>
 It builds the extension without anyone's own components (a normal build
 takes in `~/.config/caelestia-tab/components`), leaves out `render.js`, which
 nothing loads yet, and writes `release/caelestia-tab-v<version>.zip`, the
-source zip and `SHA256SUMS`. The zips are byte for byte the same on every run
-and every machine with the same lockfile: every file takes the tagged
+source zip and `SHA256SUMS`. The extension zip is byte for byte the same on
+every run and every machine with the same lockfile, in either shell: every file takes the tagged
 commit's time, and they're zipped sorted, since `web-ext build` stamps entries
-with the time it zips and adds them in any order. For 0.1.0 (built before
+with the time it zips and adds them in any order. The source zip is
+`git archive`'s, and can differ between git versions: v0.1.2's came out
+different on the runner's git 2.54 and a local 2.55, the extension zip the
+same (2026-10-02; git's version is the likely cause, unconfirmed). For 0.1.0 (built before
 the `v` in the names; its release carries them renamed):
 
 ```

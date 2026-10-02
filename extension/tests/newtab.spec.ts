@@ -922,9 +922,19 @@ test("a starred site sorts first in its section, then the rest alphabetically", 
   await expect.poll(async () => (await names()).length).toBeGreaterThan(3);
   const before = await names();
   const third = before[2];
+  // The rows slide to their new places rather than jump. Counted as they
+  // start, like the Components slide test: a read after the click can miss it.
+  await vendored.evaluate((el) => {
+    const animate = Element.prototype.animate;
+    const w = window as unknown as { __slides: number };
+    w.__slides = 0;
+    Element.prototype.animate = function (...args) {
+      if (el.contains(this)) w.__slides++;
+      return animate.apply(this, args);
+    };
+  });
   await vendored.getByRole("button", { name: `Star ${third}`, exact: true }).click();
-  // The rows slide to their new places rather than jump.
-  expect(await vendored.evaluate((el) => el.getAnimations({ subtree: true }).length)).toBeGreaterThan(0);
+  await expect.poll(() => page.evaluate(() => (window as unknown as { __slides: number }).__slides)).toBeGreaterThan(0);
   // Left of its name: star, name, switch.
   const row = vendored.locator("summary").filter({ hasText: third });
   const [starX, nameX] = [await row.getByRole("button").boundingBox(), await row.locator("span").boundingBox()];

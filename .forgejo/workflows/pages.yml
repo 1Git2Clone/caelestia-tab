@@ -6,6 +6,7 @@ name: Pages
 on:
   push:
     branches: [main]
+    paths: ["docs/**", ".forgejo/workflows/pages.yml"]
   workflow_dispatch:
 
 concurrency:

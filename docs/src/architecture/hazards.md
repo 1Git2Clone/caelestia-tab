@@ -243,3 +243,13 @@ the hard way.
 - **Tag only once main's own CI is green.** The PR's checks don't stand in
   for the push run on the merge commit: a flaky test can pass one and fail
   the other, and the tag then has to move (2026-10-02).
+- **The release API 403s from the runner.** v0.1.2's Publish got a 403 on
+  `POST /api/v1/repos/…/releases` twice, with the zips and notes already
+  built. The vps's Caddy answers a CI runner `403 "not permitted from a CI
+  runner"` on any path outside `runnerApiPaths` (vps
+  `modules/containers/caddy.nix`), and no release route has ever been on it,
+  although v0.1.1 published on 2026-09-29. But a GET of the same route from
+  the runner got a 403 with an empty body, and that rule sends one, so the
+  refusal may come from elsewhere (the deployed config, Forgejo, or
+  cloudflared, updated that evening); unconfirmed. Publish prints the reply
+  now, and the release dry run prints the headers too (2026-10-02).

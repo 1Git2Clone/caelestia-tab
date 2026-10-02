@@ -5,14 +5,28 @@
 # Run by hand with a tag to publish one whose own run failed, without moving
 # the tag: it builds from the tag, with this file's steps.
 #
+# On a pull request that bumps the version it's a dry run of the same steps,
+# for the version the PR is about to release: the versions agree, the tag is
+# free, the zips build, the notes aren't empty, and the runner can reach the
+# release API. Only the publishing itself is left out. A PR that changes the
+# release but not the version tries the same steps as v<version>-dry.
+#
 # The job's own token is enough: Forgejo gives a job write on its repo, and
-# the vps's Caddy lets the runner reach the release routes (vps
-# modules/containers/caddy.nix, runnerApiPaths). `permissions:` isn't read.
+# the vps's Caddy has to let the runner reach the release routes (vps
+# modules/containers/caddy.nix, runnerApiPaths), or Publish gets a 403 with
+# "not permitted from a CI runner". `permissions:` isn't read.
 name: Release
 
 on:
   push:
     tags: ["v*"]
+  pull_request:
+    branches: ["main"]
+    paths:
+      - Cargo.toml
+      - extension/public/manifest.json
+      - scripts/release-zip.sh
+      - .forgejo/workflows/release.yml
   workflow_dispatch:
     inputs:
       tag:
@@ -23,36 +37,85 @@ jobs:
   release:
     runs-on: nix-node
     env:
-      TAG: ${{ inputs.tag || github.ref_name }}
+      DRY: ${{ github.event_name == 'pull_request' }}
+      PUSHED: ${{ inputs.tag || github.ref_name }}
     steps:
       - uses: actions/checkout@v7.0.1
         with:
           ref: ${{ inputs.tag || github.ref }}
 
-      # The default shell, not .#ci: a tag from before .#ci existed has none.
+      # .#ci, without the UI tests' 2.2 GiB of browsers, where the checkout has
+      # it; a tag from before .#ci existed has only the default shell.
+      - name: Shell
+        run: |
+          if nix eval .#devShells.x86_64-linux.ci.name >/dev/null 2>&1; then
+            echo "SHELL_REF=.#ci" >> "$GITHUB_ENV"
+          else
+            echo "SHELL_REF=." >> "$GITHUB_ENV"
+          fi
+
+      - name: Version
+        run: |
+          if [ "$DRY" = true ]; then
+            version=$(nix develop "$SHELL_REF" -c jq -r .version extension/public/manifest.json)
+            cargo=$(sed -n 's/^version = "\(.*\)"$/\1/p' Cargo.toml | head -1)
+            [ "$version" = "$cargo" ] || { echo "manifest.json says $version, Cargo.toml $cargo" >&2; exit 1; }
+            tag=v$version
+            # Already tagged: the PR changes the release itself, not the
+            # version, so the steps are tried under a name nothing will push.
+            if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null; then
+              echo "$tag is already tagged; trying the steps as $tag-dry"
+              tag=$tag-dry
+            fi
+            # Local only, for release-zip.sh, which builds what a tag points at.
+            git tag "$tag"
+          else
+            tag=$PUSHED
+            version=${tag#v}
+          fi
+          echo "TAG=$tag" >> "$GITHUB_ENV"
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+
       - name: Build
-        run: nix develop -c scripts/release-zip.sh "${TAG#v}"
+        run: nix develop "$SHELL_REF" -c scripts/release-zip.sh "${TAG#v}"
 
       - name: Notes
         # The version's section, less its heading and the link lines at the end.
-        run: >-
-          nix develop -c awk -v h="## [${TAG#v}]"
-          '/^## \[/ { on = index($0, h) == 1; next } /^\[[^]]*\]: / { next } on'
-          CHANGELOG.md | tee notes.md
+        run: |
+          nix develop "$SHELL_REF" -c awk -v h="## [$VERSION]" \
+            '/^## \[/ { on = index($0, h) == 1; next } /^\[[^]]*\]: / { next } on' \
+            CHANGELOG.md | tee notes.md
+          grep -q '[^[:space:]]' notes.md || { echo "CHANGELOG.md has no notes under ## [$VERSION]" >&2; exit 1; }
+
+      # The same route Publish posts to, read instead of written: a PR's token
+      # may not write, but a runner Caddy turns away fails this as well.
+      - name: Reach the release API
+        if: env.DRY == 'true'
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          url=$GITHUB_SERVER_URL/api/v1/repos/$GITHUB_REPOSITORY/releases?limit=1
+          code=$(curl -sS -D headers -o reply -w '%{http_code}' -H "Authorization: token $TOKEN" "$url")
+          # The headers too: Server and the like say who refused (Caddy,
+          # Forgejo, or something in front), which a bare 403 doesn't.
+          [ "$code" = 200 ] || { echo "GET $url answered $code:" >&2; cat headers reply >&2; exit 1; }
 
       - name: Publish
+        if: env.DRY != 'true'
         env:
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           api=$GITHUB_SERVER_URL/api/v1/repos/$GITHUB_REPOSITORY
-          id=$(nix develop -c jq -n --arg tag "$TAG" --rawfile body notes.md \
-                '{tag_name: $tag, name: $tag, body: $body}' |
-            curl -fsS -H "Authorization: token $TOKEN" -H 'Content-Type: application/json' \
-              -d @- "$api/releases" |
-            nix develop -c jq -e .id)
+          request=$(nix develop "$SHELL_REF" -c jq -n --arg tag "$TAG" --rawfile body notes.md \
+            '{tag_name: $tag, name: $tag, body: $body}')
+          # --fail-with-body: a refusal says why, where -f only gave the code.
+          reply=$(curl -sS --fail-with-body -H "Authorization: token $TOKEN" \
+            -H 'Content-Type: application/json' -d "$request" "$api/releases") ||
+            { echo "$reply" >&2; exit 1; }
+          id=$(echo "$reply" | nix develop "$SHELL_REF" -c jq -e .id)
           echo "release $id: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/$TAG"
           for f in release/*; do
-            curl -fsS -H "Authorization: token $TOKEN" -F "attachment=@$f" \
-              "$api/releases/$id/assets?name=${f#release/}" |
-              nix develop -c jq -r '"uploaded \(.name) (\(.size) bytes): \(.browser_download_url)"'
+            reply=$(curl -sS --fail-with-body -H "Authorization: token $TOKEN" -F "attachment=@$f" \
+              "$api/releases/$id/assets?name=${f#release/}") || { echo "$reply" >&2; exit 1; }
+            echo "$reply" | nix develop "$SHELL_REF" -c jq -r '"uploaded \(.name) (\(.size) bytes): \(.browser_download_url)"'
           done

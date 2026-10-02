@@ -1,0 +1,39 @@
+name: Nix
+
+# The flake's package compiles every crate in one derivation, about 4 of
+# this job's 5 minutes on an empty store, so it runs only when the packaging
+# can break. The code itself is compiled and tested by ci.yml's rust job from
+# the same tracked files a flake build sees.
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - flake.nix
+      - flake.lock
+      - Cargo.toml
+      - Cargo.lock
+      - .forgejo/workflows/nix.yml
+  pull_request:
+    branches: ["main"]
+    paths:
+      - flake.nix
+      - flake.lock
+      - Cargo.toml
+      - Cargo.lock
+      - .forgejo/workflows/nix.yml
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  nix:
+    runs-on: nix-node
+    steps:
+      - uses: actions/checkout@v7.0.1
+      # Builds the helper the way a flake user gets it, manifest included.
+      - run: nix build -L .#default && test -s result/lib/mozilla/native-messaging-hosts/caelestia_tab.json
+      # No end-to-end test here: nixpkgs' Firefox wrapper refuses to build
+      # without a home directory ("home directory /homeless-shelter exists"),
+      # which the runner doesn't have. .githooks/pre-push runs it locally.
