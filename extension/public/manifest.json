@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "caelestia-tab",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A new tab, and site themes, that follow the caelestia colour scheme live.",
   "homepage_url": "https://git.hu-tao.dev/hutao/caelestia-tab",
   "icons": {

@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-10-02
+
 ### Added
 
 - *Padding* for the page's sides, top and bottom, tied or per axis, in *Settings*, *General*; 1.25rem on every side by default.
@@ -74,6 +76,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Site themes: the 134 catppuccin/userstyles, compiled against the live scheme and injected per site. Every page also gets the scheme as `--caelestia-*` CSS variables and a `caelestia-scheme` event, for your own Stylus styles and userscripts.
 - Per-site overrides in *Settings*, *Websites*: more domains for a style, a CSS selector that applies it to matching pages wherever they're hosted, and your own CSS on top. The docs carry recipes for mdBook on any domain and for claude.ai's current design.
 
-[Unreleased]: https://git.hu-tao.dev/hutao/caelestia-tab/compare/v0.1.1...main
+[Unreleased]: https://git.hu-tao.dev/hutao/caelestia-tab/compare/v0.1.2...main
+[0.1.2]: https://git.hu-tao.dev/hutao/caelestia-tab/compare/v0.1.1...v0.1.2
 [0.1.1]: https://git.hu-tao.dev/hutao/caelestia-tab/compare/v0.1.0...v0.1.1
 [0.1.0]: https://git.hu-tao.dev/hutao/caelestia-tab/releases/tag/v0.1.0
