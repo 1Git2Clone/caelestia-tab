@@ -233,3 +233,13 @@ the hard way.
   the checkout in: Docker Desktop doesn't share `/private/tmp`, so a mount of
   it comes up empty ("could not find a flake.nix"). An aarch64 container
   gives the same checksums as the x86_64 runner (2026-09-29).
+- **Polling `getAnimations()` misses a short transition.** Settings' slides
+  last 220ms, and on the loaded CI runner one can be over before
+  `expect.poll` takes its first sample, so a test waiting for "an animation is
+  running" reads 0 forever. Count `Element.prototype.animate` calls instead
+  (Svelte's transitions go through it), as the Components slide test does.
+  It failed main's CI after passing the PR's, the run v0.1.2 was first tagged
+  on (2026-10-02).
+- **Tag only once main's own CI is green.** The PR's checks don't stand in
+  for the push run on the merge commit: a flaky test can pass one and fail
+  the other, and the tag then has to move (2026-10-02).
